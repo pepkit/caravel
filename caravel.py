@@ -17,6 +17,11 @@ def index():
 
 @app.route("/process" , methods=['GET', 'POST'])
 def process():
+    
+    # Browsers aren't allowed to access the actual files stuck into HTML boxes for security reasons,
+    # so we have to actually copy those into a temporary location and read them from there.
+    # I couldn't figure out how to use the actual files; I don't think it's possible (even with javascript)
+    # because of intended security limitation of browsers that prevents them from seeing the actual file system.
 
     uploaded_files = request.files.getlist("pconfig")
     print uploaded_files
@@ -25,6 +30,8 @@ def process():
     print('Created temporary directory:', tmpdirname)
 
     pconfig = ""
+    # We have to upload multiple files (the config plus sample annotation);
+    # here we have to figure out which one ends in `yaml` -- that's the config
     for f in uploaded_files:
         fullname = "/".join([tmpdirname, f.filename])
         print(fullname)
@@ -44,7 +51,8 @@ def process():
     except:
         pass
 
-
+    # Now I delete the temporary PEP components; but this could be done later
+    
     shutil.rmtree(tmpdirname)
     return(retval)
    
