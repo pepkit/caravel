@@ -24,7 +24,7 @@ def process():
     # because of intended security limitation of browsers that prevents them from seeing the actual file system.
 
     uploaded_files = request.files.getlist("pconfig")
-    print uploaded_files
+    print(uploaded_files)
 
     tmpdirname = tempfile.mkdtemp("tmpdir")
     print('Created temporary directory:', tmpdirname)
