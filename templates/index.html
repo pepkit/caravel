@@ -1,0 +1,21 @@
+<html>
+<body>
+
+<img src="/static/caravel.svg">
+<br/><br/><br/>
+<h2>Select the input project:</h2>
+<form class="form-inline" method="POST" action="{{ url_for('process') }}">
+  <div class="form-group">
+    <div class="input-group">
+        <span class="input-group-addon">Projects: </span>
+            <select name="select_project" class="selectpicker form-control">
+              {% for p in projects %}
+              <option value="{{ p }}">{{ p }}</option>
+              {% endfor %}
+            </select>
+    </div>
+    <button type="submit" class="btn btn-default">Go</button>
+  </div>
+</form>
+   </body>
+</html>
