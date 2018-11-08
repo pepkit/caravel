@@ -35,7 +35,9 @@ projects:
 
 * The application will read the file and let you select the project of interest from a dropdown list
 
-* [`peppy`](https://peppy.readthedocs.io/en/latest/) will read the selected project
+* [`looper`](https://looper.readthedocs.io/en/latest/) will run the pipeline specified in the seleted project
+
+* The output produced by looper will be displayed
 
 * ...
 
