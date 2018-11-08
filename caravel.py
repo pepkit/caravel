@@ -5,6 +5,8 @@ import peppy
 import shutil
 import tempfile
 import yaml
+import psutil
+
 
 from flask import Flask, render_template, redirect, url_for, request
 app = Flask(__name__)
@@ -27,10 +29,24 @@ def index():
 
 @app.route("/process" , methods=['GET', 'POST'])
 def process():
-    print("in Process")
     selected_project = request.form.get('select_project')
-    print("Loading project: " + selected_project)
-    p = peppy.Project(selected_project)
-    # print(p)
+    print("\n\nLoading project: " + selected_project)
+    global config_file
+    config_file = os.path.expandvars(os.path.expanduser(selected_project))
+    p = peppy.Project(config_file)
+
+
     return(render_template('process.html', p=p))
-   
+
+@app.route("/run",methods=['GET','POST'])
+def run():
+    cmd = "looper run " + config_file
+    tmpdirname = tempfile.mkdtemp("tmpdir")
+    print("\n\nCreated temporary directory: " + tmpdirname)
+    file = open(tmpdirname + "/output.txt","w")
+    proc = psutil.Popen(cmd, shell=True,stdout=file)
+    proc.wait()
+    with open (tmpdirname + "/output.txt", "r") as myfile:
+        output=myfile.readlines()
+    shutil.rmtree(tmpdirname)
+    return(render_template("run.html",output=output))
