@@ -19,8 +19,10 @@ def index():
             os.environ["CARAVEL"])
         print(project_list_path)
         msg = "The $CARAVEL environment variable does not point to a file" 
-        assert os.path.isfile(project_list_path), msg
-        return(render_template('index.html', warning=msg))
+        if not os.path.isfile(project_list_path):
+            print(msg)
+            return(render_template('index.html', warning=msg))
+        
         with open(project_list_path, 'r') as stream:
             pl = yaml.safe_load(stream)
             print(pl)
