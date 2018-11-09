@@ -15,8 +15,12 @@ app = Flask(__name__)
 @app.route("/")
 def index():
     try:  
-        project_list_path = os.path.expanduser(os.environ["CARAVEL"]); print(project_list_path)
-        assert os.path.isfile(project_list_path), "The $CARAVEL environment variable does not point to a file" 
+        project_list_path = os.path.expanduser(
+            os.environ["CARAVEL"])
+        print(project_list_path)
+        msg = "The $CARAVEL environment variable does not point to a file" 
+        assert os.path.isfile(project_list_path), msg
+        return(render_template('index.html', warning=msg))
         with open(project_list_path, 'r') as stream:
             pl = yaml.safe_load(stream)
             print(pl)
