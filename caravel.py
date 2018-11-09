@@ -34,10 +34,8 @@ def process():
     global config_file
     config_file = os.path.expandvars(os.path.expanduser(selected_project))
     p = peppy.Project(config_file)
-
-
     return(render_template('process.html', p=p))
-
+    
 @app.route("/run",methods=['GET','POST'])
 def run():
     cmd = "looper run " + config_file
