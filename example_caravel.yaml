@@ -1,0 +1,3 @@
+projects:
+  - file.yaml
+  - ${CODEBASE}example_peps/example_basic/project_config.yaml

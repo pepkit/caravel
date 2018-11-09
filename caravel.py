@@ -25,9 +25,10 @@ def index():
         
         with open(project_list_path, 'r') as stream:
             pl = yaml.safe_load(stream)
-            print(pl)
             assert "projects" in pl, "'projects' key not in the projects list file."
             projects=pl["projects"]
+            projects = [os.path.expandvars(x) for x in projects]
+            print(pl)
     except KeyError: 
         msg = "Please set the environment variable $CARAVEL"
         print(msg)
