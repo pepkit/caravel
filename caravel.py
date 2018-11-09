@@ -2,10 +2,11 @@ from argparse import ArgumentParser
 import glob
 import os
 import peppy
+import psutil
 import shutil
+import sys
 import tempfile
 import yaml
-import psutil
 
 
 from flask import Flask, render_template, redirect, url_for, request
@@ -22,8 +23,9 @@ def index():
             assert "projects" in pl, "'projects' key not in the projects list file."
             projects=pl["projects"]
     except KeyError: 
-        print "Please set the environment variable $CARAVEL"
-        sys.exit(1)
+        msg = "Please set the environment variable $CARAVEL"
+        print(msg)
+        return(render_template('index.html', warning=msg))
 
     return(render_template('index.html', projects=projects))
 
