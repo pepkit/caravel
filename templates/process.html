@@ -1,18 +1,37 @@
 <html>
-<head>
-    <title>
-        Caravel - Run
-    </title>
-</head>
-  <body>
-    <img src="/static/caravel.svg">
-    <br/><br/><br/>
-    <h2>Selected PEP:</h2>
-    <pre>{{ p }}</pre>
-    <form class="form-inline" method="POST" action="{{ url_for('run') }}">
-      </div>
-        <button type="submit" class="btn btn-default">Run</button>
-      </div>
-    </form>
-  </body>
+    <head>
+        <title>
+            Caravel - Run
+        </title>
+    </head>
+    <body>
+        <img src="/static/caravel.svg">
+        <br/><br/><br/>
+        <h2>Selected PEP info:</h2>
+        {% for item in p_info %}
+            <p><b>{{ item }}:</b> <code>{{ p_info[item] }}</code></p>
+        {% endfor %}
+        <code>{{ p }}</code>
+        <h2>Perform action on the PEP</h2>
+        <form class="form-inline" method="POST" action="{{ url_for('run') }}">
+            <p>Provide optional options to looper run command, pass <code>-h</code> for help :</p>
+            <div>
+                <input type="text" name="opts">
+            </div>
+            <br/>
+            <div>
+                <button type="submit" class="btn btn-default">Run</button>
+            </div>
+        </form>
+        <form class="form-inline" method="POST" action="{{ url_for('check') }}">
+            <!-- <div> -->
+                <button type="submit" class="btn btn-default">Check</button>
+            <!-- </div> -->
+        </form>
+        <form class="form-inline" method="POST" action="{{ url_for('destroy') }}">
+            <div>
+                <button type="submit" class="btn btn-default">Destroy</button>
+            </div>
+        </form>
+    </body>
 </html>
