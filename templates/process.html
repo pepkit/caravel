@@ -11,7 +11,6 @@
         {% for item in p_info %}
             <p><b>{{ item }}:</b> <code>{{ p_info[item] }}</code></p>
         {% endfor %}
-        <code>{{ p }}</code>
         <h2>Perform action on the PEP</h2>
         <form class="form-inline" method="POST" action="{{ url_for('run') }}">
             <p>Provide optional options to looper run command, pass <code>-h</code> for help :</p>
