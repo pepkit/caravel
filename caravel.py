@@ -9,8 +9,12 @@ import tempfile
 import yaml
 
 
-from flask import Flask, render_template, redirect, url_for, request
+from flask import Blueprint, Flask, render_template, redirect, url_for, request
 app = Flask(__name__)
+
+summary = Blueprint('summary', __name__,
+                        template_folder='/sfs/lustre/allocations/shefflab/processed/mpfc_neurons/')
+
 
 @app.route("/")
 def index():
@@ -48,8 +52,23 @@ def process():
     p_info = {
         "name": p.name,
         "config_file": p.config_file,
-        "sample_count": len(p.samples)
+        "sample_count": len(p.samples),
+        "summary_html": "{project_name}_summary.html".format(project_name=p.name)
     }
+
+    p.metadata.output_dir
+
+    psummary = Blueprint(p.name, __name__,
+        template_folder=p.metadata.output_dir)
+
+    @psummary.route("/{pname}/summary/<path:page_name>".format(pname=p.name),methods=['GET'])
+    def render_static(page_name):
+        return render_template('%s' % page_name)
+    try:
+        app.register_blueprint(psummary)
+    except AssertionError:
+        print("this blueprint was already registered")
+
     return(render_template('process.html', p_info=p_info))
 
 
@@ -97,10 +116,4 @@ def destroy():
         output_destroy=myfile.readlines()
     shutil.rmtree(tmpdirname)
     return(render_template("execute.html",output=output_destroy))
-
-
-
-
-
-
 
