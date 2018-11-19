@@ -18,6 +18,15 @@ summary = Blueprint('summary', __name__,
 
 @app.route("/")
 def index():
+    
+    # helper functions
+    def glob_if_exists(x):
+        """return all matches in the directory for x and x if nothing matches"""
+        if isinstance(x, list):
+            return [glob.glob(e) if len(glob.glob(e))>0 else e for e in x]
+        else:
+            return glob.glob(x) if len(glob.glob(x))>0 else x
+
     try:  
         project_list_path = os.path.expanduser(
             os.environ["CARAVEL"])
@@ -30,9 +39,19 @@ def index():
         with open(project_list_path, 'r') as stream:
             pl = yaml.safe_load(stream)
             assert "projects" in pl, "'projects' key not in the projects list file."
-            projects=pl["projects"]
-            projects = [os.path.expandvars(x) for x in projects]
-            print(pl)
+            projects = pl["projects"]
+            # expand user and environment variables
+            projects = [os.path.expanduser(os.path.expandvars(x)) for x in projects]
+            # get all globs and return unnested list
+            glob_projects = []
+            for x in projects:
+                glob_element = glob_if_exists(x)
+                if isinstance(glob_element,list):
+                    glob_projects += glob_element
+                else:
+                    glob_projects.append(x)
+            projects = glob_projects
+
     except KeyError: 
         msg = "Please set the environment variable $CARAVEL"
         print(msg)
