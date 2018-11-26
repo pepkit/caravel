@@ -68,15 +68,19 @@ def process():
     global config_file
     config_file = os.path.expandvars(os.path.expanduser(selected_project))
     p = peppy.Project(config_file)
+    global p_info
     p_info = {
         "name": p.name,
         "config_file": p.config_file,
         "sample_count": len(p.samples),
         "summary_html": "{project_name}_summary.html".format(project_name=p.name)
     }
-
-    p.metadata.output_dir
-
+    options = {
+        "run": ["--ingore-flags","--allow-duplicate-names","--compute","--env","--limit","--lump","--lumpn","--file-checks","--dry-run","--exlude-protocols","--include-protocols","--sp"],
+        "check": ["--all-folders","--file-checks","--dry-run","--exlude-protocols","--include-protocols","--sp"],
+        "destroy": ["--file-checks","--force-yes","--dry-run","--exlude-protocols","--include-protocols","--sp"],
+        "summarize": ["--file-checks","--dry-run","--exlude-protocols","--include-protocols","--sp"]
+    }
     psummary = Blueprint(p.name, __name__,
         template_folder=p.metadata.output_dir)
 
@@ -88,51 +92,23 @@ def process():
     except AssertionError:
         print("this blueprint was already registered")
 
-    return(render_template('process.html', p_info=p_info))
+    return(render_template('process.html', p_info=p_info, options=options))
 
-
-@app.route("/execute/run", methods=['GET','POST'])
-def run():
-    # if request.method == 'POST':
-    options = request.form['opts']
-    print("\nAppending options: " + options + "\n")
-    cmd = "looper run " + options + " " + config_file
-    print("\ncommand: " + cmd)
+@app.route("/execute", methods=['GET','POST'])
+def action():
+    action = request.form['actions']
+    opt = request.form.getlist('opt')
+    print("\nSelected flags:\n " + '\n'.join(opt)) 
+    print("\nSelected action: " + action)
+    cmd = "looper " + action + " " + ' '.join(opt) + " " + config_file
+    print("\nCreated Command: " + cmd)
     tmpdirname = tempfile.mkdtemp("tmpdir")
     print("\nCreated temporary directory: " + tmpdirname)
-    file_run = open(tmpdirname + "/output_run.txt","w")
+    file_run = open(tmpdirname + "/output.txt","w")
     proc_run = psutil.Popen(cmd, shell=True,stdout=file_run)
     proc_run.wait()
-    with open (tmpdirname + "/output_run.txt", "r") as myfile:
+    with open (tmpdirname + "/output.txt", "r") as myfile:
         output_run=myfile.readlines()
     shutil.rmtree(tmpdirname)
     return(render_template("execute.html",output=output_run))
-
-
-@app.route("/execute/check", methods=['GET','POST'])
-def check():
-    cmd = "looper check " + config_file
-    tmpdirname = tempfile.mkdtemp("tmpdir")
-    print("\n\nCreated temporary directory: " + tmpdirname)
-    file_check = open(tmpdirname + "/output_check.txt","w")
-    proc_check = psutil.Popen(cmd, shell=True,stdout=file_check)
-    proc_check.wait()
-    with open (tmpdirname + "/output_check.txt", "r") as myfile:
-        output_check=myfile.readlines()
-    shutil.rmtree(tmpdirname)
-    return(render_template("execute.html",output=output_check))
-
-
-@app.route("/execute/destroy", methods=['GET','POST'])
-def destroy():
-    cmd = "looper destroy " + config_file
-    tmpdirname = tempfile.mkdtemp("tmpdir")
-    print("\n\nCreated temporary directory: " + tmpdirname)
-    file_destroy = open(tmpdirname + "/output_destroy.txt","w")
-    proc_destroy = psutil.Popen(cmd, shell=True,stdout=file_destroy)
-    proc_destroy.wait()
-    with open (tmpdirname + "/output_destroy.txt", "r") as myfile:
-        output_destroy=myfile.readlines()
-    shutil.rmtree(tmpdirname)
-    return(render_template("execute.html",output=output_destroy))
 

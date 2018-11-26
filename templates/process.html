@@ -1,8 +1,8 @@
 <html>
     <head>
-	<link rel="stylesheet" type="text/css" href="/static/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/bootstrap.min.css">
         <title>
-	
+    
             Caravel - Run
         </title>
     </head>
@@ -17,25 +17,30 @@
     <a href="/{{p_info.name}}/summary/{{p_info.summary_html}}">summary</a>
 
         <h2>Perform action on the PEP</h2>
-        <form class="form-inline" method="POST" action="{{ url_for('run') }}">
-            <p>Provide optional options to looper run command, pass <code>-h</code> for help :</p>
+        <form class="form-inline" method="POST" action="{{ url_for('action') }}">
             <div>
-                <input type="text" name="opts">
+                <select name="actions">
+                  <option value="run">Run</option>
+                  <option value="check">Check</option>
+                  <option value="destroy">Destroy</option>
+                  <option value="summarize">Summarize</option>
+                </select>
+            </div>
+            <div>
+                {% for key in options.keys() %}
+                    <div>
+                    <h3>{{ key }}</h3>
+                    {% for item in options[key] %}
+                        <input type="checkbox" name="opt" value="{{ item }}">{{ item }}<br>
+                    {% endfor %}
+                    </div>
+                {% endfor %}
             </div>
             <br/>
             <div>
-                <button type="submit" class="btn btn-default">Run</button>
+                <button type="submit" class="btn btn-default">GO!</button>
             </div>
         </form>
-        <form class="form-inline" method="POST" action="{{ url_for('check') }}">
-            <!-- <div> -->
-                <button type="submit" class="btn btn-default">Check</button>
-            <!-- </div> -->
-        </form>
-        <form class="form-inline" method="POST" action="{{ url_for('destroy') }}">
-            <div>
-                <button type="submit" class="btn btn-default">Destroy</button>
-            </div>
-        </form>
+        <p>See <a href="https://looper.readthedocs.io/en/latest/usage.html">looper documentation</a> for the options explanation.</p>
     </body>
 </html>
