@@ -23,9 +23,9 @@ def index():
     def glob_if_exists(x):
         """return all matches in the directory for x and x if nothing matches"""
         if isinstance(x, list):
-            return [glob.glob(e) if len(glob.glob(e))>0 else e for e in x]
+            return [glob.glob(e) if len(glob.glob(e)) > 0 else e for e in x]
         else:
-            return glob.glob(x) if len(glob.glob(x))>0 else x
+            return glob.glob(x) if len(glob.glob(x)) > 0 else x
 
     try:  
         project_list_path = os.path.expanduser(
@@ -46,8 +46,8 @@ def index():
             glob_projects = []
             for x in projects:
                 glob_element = glob_if_exists(x)
-                if isinstance(glob_element,list):
-                    glob_projects += glob_element
+                if isinstance(glob_element, list):
+                    glob_projects.extend(glob_element)
                 else:
                     glob_projects.append(x)
             projects = glob_projects
@@ -72,19 +72,19 @@ def process():
     p_info = {
         "name": p.name,
         "config_file": p.config_file,
-        "sample_count": len(p.samples),
+        "sample_count": p.num_samples,
         "summary_html": "{project_name}_summary.html".format(project_name=p.name)
     }
     options = {
-        "run": ["--ingore-flags","--allow-duplicate-names","--compute","--env","--limit","--lump","--lumpn","--file-checks","--dry-run","--exlude-protocols","--include-protocols","--sp"],
-        "check": ["--all-folders","--file-checks","--dry-run","--exlude-protocols","--include-protocols","--sp"],
-        "destroy": ["--file-checks","--force-yes","--dry-run","--exlude-protocols","--include-protocols","--sp"],
-        "summarize": ["--file-checks","--dry-run","--exlude-protocols","--include-protocols","--sp"]
+        "run": ["--ignore-flags","--allow-duplicate-names","--compute","--env","--limit","--lump","--lumpn","--file-checks","--dry-run","--exclude-protocols","--include-protocols","--sp"],
+        "check": ["--all-folders","--file-checks","--dry-run","--exclude-protocols","--include-protocols","--sp"],
+        "destroy": ["--file-checks","--force-yes","--dry-run","--exclude-protocols","--include-protocols","--sp"],
+        "summarize": ["--file-checks","--dry-run","--exclude-protocols","--include-protocols","--sp"]
     }
     psummary = Blueprint(p.name, __name__,
         template_folder=p.metadata.output_dir)
 
-    @psummary.route("/{pname}/summary/<path:page_name>".format(pname=p.name),methods=['GET'])
+    @psummary.route("/{pname}/summary/<path:page_name>".format(pname=p.name), methods=['GET'])
     def render_static(page_name):
         return render_template('%s' % page_name)
     try:
@@ -105,10 +105,10 @@ def action():
     tmpdirname = tempfile.mkdtemp("tmpdir")
     print("\nCreated temporary directory: " + tmpdirname)
     file_run = open(tmpdirname + "/output.txt","w")
-    proc_run = psutil.Popen(cmd, shell=True,stdout=file_run)
+    proc_run = psutil.Popen(cmd, shell=True, stdout=file_run)
     proc_run.wait()
     with open (tmpdirname + "/output.txt", "r") as myfile:
         output_run=myfile.readlines()
     shutil.rmtree(tmpdirname)
-    return(render_template("execute.html",output=output_run))
+    return(render_template("execute.html", output=output_run))
 

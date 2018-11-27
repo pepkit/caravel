@@ -37,12 +37,12 @@ Since `flask` (and `caravel`) uses port 5000 by default, this maps your localhos
 So a complete one-line command to run `caravel` remotely with a local web GUI would be something like this:
 
 ```
-ssh -L 5000:localhost:5000 server "FLASK_APP=${REMOTE_CODEBASE}/caravel/caravel.py flask run"
+ssh -L 5000:localhost:5000 user@server "FLASK_APP=${REMOTE_CODEBASE}/caravel/caravel.py flask run"
 ```
 
 # How it works
 
-* Set enviroment variable `$CARAVEL` to point to a YAML file formatted as shown below:
+* Set environment variable `$CARAVEL` to point to a YAML file formatted as shown below:
 
 ```
 projects:

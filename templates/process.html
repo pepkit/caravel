@@ -2,45 +2,46 @@
     <head>
     <link rel="stylesheet" type="text/css" href="/static/bootstrap.min.css">
         <title>
-    
             Caravel - Run
         </title>
     </head>
     <body>
-        <img src="/static/caravel.svg">
-        <br/><br/><br/>
-        <h2>Selected PEP info:</h2>
-        {% for item in p_info %}
-            <p><b>{{ item }}:</b> <code>{{ p_info[item] }}</code></p>
-        {% endfor %}
+        <div class="container">
+            <img src="/static/caravel.svg">
+            <br/><br/><br/>
+            <h2>Selected PEP info:</h2>
+            {% for item in p_info %}
+                <p><b>{{ item }}:</b> <code>{{ p_info[item] }}</code></p>
+            {% endfor %}
 
-    <a href="/{{p_info.name}}/summary/{{p_info.summary_html}}">summary</a>
+            <a href="/{{p_info.name}}/summary/{{p_info.summary_html}}">summary</a>
 
-        <h2>Perform action on the PEP</h2>
-        <form class="form-inline" method="POST" action="{{ url_for('action') }}">
-            <div>
-                <select name="actions">
-                  <option value="run">Run</option>
-                  <option value="check">Check</option>
-                  <option value="destroy">Destroy</option>
-                  <option value="summarize">Summarize</option>
-                </select>
-            </div>
-            <div>
-                {% for key in options.keys() %}
-                    <div>
-                    <h3>{{ key }}</h3>
-                    {% for item in options[key] %}
-                        <input type="checkbox" name="opt" value="{{ item }}">{{ item }}<br>
+            <h2>Perform action on the PEP</h2>
+            <form class="form-inline" method="POST" action="{{ url_for('action') }}">
+                <div>
+                    <select name="actions">
+                      <option value="run">Run</option>
+                      <option value="check">Check</option>
+                      <option value="destroy">Destroy</option>
+                      <option value="summarize">Summarize</option>
+                    </select>
+                </div>
+                <div>
+                    {% for key in options.keys() %}
+                        <div>
+                        <h3>{{ key }}</h3>
+                        {% for item in options[key] %}
+                            <input type="checkbox" name="opt" value="{{ item }}">{{ item }}<br>
+                        {% endfor %}
+                        </div>
                     {% endfor %}
-                    </div>
-                {% endfor %}
-            </div>
-            <br/>
-            <div>
-                <button type="submit" class="btn btn-default">GO!</button>
-            </div>
-        </form>
-        <p>See <a href="https://looper.readthedocs.io/en/latest/usage.html">looper documentation</a> for the options explanation.</p>
+                </div>
+                <br/>
+                <div>
+                    <button type="submit" class="btn btn-default">GO!</button>
+                </div>
+            </form>
+            <p>See <a href="https://looper.readthedocs.io/en/latest/usage.html">looper documentation</a> for the options explanation.</p>
+        </div>
     </body>
 </html>
