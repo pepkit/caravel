@@ -54,6 +54,8 @@ projects:
 
 * [`peppy`](https://peppy.readthedocs.io/en/latest/index.html) will read the *PEP* and the application will display the *PEP* info
 
+* You will have an option to activate a subproject, if available
+
 * Depending on your choice [`looper`](https://looper.readthedocs.io/en/latest/) will `run`/`check`/`destroy` the pipeline specified in the seleted project
 
 * The output produced by `looper` will be displayed
