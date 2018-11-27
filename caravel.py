@@ -63,17 +63,38 @@ def index():
 def process():
     # if request.method == 'GET':
     #     return redirect(url_for("index"))
-    selected_project = request.form.get('select_project')
-    print("\nLoading project: " + selected_project)
+    global p
     global config_file
+    global p_info
+    selected_project = request.form.get('select_project')
+    print(selected_project)
+    if selected_project is None:
+        selected_project = p.config_file
+    print("\nLoading project: " + selected_project)
+    
     config_file = os.path.expandvars(os.path.expanduser(selected_project))
     p = peppy.Project(config_file)
-    global p_info
+
+    try:
+        subprojects = list(p.subprojects.keys())
+    except:
+        subprojects = None
+
+    try:
+        selected_subproject = request.form.get('subprojects')
+        if selected_project is None:
+            p = peppy.Project(config_file)
+        else:
+            p.activate_subproject(selected_subproject)
+    except:
+        selected_subproject = None
+
     p_info = {
         "name": p.name,
         "config_file": p.config_file,
         "sample_count": p.num_samples,
-        "summary_html": "{project_name}_summary.html".format(project_name=p.name)
+        "summary_html": "{project_name}_summary.html".format(project_name=p.name),
+        "subprojects": subprojects
     }
     options = {
         "run": ["--ignore-flags","--allow-duplicate-names","--compute","--env","--limit","--lump","--lumpn","--file-checks","--dry-run","--exclude-protocols","--include-protocols","--sp"],
@@ -92,12 +113,12 @@ def process():
     except AssertionError:
         print("this blueprint was already registered")
 
-    return(render_template('process.html', p_info=p_info, options=options))
+    return(render_template('process.html', p_info=p_info, options=options, sp=selected_subproject))
 
 @app.route("/execute", methods=['GET','POST'])
 def action():
     action = request.form['actions']
-    opt = request.form.getlist('opt')
+    opt = list(set(request.form.getlist('opt')))
     print("\nSelected flags:\n " + '\n'.join(opt)) 
     print("\nSelected action: " + action)
     cmd = "looper " + action + " " + ' '.join(opt) + " " + config_file
