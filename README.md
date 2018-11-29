@@ -21,8 +21,16 @@ projects:
 Run like:
 
 ```
-FLASK_APP=caravel.py flask run
+python caravel.py
 ```
+if you have the `CARAVEL` environment variable pointing to a list of project config files.
+
+Or like:
+
+```
+python caravel.py configs.yaml
+```
+to point directly to a file declaring a list of project config filepaths.
 
 Then point browser to: http://127.0.0.1:5000
 
