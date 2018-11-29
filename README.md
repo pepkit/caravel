@@ -36,10 +36,9 @@ Then point browser to: http://127.0.0.1:5000
 
 
 
-Debug mode is: 
-
+To run in debug/development mode, set `FLASK_ENV`: 
 ```
-FLASK_APP=caravel.py FLASK_ENV=development flask run
+FLASK_ENV=development
 ```
 
 # Run on a remote server (like a head node for a compute cluster):
@@ -55,7 +54,7 @@ Since `flask` (and `caravel`) uses port 5000 by default, this maps your localhos
 So a complete one-line command to run `caravel` remotely with a local web GUI would be something like this:
 
 ```
-ssh -L 5000:localhost:5000 user@server "FLASK_APP=${REMOTE_CODEBASE}/caravel/caravel.py flask run"
+ssh -L 5000:localhost:5000 user@server "python ${REMOTE_CODEBASE}/caravel/caravel.py"
 ```
 
 # How it works
