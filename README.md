@@ -38,7 +38,7 @@ Then point browser to: http://127.0.0.1:5000
 
 To run in debug/development mode, set `FLASK_ENV`: 
 ```
-FLASK_ENV=development
+export FLASK_ENV=development
 ```
 
 # Run on a remote server (like a head node for a compute cluster):
