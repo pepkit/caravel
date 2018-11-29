@@ -1,61 +1,59 @@
+import itertools
 import glob
 import os
-import peppy
-import psutil
 import shutil
+import sys
 import tempfile
+import psutil
 import yaml
-
-
+import peppy
 from flask import Blueprint, Flask, render_template, redirect, url_for, request
+
 app = Flask(__name__)
 
 summary = Blueprint('summary', __name__,
-                        template_folder='/sfs/lustre/allocations/shefflab/processed/mpfc_neurons/')
+    template_folder='/sfs/lustre/allocations/shefflab/processed/mpfc_neurons/')
+
+CONFIG_ENV_VAR = "CARAVEL"
+CONFIG_PRJ_KEY = "projects"
 
 
 @app.route("/")
 def index():
-    
+
     # helper functions
     def glob_if_exists(x):
         """return all matches in the directory for x and x if nothing matches"""
-        if isinstance(x, list):
-            return [glob.glob(e) if len(glob.glob(e)) > 0 else e for e in x]
-        else:
-            return glob.glob(x) if len(glob.glob(x)) > 0 else x
+        return list(itertools.chain(*[
+            glob.glob(e) or x for e in (x if isinstance(x, list) else [x])]))
 
-    try:  
-        project_list_path = os.path.expanduser(
-            os.environ["CARAVEL"])
-        print(project_list_path)
-        if not os.path.isfile(project_list_path):
-            msg = "The $CARAVEL environment variable does not point to a file"
-            print(msg)
-            return(render_template('index.html', warning=msg))
-        
-        with open(project_list_path, 'r') as stream:
-            pl = yaml.safe_load(stream)
-            assert "projects" in pl, "'projects' key not in the projects list file."
-            projects = pl["projects"]
-            # expand user and environment variables
-            projects = [os.path.expanduser(os.path.expandvars(x)) for x in projects]
-            # get all globs and return unnested list
-            glob_projects = []
-            for x in projects:
-                glob_element = glob_if_exists(x)
-                if isinstance(glob_element, list):
-                    glob_projects.extend(glob_element)
-                else:
-                    glob_projects.append(x)
-            projects = glob_projects
+    project_list_path = app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
 
-    except KeyError: 
-        msg = "Please set the environment variable $CARAVEL"
+    if project_list_path is None:
+        msg = "Please set the environment variable {} or provide a YAML file " \
+              "listing paths to project config files".format(CONFIG_ENV_VAR)
         print(msg)
-        return(render_template('index.html', warning=msg))
+        return render_template('index.html', warning=msg)
 
-    return(render_template('index.html', projects=projects))
+    project_list_path = os.path.expanduser(project_list_path)
+    print(project_list_path)
+
+    if not os.path.isfile(project_list_path):
+        msg = "Project configs list isn't a file: {}".format(project_list_path)
+        print(msg)
+        return render_template('index.html', warning=msg)
+
+    with open(project_list_path, 'r') as stream:
+        pl = yaml.safe_load(stream)
+        assert CONFIG_PRJ_KEY in pl, \
+            "'{}' key not in the projects list file.".format(CONFIG_PRJ_KEY)
+        projects = pl[CONFIG_PRJ_KEY]
+        # get all globs and return unnested list
+        projects = [f for prj in projects for f in
+                    glob_if_exists(os.path.expanduser(os.path.expandvars(prj)))]
+
+    return render_template('index.html', projects=projects)
+
 
 @app.route("/process", methods=['GET', 'POST'])
 def process():
@@ -66,8 +64,7 @@ def process():
     global p_info
     selected_project = request.form.get('select_project')
     print(selected_project)
-    if selected_project is None:
-        selected_project = p.config_file
+    selected_project = selected_project or p.config_file
     print("\nLoading project: " + selected_project)
     
     config_file = os.path.expandvars(os.path.expanduser(selected_project))
@@ -100,8 +97,7 @@ def process():
         "destroy": ["--file-checks","--force-yes","--dry-run","--exclude-protocols","--include-protocols","--sp"],
         "summarize": ["--file-checks","--dry-run","--exclude-protocols","--include-protocols","--sp"]
     }
-    psummary = Blueprint(p.name, __name__,
-        template_folder=p.metadata.output_dir)
+    psummary = Blueprint(p.name, __name__, template_folder=p.metadata.output_dir)
 
     @psummary.route("/{pname}/summary/<path:page_name>".format(pname=p.name), methods=['GET'])
     def render_static(page_name):
@@ -111,9 +107,10 @@ def process():
     except AssertionError:
         print("this blueprint was already registered")
 
-    return(render_template('process.html', p_info=p_info, options=options, sp=selected_subproject))
+    return render_template('process.html', p_info=p_info, options=options, sp=selected_subproject)
 
-@app.route("/execute", methods=['GET','POST'])
+
+@app.route("/execute", methods=['GET', 'POST'])
 def action():
     action = request.form['actions']
     opt = list(set(request.form.getlist('opt')))
@@ -123,11 +120,15 @@ def action():
     print("\nCreated Command: " + cmd)
     tmpdirname = tempfile.mkdtemp("tmpdir")
     print("\nCreated temporary directory: " + tmpdirname)
-    file_run = open(tmpdirname + "/output.txt","w")
+    file_run = open(tmpdirname + "/output.txt", "w")
     proc_run = psutil.Popen(cmd, shell=True, stdout=file_run)
     proc_run.wait()
-    with open (tmpdirname + "/output.txt", "r") as myfile:
-        output_run=myfile.readlines()
+    with open(tmpdirname + "/output.txt", "r") as myfile:
+        output_run = myfile.readlines()
     shutil.rmtree(tmpdirname)
-    return(render_template("execute.html", output=output_run))
+    return render_template("execute.html", output=output_run)
 
+
+if __name__ == "__main__":
+    app.config["project_configs"] = sys.argv[1] if len(sys.argv) > 1 else None
+    app.run()
