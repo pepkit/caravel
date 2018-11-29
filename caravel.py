@@ -1,10 +1,8 @@
-from argparse import ArgumentParser
 import glob
 import os
 import peppy
 import psutil
 import shutil
-import sys
 import tempfile
 import yaml
 
