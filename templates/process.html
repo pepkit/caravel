@@ -4,66 +4,69 @@
         <title>
             Caravel - Run
         </title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script type=text/javascript>
+            $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+        </script>
+
+        <script type=text/javascript>
+          $(function() {
+            $('a#show_subproject').bind('click', function() {
+              $.getJSON($SCRIPT_ROOT + '/_background_subproject', {
+                sp: $('select[name="subprojects"]').val(),
+              }, function(data) {
+                $("#result").text(data.result);
+              });
+              return false;
+            });
+          });
+        </script>
     </head>
     <body>
-        <div class="container">
-            <img src="/static/caravel.svg">
-            <br/><br/><br/>
-            <h2>Selected PEP info:</h2>
-            {% for item in p_info %}
-                <p><b>{{ item }}:</b> <code>{{ p_info[item] }}</code></p>
-            {% endfor %}
+        <img src="/static/caravel.svg">
+        <br/><br/><br/>
+        
+        <h2>Selected PEP info:</h2>
+        {% for item in p_info %}
+            <p><b>{{ item }}:</b> <code>{{ p_info[item] }}</code></p>
+        {% endfor %}
 
-            <a href="/{{p_info.name}}/summary/{{p_info.summary_html}}">summary</a>
+        {% if p_info["subprojects"] is not none %}
+            <select name="subprojects">
+                {% for i in p_info["subprojects"] %}
+                    <option value="{{ i }}">{{ i }}</option>
+                {% endfor %}
+                <option value="{{ None }}">None</option>
+            </select>
+            <a href='#' id=show_subproject><button type="submit" class="btn btn-default">Activate</button></a>
+            <i><p id=result>No subproject activated</p></i>
+        {% endif %}
 
-            {% if p_info["subprojects"] is not none %}
-            <form class="form-inline" method="POST" action="{{ url_for('process') }}">
-                <div>
-                    <select name="subprojects">
-                        {% for i in p_info["subprojects"] %}
-                            <option value="{{ i }}">{{ i }}</option>
-                        {% endfor %}
-                        <option value="{{ None }}">None</option>
-                    </select>
-                </div>
-                <div>
-                    <button type="submit" class="btn btn-default">Activate</button>
-                </div>
-            </form>
-            {% endif %}
-            {% if sp is not none %}
-                <i><p>{{ sp }} subproject activated</p></i>
-            {% else %}
-                {% if p_info["subprojects"] is not none %}
-                    <i><p>No subproject activated</p></i>
-                {% endif %}
-            {% endif %}
-            <h2>Perform action on the PEP</h2>
-            <form class="form-inline" method="POST" action="{{ url_for('action') }}">
-                <div>
-                    <select name="actions">
-                      <option value="run">Run</option>
-                      <option value="check">Check</option>
-                      <option value="destroy">Destroy</option>
-                      <option value="summarize">Summarize</option>
-                    </select>
-                </div>
-                <div>
-                    {% for key in options.keys() %}
-                        <div>
-                        <h3>{{ key }}</h3>
-                        {% for item in options[key] %}
-                            <input type="checkbox" name="opt" value="{{ item }}">{{ item }}<br>
-                        {% endfor %}
-                        </div>
+        <h2>Perform action on the PEP</h2>
+        <form class="form-inline" method="POST" action="{{ url_for('action') }}">
+            <div>
+                <select name="actions">
+                  <option value="run">Run</option>
+                  <option value="check">Check</option>
+                  <option value="destroy">Destroy</option>
+                  <option value="summarize">Summarize</option>
+                </select>
+            </div>
+            <div>
+                {% for key in options.keys() %}
+                    <div>
+                    <h3>{{ key }}</h3>
+                    {% for item in options[key] %}
+                        <input type="checkbox" name="opt" value="{{ item }}">{{ item }}<br>
                     {% endfor %}
-                </div>
-                <br/>
-                <div>
-                    <button type="submit" class="btn btn-default">GO!</button>
-                </div>
-            </form>
-            <p>See <a href="https://looper.readthedocs.io/en/latest/usage.html">looper documentation</a> for the options explanation.</p>
-        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <br/>
+            <div>
+                <button type="submit" class="btn btn-default">GO!</button>
+            </div>
+        </form>
+        <p>See <a href="https://looper.readthedocs.io/en/latest/usage.html">looper documentation</a> for the options explanation.</p>
     </body>
 </html>

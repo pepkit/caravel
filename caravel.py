@@ -7,7 +7,7 @@ import tempfile
 import psutil
 import yaml
 import peppy
-from flask import Blueprint, Flask, render_template, redirect, url_for, request
+from flask import Blueprint, Flask, render_template, redirect, url_for, request, jsonify
 
 app = Flask(__name__)
 
@@ -20,7 +20,6 @@ CONFIG_PRJ_KEY = "projects"
 
 @app.route("/")
 def index():
-
     # helper functions
     def glob_if_exists(x):
         """return all matches in the directory for x and x if nothing matches"""
@@ -54,6 +53,11 @@ def index():
 
     return render_template('index.html', projects=projects)
 
+@app.route('/_background_subproject')
+def background_subproject():
+    sp = request.args.get('sp')
+    output = "Activated suproject: " + sp
+    return jsonify(result=output)
 
 @app.route("/process", methods=['GET', 'POST'])
 def process():
