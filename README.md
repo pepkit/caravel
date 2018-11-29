@@ -5,6 +5,16 @@
 A local web GUI for [looper](https://looper.readthedocs.io/). Caravel gives you a slick web interface to interact with your projects formatted as [PEPs](http://pepkit.github.io). You can use it to submit jobs to any cluster resource manager, monitor jobs, summarize results, and browse project summary web pages. `caravel` basically builds on top of `looper`, but uses the lightweight `flask` microframework to give you a web interface, making it even easier to manage your jobs for those who like pointy-clicky.
 
 
+# Setup/configuration
+
+* Set environment variable `$CARAVEL` to point to a YAML file formatted as shown below:
+
+```
+projects:
+  - path/to/project1_config.yaml
+  - path/to/project2_config.yaml
+```
+
 # Run a web-server
 
 
@@ -42,17 +52,9 @@ ssh -L 5000:localhost:5000 user@server "FLASK_APP=${REMOTE_CODEBASE}/caravel/car
 
 # How it works
 
-* Set environment variable `$CARAVEL` to point to a YAML file formatted as shown below:
+* The application will read each project configuration file and let you select the project of interest from a dropdown list
 
-```
-projects:
-  - path/to/project1_config.yaml
-  - path/to/project2_config.yaml
-```
-
-* The application will read the file and let you select the project of interest from a dropdown list
-
-* [`peppy`](https://peppy.readthedocs.io/en/latest/index.html) will read the *PEP* and the application will display the *PEP* info
+* [`peppy`](https://peppy.readthedocs.io/en/latest/index.html) will read the project (*PEP*) and the application will display its info
 
 * You will have an option to activate a subproject, if available
 
