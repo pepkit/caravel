@@ -15,7 +15,8 @@
               $.getJSON($SCRIPT_ROOT + '/_background_subproject', {
                 sp: $('select[name="subprojects"]').val(),
               }, function(data) {
-                $("#result").text(data.result);
+                $("#subproj_txt").text(data.subproj_txt);
+                $("#sample_count").text(data.sample_count);
               });
               return false;
             });
@@ -28,7 +29,7 @@
         
         <h2>Selected PEP info:</h2>
         {% for item in p_info %}
-            <p><b>{{ item }}:</b> <code>{{ p_info[item] }}</code></p>
+            <p><b>{{ item }}: </b><code id="{{ item }}">{{ p_info[item] }}</code></p>
         {% endfor %}
 
         {% if p_info["subprojects"] is not none %}
@@ -36,10 +37,10 @@
                 {% for i in p_info["subprojects"] %}
                     <option value="{{ i }}">{{ i }}</option>
                 {% endfor %}
-                <option value="{{ None }}">None</option>
+                <option value=reset>None</option>
             </select>
             <a href='#' id=show_subproject><button type="submit" class="btn btn-default">Activate</button></a>
-            <i><p id=result>No subproject activated</p></i>
+            <i><p id=subproj_txt>No subproject activated</p></i>
         {% endif %}
 
         <h2>Perform action on the PEP</h2>

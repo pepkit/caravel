@@ -53,11 +53,6 @@ def index():
 
     return render_template('index.html', projects=projects)
 
-@app.route('/_background_subproject')
-def background_subproject():
-    sp = request.args.get('sp')
-    output = "Activated suproject: " + sp
-    return jsonify(result=output)
 
 @app.route("/process", methods=['GET', 'POST'])
 def process():
@@ -113,6 +108,21 @@ def process():
 
     return render_template('process.html', p_info=p_info, options=options, sp=selected_subproject)
 
+@app.route('/_background_subproject')
+def background_subproject():
+	global p
+	global config_file
+	sp = request.args.get('sp', type=str)
+	print(config_file)
+	if sp == "reset":
+		output = "No subproject activated"
+		p = peppy.Project(config_file)
+		sps = p.num_samples
+	else:
+		output = "Activated suproject: " + sp
+		p.activate_subproject(sp)
+		sps = p.num_samples
+	return jsonify(subproj_txt=output, sample_count=sps)
 
 @app.route("/execute", methods=['GET', 'POST'])
 def action():
