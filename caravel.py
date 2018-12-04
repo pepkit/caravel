@@ -129,6 +129,7 @@ def background_subproject():
 def background_options():
     global p_info
     global selected_subproject
+    #TODO: the options have to be retrieved from the looper argumen parser 
     options = {
         "run": ["--ignore-flags","--allow-duplicate-names","--compute","--env","--limit","--lump","--lumpn","--file-checks","--dry-run","--exclude-protocols","--include-protocols","--sp"],
         "check": ["--all-folders","--file-checks","--dry-run","--exclude-protocols","--include-protocols","--sp"],
