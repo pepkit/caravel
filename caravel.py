@@ -61,6 +61,7 @@ def process():
     global p
     global config_file
     global p_info
+    global selected_subproject
     selected_project = request.form.get('select_project')
     print(selected_project)
     selected_project = selected_project or p.config_file
@@ -106,7 +107,7 @@ def process():
     except AssertionError:
         print("this blueprint was already registered")
 
-    return render_template('process.html', p_info=p_info, options=options, sp=selected_subproject)
+    return render_template('process.html', p_info=p_info, options=None, sp=selected_subproject)
 
 @app.route('/_background_subproject')
 def background_subproject():
@@ -123,6 +124,20 @@ def background_subproject():
 		p.activate_subproject(sp)
 		sps = p.num_samples
 	return jsonify(subproj_txt=output, sample_count=sps)
+
+@app.route('/_background_options')
+def background_options():
+    global p_info
+    global selected_subproject
+    options = {
+        "run": ["--ignore-flags","--allow-duplicate-names","--compute","--env","--limit","--lump","--lumpn","--file-checks","--dry-run","--exclude-protocols","--include-protocols","--sp"],
+        "check": ["--all-folders","--file-checks","--dry-run","--exclude-protocols","--include-protocols","--sp"],
+        "destroy": ["--file-checks","--force-yes","--dry-run","--exclude-protocols","--include-protocols","--sp"],
+        "summarize": ["--file-checks","--dry-run","--exclude-protocols","--include-protocols","--sp"]
+    }
+    act = request.args.get('act', type=str)
+    options_act = options[act]
+    return jsonify(options=render_template('options.html', options=options_act))
 
 @app.route("/execute", methods=['GET', 'POST'])
 def action():

@@ -1,0 +1,11 @@
+<form class="form-inline" method="POST" action="{{ url_for('action') }}">
+    <div>
+        <h3>Options</h3>
+        {% for item in options %}
+            <input type="checkbox" name="opt" value="{{ item }}">{{ item }}<br>
+        {% endfor %}
+    </div>
+    <div>
+        <button type="submit" class="btn btn-default">GO!</button>
+    </div>
+</form>
