@@ -17,6 +17,10 @@ summary = Blueprint('summary', __name__,
 CONFIG_ENV_VAR = "CARAVEL"
 CONFIG_PRJ_KEY = "projects"
 
+@app.errorhandler(Exception)
+def unhandled_exception(e):
+    return render_template('500.html',e=e), 500
+
 
 @app.route("/")
 def index():
@@ -56,8 +60,6 @@ def index():
 
 @app.route("/process", methods=['GET', 'POST'])
 def process():
-    # if request.method == 'GET':
-    #     return redirect(url_for("index"))
     global p
     global config_file
     global p_info
@@ -91,12 +93,7 @@ def process():
         "summary_html": "{project_name}_summary.html".format(project_name=p.name),
         "subprojects": subprojects
     }
-    options = {
-        "run": ["--ignore-flags","--allow-duplicate-names","--compute","--env","--limit","--lump","--lumpn","--file-checks","--dry-run","--exclude-protocols","--include-protocols","--sp"],
-        "check": ["--all-folders","--file-checks","--dry-run","--exclude-protocols","--include-protocols","--sp"],
-        "destroy": ["--file-checks","--force-yes","--dry-run","--exclude-protocols","--include-protocols","--sp"],
-        "summarize": ["--file-checks","--dry-run","--exclude-protocols","--include-protocols","--sp"]
-    }
+
     psummary = Blueprint(p.name, __name__, template_folder=p.metadata.output_dir)
 
     @psummary.route("/{pname}/summary/<path:page_name>".format(pname=p.name), methods=['GET'])
@@ -129,7 +126,9 @@ def background_subproject():
 def background_options():
     global p_info
     global selected_subproject
-    #TODO: the options have to be retrieved from the looper argumen parser 
+    # TODO: the options have to be retrieved from the looper argument parser 
+    # argparse.ArgumentParser._actions has all the info needed to determine
+    # what kind (or absence) of input is needed
     options = {
         "run": ["--ignore-flags","--allow-duplicate-names","--compute","--env","--limit","--lump","--lumpn","--file-checks","--dry-run","--exclude-protocols","--include-protocols","--sp"],
         "check": ["--all-folders","--file-checks","--dry-run","--exclude-protocols","--include-protocols","--sp"],
