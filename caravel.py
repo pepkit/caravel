@@ -7,7 +7,10 @@ import tempfile
 import psutil
 import yaml
 import peppy
-from flask import Blueprint, Flask, render_template, redirect, url_for, request, jsonify
+from flask import Blueprint, Flask, render_template, redirect, url_for, request, jsonify, make_response
+import jwt
+import datetime
+from functools import wraps
 
 app = Flask(__name__)
 
@@ -19,10 +22,47 @@ CONFIG_PRJ_KEY = "projects"
 
 @app.errorhandler(Exception)
 def unhandled_exception(e):
+    app.logger.error('Unhandled Exception: %s', (e))
     return render_template('500.html',e=e), 500
 
+app.config['SECRET_KEY'] = 'thisisthesecretkey'
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        global token
+        token = request.args.get('token')
+        if not token:
+            return render_template('redirect_login.html')
+
+        try: 
+            data = jwt.decode(token, app.config['SECRET_KEY'])
+        except:
+            return render_template("invalid_token.html"), 403
+
+        return f(*args, **kwargs)
+
+    return decorated
+
+
+@app.route("/login")
+def login():
+    auth = request.authorization
+
+    def prGreen(skk): 
+        print("\033[92m {}\033[00m" .format(skk)) 
+
+    if auth and auth.password == "a":
+        token = jwt.encode({'user' : auth.username, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
+        # return jsonify({'token' : token.decode('UTF-8')})
+        print("\n\nYour token:\n")
+        prGreen(token.decode('UTF-8') + "\n\n")
+        return render_template('token.html')
+
+    return make_response("Could not verify", 401, {'WWW-Authenticate' : 'Basic realm="Login required"'})
 
 @app.route("/")
+@token_required
 def index():
     # helper functions
     def glob_if_exists(x):
@@ -65,9 +105,6 @@ def process():
     global p_info
     global selected_subproject
     selected_project = request.form.get('select_project')
-    print(selected_project)
-    selected_project = selected_project or p.config_file
-    print("\nLoading project: " + selected_project)
     
     config_file = os.path.expandvars(os.path.expanduser(selected_project))
     p = peppy.Project(config_file)
@@ -126,6 +163,7 @@ def background_subproject():
 def background_options():
     global p_info
     global selected_subproject
+    global act
     # TODO: the options have to be retrieved from the looper argument parser 
     # argparse.ArgumentParser._actions has all the info needed to determine
     # what kind (or absence) of input is needed
@@ -139,13 +177,17 @@ def background_options():
     options_act = options[act]
     return jsonify(options=render_template('options.html', options=options_act))
 
-@app.route("/execute", methods=['GET', 'POST'])
+@app.route("/action", methods=['GET', 'POST'])
 def action():
-    action = request.form['actions']
+    global token
+    global act
+    user_token = request.form['token']
+    if not token == user_token:
+        return render_template("invalid_token.html"), 403
     opt = list(set(request.form.getlist('opt')))
     print("\nSelected flags:\n " + '\n'.join(opt)) 
-    print("\nSelected action: " + action)
-    cmd = "looper " + action + " " + ' '.join(opt) + " " + config_file
+    print("\nSelected action: " + act)
+    cmd = "looper " + act + " " + ' '.join(opt) + " " + config_file
     print("\nCreated Command: " + cmd)
     tmpdirname = tempfile.mkdtemp("tmpdir")
     print("\nCreated temporary directory: " + tmpdirname)

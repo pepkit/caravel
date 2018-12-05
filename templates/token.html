@@ -2,7 +2,7 @@
   <head>
 	<link rel="stylesheet" type="text/css" href="/static/bootstrap.min.css">
   	<title>
-  		Caravel - Error
+  		Caravel - Token
   	</title>
     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='style.css') }}">
   </head>
@@ -11,15 +11,11 @@
       <img src="/static/caravel.svg">
     </div>
     <div>
-      <h2>Caravel server encountered exception(s):</h2>
-    </div>
-    <div>
-        {% for ei in e %}
-        <code><p>{{ ei }}</p></code>
-        {% endfor %}
-    </div>
-    <div>
-      <p>Go back to the <a href="{{ url_for('index') }}"><b>Home page</b></a>
+      <h2>Authentication instructions</h2>
+      <p>Your token has been printed to the terminal. Copy and paste it into the browser after:</p>
+      <p><code>http://localhost:5000/?token=</code></p>
+      <p>Additionally, it will be required to <b>run the <code>looper</code> command</b></p>
+      </div>
     </div>
   </body>
 </html>

@@ -2,7 +2,7 @@
   <head>
 	<link rel="stylesheet" type="text/css" href="/static/bootstrap.min.css">
   	<title>
-  		Caravel - Error
+  		Caravel - Invalid token
   	</title>
     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='style.css') }}">
   </head>
@@ -11,15 +11,9 @@
       <img src="/static/caravel.svg">
     </div>
     <div>
-      <h2>Caravel server encountered exception(s):</h2>
-    </div>
-    <div>
-        {% for ei in e %}
-        <code><p>{{ ei }}</p></code>
-        {% endfor %}
-    </div>
-    <div>
-      <p>Go back to the <a href="{{ url_for('index') }}"><b>Home page</b></a>
+      <h2>Invalid token</h2>
+      <p>The provided token is invalid, make sure you have copied the token from the terminal correctly</p>
+      <p>Go <a href="{{ url_for('index') }}">back.</a></p>
     </div>
   </body>
 </html>
