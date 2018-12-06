@@ -1,3 +1,4 @@
+from __future__ import print_function
 import itertools
 import glob
 import os
@@ -15,57 +16,79 @@ from functools import wraps
 app = Flask(__name__)
 
 summary = Blueprint('summary', __name__,
-    template_folder='/sfs/lustre/allocations/shefflab/processed/mpfc_neurons/')
+                    template_folder='/sfs/lustre/allocations/shefflab/processed/mpfc_neurons/')
 
 CONFIG_ENV_VAR = "CARAVEL"
 CONFIG_PRJ_KEY = "projects"
+TOKEN_EXPIRATION = 60 * 2
+
 
 @app.errorhandler(Exception)
 def unhandled_exception(e):
     app.logger.error('Unhandled Exception: %s', (e))
-    return render_template('500.html',e=e), 500
+    return render_template('500.html', e=e), 500
 
-app.config['SECRET_KEY'] = 'thisisthesecretkey'
 
-def token_required(f):
-    @wraps(f)
+def token_required(func):
+    """
+    This decorator checks for a token, verifies if it is valid
+    and redirects to the login page if needed
+    :param func: function to be decorated
+    :return: decorated function
+    """
+
+    @wraps(func)
     def decorated(*args, **kwargs):
         global token
-        token = request.args.get('token')
+        try:
+            token
+        except NameError:
+            token = request.args.get('token')
         if not token:
             return render_template('redirect_login.html')
 
-        try: 
-            data = jwt.decode(token, app.config['SECRET_KEY'])
+        try:
+            jwt.decode(token, app.config['SECRET_KEY'])
         except:
+            del token
             return render_template("invalid_token.html"), 403
-
-        return f(*args, **kwargs)
+        return func(*args, **kwargs)
 
     return decorated
 
 
 @app.route("/login")
 def login():
+    global token
     auth = request.authorization
 
-    def prGreen(txt): 
-        print("\033[92m {}\033[00m" .format(txt)) 
+    def pr_green(txt):
+        """
+        Print the provided text to stderr in green. Used to print the token for the user.
+        :param txt: string with text to be printed.
+        :return: None
+        """
+        print("\033[92m {}\033[00m".format(txt), file=sys.stderr)
 
-    if auth and auth.password == "a":
-        token = jwt.encode({'user' : auth.username, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=20)}, app.config['SECRET_KEY'])
-        print("\n\nYour token:\n")
-        prGreen(token.decode('UTF-8').strip() + "\n\n")
+    if auth and auth.password == "abc":
+        token = jwt.encode(
+            {'user': auth.username, 'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=TOKEN_EXPIRATION)},
+            app.config['SECRET_KEY'])
+        pr_green("\n\nYour token:\n" + token.decode('UTF-8').strip() + "\n\n")
         return render_template('token.html')
+    return make_response("Could not verify", 401, {'WWW-Authenticate': 'Basic realm="Login required"'})
 
-    return make_response("Could not verify", 401, {'WWW-Authenticate' : 'Basic realm="Login required"'})
 
 @app.route("/")
 @token_required
 def index():
     # helper functions
     def glob_if_exists(x):
-        """return all matches in the directory for x and x if nothing matches"""
+        """
+        Return all matches in the directory for x and x if nothing matches
+        :param x: a string with path containing globs
+        :return: a list of paths
+        """
         return list(itertools.chain(*[
             glob.glob(e) or x for e in (x if isinstance(x, list) else [x])]))
 
@@ -75,14 +98,14 @@ def index():
         msg = "Please set the environment variable {} or provide a YAML file " \
               "listing paths to project config files".format(CONFIG_ENV_VAR)
         print(msg)
-        return render_template('500.html',e=[msg])
+        return render_template('500.html', e=[msg])
 
     project_list_path = os.path.expanduser(project_list_path)
 
     if not os.path.isfile(project_list_path):
         msg = "Project configs list isn't a file: {}".format(project_list_path)
         print(msg)
-        return render_template('500.html',e=[msg])
+        return render_template('500.html', e=[msg])
 
     with open(project_list_path, 'r') as stream:
         pl = yaml.safe_load(stream)
@@ -97,13 +120,14 @@ def index():
 
 
 @app.route("/process", methods=['GET', 'POST'])
+@token_required
 def process():
     global p
     global config_file
     global p_info
     global selected_subproject
     selected_project = request.form.get('select_project')
-    
+
     config_file = os.path.expandvars(os.path.expanduser(selected_project))
     p = peppy.Project(config_file)
 
@@ -134,6 +158,7 @@ def process():
     @psummary.route("/{pname}/summary/<path:page_name>".format(pname=p.name), methods=['GET'])
     def render_static(page_name):
         return render_template('%s' % page_name)
+
     try:
         app.register_blueprint(psummary)
     except AssertionError:
@@ -141,38 +166,41 @@ def process():
 
     return render_template('process.html', p_info=p_info, options=None, sp=selected_subproject)
 
+
 @app.route('/_background_subproject')
 def background_subproject():
-	global p
-	global config_file
-	sp = request.args.get('sp', type=str)
-	if sp == "reset":
-		output = "No subproject activated"
-		p = peppy.Project(config_file)
-		sps = p.num_samples
-	else:
-		output = "Activated suproject: " + sp
-		p.activate_subproject(sp)
-		sps = p.num_samples
-	return jsonify(subproj_txt=output, sample_count=sps)
+    global p
+    global config_file
+    sp = request.args.get('sp', type=str)
+    if sp == "reset":
+        output = "No subproject activated"
+        p = peppy.Project(config_file)
+        sps = p.num_samples
+    else:
+        output = "Activated suproject: " + sp
+        p.activate_subproject(sp)
+        sps = p.num_samples
+    return jsonify(subproj_txt=output, sample_count=sps)
+
 
 @app.route('/_background_options')
 def background_options():
     global p_info
     global selected_subproject
     global act
-    # TODO: the options have to be retrieved from the looper argument parser 
-    # argparse.ArgumentParser._actions has all the info needed to determine
-    # what kind (or absence) of input is needed
+    # TODO: the options have to be retrieved from the looper argument parser
+    # argparse.ArgumentParser._actions has all the info needed to determine what kind (or absence) of input is needed
     options = {
-        "run": ["--ignore-flags","--allow-duplicate-names","--compute","--env","--limit","--lump","--lumpn","--file-checks","--dry-run","--exclude-protocols","--include-protocols","--sp"],
-        "check": ["--all-folders","--file-checks","--dry-run","--exclude-protocols","--include-protocols","--sp"],
-        "destroy": ["--file-checks","--force-yes","--dry-run","--exclude-protocols","--include-protocols","--sp"],
-        "summarize": ["--file-checks","--dry-run","--exclude-protocols","--include-protocols","--sp"]
+        "run": ["--ignore-flags", "--allow-duplicate-names", "--compute", "--env", "--limit", "--lump", "--lumpn",
+                "--file-checks", "--dry-run", "--exclude-protocols", "--include-protocols", "--sp"],
+        "check": ["--all-folders", "--file-checks", "--dry-run", "--exclude-protocols", "--include-protocols", "--sp"],
+        "destroy": ["--file-checks", "--force-yes", "--dry-run", "--exclude-protocols", "--include-protocols", "--sp"],
+        "summarize": ["--file-checks", "--dry-run", "--exclude-protocols", "--include-protocols", "--sp"]
     }
     act = request.args.get('act', type=str)
     options_act = options[act]
     return jsonify(options=render_template('options.html', options=options_act))
+
 
 @app.route("/action", methods=['GET', 'POST'])
 def action():
@@ -180,9 +208,10 @@ def action():
     global act
     user_token = request.form['token']
     if not token == user_token:
+        del token
         return render_template("invalid_token.html"), 403
     opt = list(set(request.form.getlist('opt')))
-    print("\nSelected flags:\n " + '\n'.join(opt)) 
+    print("\nSelected flags:\n " + '\n'.join(opt))
     print("\nSelected action: " + act)
     cmd = "looper " + act + " " + ' '.join(opt) + " " + config_file
     print("\nCreated Command: " + cmd)
@@ -199,4 +228,5 @@ def action():
 
 if __name__ == "__main__":
     app.config["project_configs"] = sys.argv[1] if len(sys.argv) > 1 else None
+    app.config['SECRET_KEY'] = 'thisisthesecretkey'
     app.run()
