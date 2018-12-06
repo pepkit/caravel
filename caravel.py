@@ -62,6 +62,7 @@ def login():
     global token
     auth = request.authorization
 
+    token_exp = app.config["TOKEN_EXPIRATION"] or TOKEN_EXPIRATION
     def pr_green(txt):
         """
         Print the provided text to stderr in green. Used to print the token for the user.
@@ -72,11 +73,11 @@ def login():
 
     if auth and auth.password == "abc":
         token = jwt.encode(
-            {'user': auth.username, 'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=TOKEN_EXPIRATION)},
+            {'user': auth.username, 'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=token_exp)},
             app.config['SECRET_KEY'])
         print("\n\nYour token:\n")
         pr_green(token.decode('UTF-8').strip() + "\n")
-        m, s = divmod(TOKEN_EXPIRATION, 60)
+        m, s = divmod(token_exp, 60)
         h, m = divmod(m, 60)
         print("It will expire in %d:%02d:%02dh\n\n" % (h, m, s), file=sys.stderr)
         return render_template('token.html')
@@ -232,5 +233,6 @@ def action():
 
 if __name__ == "__main__":
     app.config["project_configs"] = sys.argv[1] if len(sys.argv) > 1 else None
+    app.config["TOKEN_EXPIRATION"] = int(sys.argv[2]) if len(sys.argv) > 2 else None
     app.config['SECRET_KEY'] = 'thisisthesecretkey'
     app.run()
