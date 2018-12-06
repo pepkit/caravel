@@ -20,7 +20,7 @@ summary = Blueprint('summary', __name__,
 
 CONFIG_ENV_VAR = "CARAVEL"
 CONFIG_PRJ_KEY = "projects"
-TOKEN_EXPIRATION = 60 * 2
+TOKEN_EXPIRATION = 100 # in seconds
 
 
 @app.errorhandler(Exception)
@@ -74,7 +74,11 @@ def login():
         token = jwt.encode(
             {'user': auth.username, 'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=TOKEN_EXPIRATION)},
             app.config['SECRET_KEY'])
-        pr_green("\n\nYour token:\n" + token.decode('UTF-8').strip() + "\n\n")
+        print("\n\nYour token:\n")
+        pr_green(token.decode('UTF-8').strip() + "\n")
+        m, s = divmod(TOKEN_EXPIRATION, 60)
+        h, m = divmod(m, 60)
+        print("It will expire in %d:%02d:%02dh\n\n" % (h, m, s), file=sys.stderr)
         return render_template('token.html')
     return make_response("Could not verify", 401, {'WWW-Authenticate': 'Basic realm="Login required"'})
 
