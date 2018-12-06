@@ -49,14 +49,13 @@ def token_required(f):
 def login():
     auth = request.authorization
 
-    def prGreen(skk): 
-        print("\033[92m {}\033[00m" .format(skk)) 
+    def prGreen(txt): 
+        print("\033[92m {}\033[00m" .format(txt)) 
 
     if auth and auth.password == "a":
-        token = jwt.encode({'user' : auth.username, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
-        # return jsonify({'token' : token.decode('UTF-8')})
+        token = jwt.encode({'user' : auth.username, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=20)}, app.config['SECRET_KEY'])
         print("\n\nYour token:\n")
-        prGreen(token.decode('UTF-8') + "\n\n")
+        prGreen(token.decode('UTF-8').strip() + "\n\n")
         return render_template('token.html')
 
     return make_response("Could not verify", 401, {'WWW-Authenticate' : 'Basic realm="Login required"'})
@@ -76,15 +75,14 @@ def index():
         msg = "Please set the environment variable {} or provide a YAML file " \
               "listing paths to project config files".format(CONFIG_ENV_VAR)
         print(msg)
-        return render_template('index.html', warning=msg)
+        return render_template('500.html',e=[msg])
 
     project_list_path = os.path.expanduser(project_list_path)
-    print(project_list_path)
 
     if not os.path.isfile(project_list_path):
         msg = "Project configs list isn't a file: {}".format(project_list_path)
         print(msg)
-        return render_template('index.html', warning=msg)
+        return render_template('500.html',e=[msg])
 
     with open(project_list_path, 'r') as stream:
         pl = yaml.safe_load(stream)
@@ -148,7 +146,6 @@ def background_subproject():
 	global p
 	global config_file
 	sp = request.args.get('sp', type=str)
-	print(config_file)
 	if sp == "reset":
 		output = "No subproject activated"
 		p = peppy.Project(config_file)

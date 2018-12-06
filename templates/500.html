@@ -1,25 +1,12 @@
-<html>
-  <head>
-	<link rel="stylesheet" type="text/css" href="/static/bootstrap.min.css">
-  	<title>
-  		Caravel - Error
-  	</title>
-    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='style.css') }}">
-  </head>
-  <body>
-    <div>
-      <img src="/static/caravel.svg">
-    </div>
-    <div>
-      <h2>Caravel server encountered exception(s):</h2>
-    </div>
-    <div>
-        {% for ei in e %}
-        <code><p>{{ ei }}</p></code>
-        {% endfor %}
-    </div>
-    <div>
-      <p>Go back to the <a href="{{ url_for('index') }}"><b>Home page</b></a>
-    </div>
-  </body>
-</html>
+{% extends "template.html" %}
+{% block title %}Error{% endblock %}
+{% block content %}
+<h2>Caravel server encountered exception(s):</h2>
+<ol>
+  {% for ei in e %}
+  <li><code>{{ ei }}</code></li>
+  {% endfor %}
+</ol>
+<br style = “line-height:2;”><br>
+<p>Go back to the <a href="{{ url_for('index') }}"><b>Home page</b></a>
+{% endblock %}

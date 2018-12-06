@@ -1,76 +1,59 @@
-<html>
-    <head>
-    <link rel="stylesheet" type="text/css" href="/static/bootstrap.min.css">
-        <title>
-            Caravel - Run
-        </title>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <script type=text/javascript>
-            $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-        </script>
-
-        <script type=text/javascript>
-          $(function() {
-            $('a#show_subproject').bind('click', function() {
-              $.getJSON($SCRIPT_ROOT + '/_background_subproject', {
-                sp: $('select[name="subprojects"]').val(),
-              }, function(data) {
-                $("#subproj_txt").text(data.subproj_txt);
-                $("#sample_count").text(data.sample_count);
-              });
-              return false;
-            });
-          });
-        </script>
-        <script type=text/javascript>
-          $(function() {
-            $('a#show_options').bind('click', function() {
-              $.getJSON($SCRIPT_ROOT + '/_background_options', {
-                act: $('select[name="actions"]').val(),
-              }, function(data) {
-                $("div#options").html(data.options);
-              });
-              return false;
-            });
-          });
-        </script>
-        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='style.css') }}">
-    </head>
-    <body>
-        <div>
-        <img src="/static/caravel.svg">
-        </div>
-        <br/>
-        <div>
-        <h2>Selected PEP info:</h2>
-        {% for item in p_info %} 
-            <p><b>{{ item }}: </b><code id="{{ item }}">{{ p_info[item] }}</code></p>
-        {% endfor %}
-
-        {% if p_info["subprojects"] is not none %}
-            <select name="subprojects">
-                {% for i in p_info["subprojects"] %}
-                    <option value="{{ i }}">{{ i }}</option>
-                {% endfor %}
-                <option value=reset>None</option>
-            </select>
-            <a href='#' id=show_subproject><button type="submit" class="btn btn-default">ACTIVATE</button></a>
-            <i><p id=subproj_txt>No subproject activated</p></i>
-        {% endif %}
-        </div>
-        <div>
-        <h2>Perform action on the PEP</h2>
-            <select name="actions">
-              <option value="run">Run</option>
-              <option value="check">Check</option>
-              <option value="destroy">Destroy</option>
-              <option value="summarize">Summarize</option>
-            </select>
-            <a href='#' id=show_options><button type="submit" class="btn btn-default">SELECT</button></a>
-        </div>
-        <div id="options"></div>
-        <div>
-        <p>See <a href="https://looper.readthedocs.io/en/latest/usage.html">looper documentation</a> for the options explanation.</p>
-        </div>
-    </body>
-</html>
+{% extends "template.html" %}
+{% block head %}
+{{ super() }}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type=text/javascript>
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+<script type=text/javascript>
+  $(function() {
+    $('a#show_subproject').bind('click', function() {
+      $.getJSON($SCRIPT_ROOT + '/_background_subproject', {
+        sp: $('select[name="subprojects"]').val(),
+      }, function(data) {
+        $("#subproj_txt").text(data.subproj_txt);
+        $("#sample_count").text(data.sample_count);
+      });
+      return false;
+    });
+  });
+</script>
+<script type=text/javascript>
+  $(function() {
+    $('a#show_options').bind('click', function() {
+      $.getJSON($SCRIPT_ROOT + '/_background_options', {
+        act: $('select[name="actions"]').val(),
+      }, function(data) {
+        $("div#options").html(data.options);
+      });
+      return false;
+    });
+  });
+</script>
+{% endblock %}
+{% block title %}Index{% endblock %}
+{% block content %}
+    <h2>Selected PEP info:</h2>
+    {% for item in p_info %} 
+        <p><b>{{ item }}: </b><code id="{{ item }}">{{ p_info[item] }}</code></p>
+    {% endfor %}
+    {% if p_info["subprojects"] is not none %}
+        <select name="subprojects">
+            {% for i in p_info["subprojects"] %}
+                <option value="{{ i }}">{{ i }}</option>
+            {% endfor %}
+            <option value=reset>None</option>
+        </select>
+        <a href='#' id=show_subproject><button type="submit" class="btn btn-default">ACTIVATE</button></a>
+        <i><p id=subproj_txt>No subproject activated</p></i>
+    {% endif %}
+    <h2>Perform action on the PEP</h2>
+        <select name="actions">
+          <option value="run">Run</option>
+          <option value="check">Check</option>
+          <option value="destroy">Destroy</option>
+          <option value="summarize">Summarize</option>
+        </select>
+        <a href='#' id=show_options><button type="submit" class="btn btn-default">SELECT</button></a>
+    <div id="options"></div>
+{% endblock %}

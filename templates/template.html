@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+  <head>
+    {% block head %}
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='bootstrap.min.css') }}">
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='style.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <title>Caravel - {% block title %}{% endblock %}</title>
+    {% endblock %}
+  </head>
+  <body>
+    <div>
+    <img src="{{ url_for('static',filename='caravel.svg') }}">
+    <br style = “line-height:6;”><br>
+    {% block content %}{% endblock %}
+      {% block footer %}
+        <footer class="footer">
+            <div id="footer">
+              <span class="muted">© 2018 <a href="http://databio.org/" target="_new">Sheffield Computational Biology Lab</a> at the University of Virginia</span>
+            </div>
+        </footer>
+      {% endblock %}
+    </div>
+  </body>
+
+</html>

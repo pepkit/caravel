@@ -1,29 +1,13 @@
-<html>
-  <head>
-	<link rel="stylesheet" type="text/css" href="/static/bootstrap.min.css">
-  	<title>
-  		Caravel - Index
-  	</title>
-    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='style.css') }}">
-  </head>
-  <body>
-    <div>
-      <img src="/static/caravel.svg">
-    </div>
-    <br/>
-    <p style="color: red;">{{ warning }}</p>
-    <div>
-      <h2>Select the input project:</h2>
-    </div>
-    <div>
-      <form class="form-inline" method="POST" action="{{ url_for('process') }}">
-        <select name="select_project" class="selectpicker form-control">
-          {% for p in projects %}
-          <option value="{{ p }}">{{ p }}</option>
-          {% endfor %}
-        </select>
-        <button type="submit" class="btn btn-default">Go</button>
-      </form>
-    </div>
-  </body>
-</html>
+{% extends "template.html" %}
+{% block title %}Index{% endblock %}
+{% block content %}
+<h2>Select the input project:</h2>
+<form class="form-inline" method="POST" action="{{ url_for('process') }}">
+  <select name="select_project" class="selectpicker form-control">
+    {% for p in projects %}
+    <option value="{{ p }}">{{ p }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit" class="btn btn-default">Go</button>
+</form>
+{% endblock %}
