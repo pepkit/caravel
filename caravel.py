@@ -39,18 +39,15 @@ def token_required(func):
 
     @wraps(func)
     def decorated(*args, **kwargs):
-        global token
-        try:
-            token
-        except NameError:
-            token = request.args.get('token')
+        token = request.args.get('token')
+
         if not token:
             return render_template('redirect_login.html')
 
         try:
             jwt.decode(token, app.config['SECRET_KEY'])
         except:
-            del token
+            # del token
             return render_template("invalid_token.html"), 403
         return func(*args, **kwargs)
 
@@ -59,7 +56,6 @@ def token_required(func):
 
 @app.route("/login")
 def login():
-    global token
     auth = request.authorization
 
     token_exp = app.config["TOKEN_EXPIRATION"] or TOKEN_EXPIRATION
@@ -71,7 +67,8 @@ def login():
         """
         print("\033[92m {}\033[00m".format(txt), file=sys.stderr)
 
-    if auth and auth.password == "abc":
+    if auth and auth.password == "a":
+        global token
         token = jwt.encode(
             {'user': auth.username, 'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=token_exp)},
             app.config['SECRET_KEY'])
@@ -125,7 +122,6 @@ def index():
 
 
 @app.route("/process", methods=['GET', 'POST'])
-@token_required
 def process():
     global p
     global config_file

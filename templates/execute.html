@@ -2,9 +2,7 @@
 {% block title %}Looper results{% endblock %}
 {% block content %}
   <h2>Looper results:</h2>
-  <div>
     {% for line in output %}
-    	<pre>{{ line }}</pre>
+    	<code>{{ line }}</code>
     {% endfor %}
-  <div>
 {% endblock %}
