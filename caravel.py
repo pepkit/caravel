@@ -105,7 +105,6 @@ def csrf_protect():
 
 def generate_csrf_token():
     if '_csrf_token' not in session:
-        print("generating")
         session['_csrf_token'] = random_string(10)
     return session['_csrf_token']
 
