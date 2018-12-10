@@ -1,4 +1,5 @@
 <form class="form-inline" method="POST" action="{{ url_for('action') }}">
+	<input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
     <div id="vertical">
         <h3>Options</h3>
         {% for item in options %}

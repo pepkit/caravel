@@ -8,10 +8,12 @@ import tempfile
 import psutil
 import yaml
 import peppy
-from flask import Blueprint, Flask, render_template, redirect, url_for, request, jsonify, make_response
+from flask import Blueprint, Flask, render_template, redirect, url_for, request, jsonify, make_response, session
 import jwt
 import datetime
 from functools import wraps
+import string
+import random
 
 app = Flask(__name__)
 
@@ -53,6 +55,13 @@ def token_required(func):
 
     return decorated
 
+def random_string(N):
+    """
+    Generates a random string of length N
+    :param N: length of the string to be generated
+    :return: random string
+    """
+    return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(N))
 
 @app.route("/login")
 def login():
@@ -67,11 +76,12 @@ def login():
         """
         print("\033[92m {}\033[00m".format(txt), file=sys.stderr)
 
-    if auth and auth.password == "a":
+    if auth and auth.password == "abc":
         global token
         token = jwt.encode(
             {'user': auth.username, 'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=token_exp)},
             app.config['SECRET_KEY'])
+        session['user'] = auth.username
         print("\n\nYour token:\n")
         pr_green(token.decode('UTF-8').strip() + "\n")
         m, s = divmod(token_exp, 60)
@@ -80,6 +90,26 @@ def login():
         return render_template('token.html')
     return make_response("Could not verify", 401, {'WWW-Authenticate': 'Basic realm="Login required"'})
 
+
+
+@app.before_request
+def csrf_protect():
+    print(request.method)
+    if request.method == "POST":
+        token = session.pop('_csrf_token', None)
+        token_get = request.form.get("_csrf_token")
+        if not token or token != token_get:
+            msg = "The request CSRF token is invalid"
+            print(msg)
+            return render_template('500.html', e=[msg])
+
+def generate_csrf_token():
+    if '_csrf_token' not in session:
+        print("generating")
+        session['_csrf_token'] = random_string(10)
+    return session['_csrf_token']
+
+app.jinja_env.globals['csrf_token'] = generate_csrf_token 
 
 @app.route("/")
 @token_required

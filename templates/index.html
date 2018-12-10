@@ -3,6 +3,7 @@
 {% block content %}
 <h2>Select the input project:</h2>
 <form class="form-inline" method="POST" action="{{ url_for('process') }}">
+  <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
   <select name="select_project" class="selectpicker form-control">
     {% for p in projects %}
     <option value="{{ p }}">{{ p }}</option>
