@@ -1,5 +1,5 @@
 from __future__ import print_function
-import itertools
+from itertools import chain
 import glob
 import os
 import shutil
@@ -25,12 +25,25 @@ CONFIG_ENV_VAR = "CARAVEL"
 CONFIG_PRJ_KEY = "projects"
 TOKEN_EXPIRATION = 100  # in seconds
 
+# Helper functions
+def glob_if_exists(x):
+    """
+    Return all matches in the directory for x and x if nothing matches
+    :param x: a string with path containing globs
+    :return: a list of paths
+    """
+    if isinstance(x, list):
+        return [glob.glob(e) if len(glob.glob(e)) > 0 else e for e in x]
+    else:
+        return glob.glob(x) if len(glob.glob(x)) > 0 else [x]
 
-@app.errorhandler(Exception)
-def unhandled_exception(e):
-    app.logger.error('Unhandled Exception: %s', (e))
-    return render_template('500.html', e=e), 500
-
+def flatten(x):
+    """
+    Flatten one level of nesting
+    :param x: a list to flatten
+    :return: a flat list
+    """
+    return list(chain.from_iterable(x))
 
 def shutdown_server():
     func = request.environ.get('werkzeug.server.shutdown')
@@ -63,7 +76,7 @@ def token_required(func):
                 login_uid
                 token = session['token']
                 eprint("Token retrieved from the session")
-            except NameError:
+            except (NameError, KeyError):
                 eprint("No token in session and no argument. Log in")
                 return render_template('redirect_login.html')
 
@@ -97,6 +110,22 @@ def geprint(txt):
     :return: None
     """
     eprint("\033[92m {}\033[00m".format(txt))
+
+
+def generate_csrf_token():
+    if '_csrf_token' not in session:
+        session['_csrf_token'] = random_string(10)
+    return session['_csrf_token']
+
+
+app.jinja_env.globals['csrf_token'] = generate_csrf_token
+
+
+# Routes
+@app.errorhandler(Exception)
+def unhandled_exception(e):
+    app.logger.error('Unhandled Exception: %s', (e))
+    return render_template('500.html', e=e), 500
 
 
 @app.route('/shutdown', methods=['GET'])
@@ -168,27 +197,9 @@ def csrf_protect():
             return render_template('500.html', e=[msg])
 
 
-def generate_csrf_token():
-    if '_csrf_token' not in session:
-        session['_csrf_token'] = random_string(10)
-    return session['_csrf_token']
-
-
-app.jinja_env.globals['csrf_token'] = generate_csrf_token
-
-
 @app.route("/")
 @token_required
 def index():
-    # helper functions
-    def glob_if_exists(x):
-        """
-        Return all matches in the directory for x and x if nothing matches
-        :param x: a string with path containing globs
-        :return: a list of paths
-        """
-        return list(itertools.chain(*[
-            glob.glob(e) or x for e in (x if isinstance(x, list) else [x])]))
 
     project_list_path = app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
 
@@ -211,8 +222,7 @@ def index():
             "'{}' key not in the projects list file.".format(CONFIG_PRJ_KEY)
         projects = pl[CONFIG_PRJ_KEY]
         # get all globs and return unnested list
-        projects = [f for prj in projects for f in
-                    glob_if_exists(os.path.expanduser(os.path.expandvars(prj)))]
+        projects = flatten([glob_if_exists(os.path.expanduser(os.path.expandvars(prj))) for prj in projects])
 
     return render_template('index.html', projects=projects)
 
