@@ -140,7 +140,7 @@ def login():
     auth = request.authorization
     token_exp = app.config["TOKEN_EXPIRATION"] or TOKEN_EXPIRATION
 
-    if auth and auth.password == "a":
+    if auth and auth.password == "aaaa":
         global login_uid
         # verbosity for testing purposes
         try:
@@ -172,9 +172,7 @@ def login():
             return render_template('500.html', e=[msg])
         return render_template('token.html')
     else:
-        msg = "Wrong password"
-        print(msg)
-        return render_template('500.html', e=[msg])
+        return make_response("Wrong password", 401, {'WWW-Authenticate': 'Basic realm="Login required"'})
 
 
 @app.before_request
