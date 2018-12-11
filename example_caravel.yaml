@@ -1,3 +1,3 @@
 projects:
-  - file.yaml
-  - ${CODEBASE}/example_peps/example_basic/project_config.yaml
+  - ${CODE}/example_peps/*/project_config.yaml
+  - /invalid/path/for/tesing/file.yaml
