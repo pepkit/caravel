@@ -14,6 +14,10 @@ import datetime
 from functools import wraps
 import string
 import random
+from uuid import uuid1
+
+# TOKEN in session
+
 
 app = Flask(__name__)
 
@@ -24,11 +28,22 @@ CONFIG_ENV_VAR = "CARAVEL"
 CONFIG_PRJ_KEY = "projects"
 TOKEN_EXPIRATION = 100 # in seconds
 
-
 @app.errorhandler(Exception)
 def unhandled_exception(e):
     app.logger.error('Unhandled Exception: %s', (e))
     return render_template('500.html', e=e), 500
+
+
+def shutdown_server():
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    try:
+        global login_uid
+        del login_uid
+    except NameError:
+        pass
+    func()
 
 
 def token_required(func):
@@ -64,25 +79,42 @@ def random_string(N):
     eprint("CSRF token generated")
     return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(N))
 
+def eprint(*args, **kwargs):
+        print(*args, file=sys.stderr, **kwargs)
+
+def geprint(txt, color=False):
+    """
+    Print the provided text to stderr in green. Used to print the token for the user.
+    :param txt: string with text to be printed.
+    :return: None
+    """
+    eprint("\033[92m {}\033[00m".format(txt))
+
+@app.route('/shutdown', methods=['GET'])
+def shutdown():
+    shutdown_server()
+    return 'Server shutting down...'
+
 @app.route("/login")
 def login():
     auth = request.authorization
-
     token_exp = app.config["TOKEN_EXPIRATION"] or TOKEN_EXPIRATION
     
-    def eprint(*args, **kwargs):
-        print(*args, file=sys.stderr, **kwargs)
-
-    def geprint(txt, color=False):
-        """
-        Print the provided text to stderr in green. Used to print the token for the user.
-        :param txt: string with text to be printed.
-        :return: None
-        """
-        eprint("\033[92m {}\033[00m".format(txt))
-
     if auth and auth.password == "abc":
         global token
+        global login_uid
+        # verbosity for testing purposes
+        try:
+            eprint("Retrieved session UID: " + str(session['uid']))
+        except:
+            session['uid'] = uuid1()
+            eprint("Generated session UID: " + str(session['uid']))
+        try:
+            eprint("Using existing login UID: " + str(login_uid))
+        except:
+            login_uid = session['uid']
+            eprint("Assigned new login UID: " + str(login_uid))
+
         token = jwt.encode(
             {'user': auth.username, 'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=token_exp)},
             app.config['SECRET_KEY'])
@@ -100,6 +132,13 @@ def login():
 @app.before_request
 def csrf_protect():
     if request.method == "POST":
+        global login_uid
+        if login_uid.int == session['uid'].int:
+            pass
+        else:
+            msg = "The UIDs do not match"
+            print(msg)
+            return render_template('500.html', e=[msg])
         # token = session.pop('_csrf_token', None)
         token = session['_csrf_token']
         token_get = request.form.get("_csrf_token")

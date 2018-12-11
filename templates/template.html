@@ -20,7 +20,10 @@
   {% block footer %}
   <footer class="footer">
   <div id="footer">
-  <span class="muted">© 2018 <a href="http://databio.org/" target="_new">Sheffield Computational Biology Lab</a> at the University of Virginia</span>
+    <form action="{{ url_for('shutdown') }}" method="get">
+      <button type="submit" class="btn btn-default" style="float: right;">Close</button>
+    </form>
+    <span class="muted">© 2018 <a href="http://databio.org/" target="_new">Sheffield Computational Biology Lab</a> at the University of Virginia</span>
   </div>
   </footer>
   {% endblock %}
