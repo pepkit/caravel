@@ -164,7 +164,7 @@ def login():
             geprint(token.decode('UTF-8').strip() + "\n")
             m, s = divmod(token_exp, 60)
             h, m = divmod(m, 60)
-            eprint("It will expire in %d:%02d:%02dh\n\n" % (h, m, s))
+            eprint("It will expire in %dh:%02dm:%02ds\n\n" % (h, m, s))
         else:
             msg = "Other instance of Caravel is running elsewhere." \
                   " The session UID in use and your session UID do not match"
