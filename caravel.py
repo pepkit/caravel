@@ -172,7 +172,9 @@ def login():
             return render_template('500.html', e=[msg])
         return render_template('token.html')
     else:
-        return make_response("Could not verify", 401, {'WWW-Authenticate': 'Basic realm="Login required"'})
+        msg = "Wrong password"
+        print(msg)
+        return render_template('500.html', e=[msg])
 
 
 @app.before_request
@@ -228,6 +230,7 @@ def index():
 
 
 @app.route("/process", methods=['GET', 'POST'])
+@token_required
 def process():
     global p
     global config_file
