@@ -16,9 +16,6 @@ import string
 import random
 from uuid import uuid1
 
-# TOKEN in session
-
-
 app = Flask(__name__)
 
 summary = Blueprint('summary', __name__,
@@ -43,6 +40,7 @@ def shutdown_server():
         del login_uid
     except NameError:
         pass
+    session.pop('token', None)
     func()
 
 
@@ -56,15 +54,19 @@ def token_required(func):
 
     @wraps(func)
     def decorated(*args, **kwargs):
-        token = request.args.get('token')
-
-        if not token:
-            return render_template('redirect_login.html')
-
+        try:
+            token = session['token']
+            eprint("Token retrieved from the session")
+        except KeyError:
+            token = request.args.get('token')
+            if token is not None:
+                eprint("Usgin token from URL argument")
+            else:
+                eprint("No token in session and no argument. Log in")
+                return render_template('redirect_login.html')
         try:
             jwt.decode(token, app.config['SECRET_KEY'])
         except:
-            # del token
             return render_template("invalid_token.html"), 403
         return func(*args, **kwargs)
 
@@ -91,6 +93,7 @@ def geprint(txt, color=False):
     eprint("\033[92m {}\033[00m".format(txt))
 
 @app.route('/shutdown', methods=['GET'])
+@token_required
 def shutdown():
     shutdown_server()
     return 'Server shutting down...'
@@ -101,7 +104,6 @@ def login():
     token_exp = app.config["TOKEN_EXPIRATION"] or TOKEN_EXPIRATION
     
     if auth and auth.password == "abc":
-        global token
         global login_uid
         # verbosity for testing purposes
         try:
@@ -115,35 +117,41 @@ def login():
             login_uid = session['uid']
             eprint("Assigned new login UID: " + str(login_uid))
 
-        token = jwt.encode(
-            {'user': auth.username, 'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=token_exp)},
-            app.config['SECRET_KEY'])
-        session['user'] = auth.username
-        eprint("\n\nYour token:\n")
-        geprint(token.decode('UTF-8').strip() + "\n")
-        m, s = divmod(token_exp, 60)
-        h, m = divmod(m, 60)
-        eprint("It will expire in %d:%02d:%02dh\n\n" % (h, m, s))
+        if login_uid.int == session['uid'].int:
+            token = jwt.encode({'user': auth.username, 'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=token_exp)},app.config['SECRET_KEY'])
+            session['token'] = token
+            session['user'] = auth.username
+            eprint("\n\nYour token:\n")
+            geprint(token.decode('UTF-8').strip() + "\n")
+            m, s = divmod(token_exp, 60)
+            h, m = divmod(m, 60)
+            eprint("It will expire in %d:%02d:%02dh\n\n" % (h, m, s))
+        else:
+            msg = "Other instance of Caravel is running elsewhere. The session UID in use and your session UID do not match"
+            print(msg)
+            return render_template('500.html', e=[msg])
         return render_template('token.html')
-    return make_response("Could not verify", 401, {'WWW-Authenticate': 'Basic realm="Login required"'})
-
+    else:
+        return make_response("Could not verify", 401, {'WWW-Authenticate': 'Basic realm="Login required"'})
 
 
 @app.before_request
 def csrf_protect():
     if request.method == "POST":
         global login_uid
+        try:
+            login_uid.int
+        except:
+            login_uid = session['uid']
         if login_uid.int == session['uid'].int:
-            pass
+            token = session['_csrf_token']
+            token_get = request.form.get("_csrf_token")
+            if not token or token != token_get:
+                msg = "The CSRF token is invalid"
+                print(msg)
+                return render_template('500.html', e=[msg])
         else:
-            msg = "The UIDs do not match"
-            print(msg)
-            return render_template('500.html', e=[msg])
-        # token = session.pop('_csrf_token', None)
-        token = session['_csrf_token']
-        token_get = request.form.get("_csrf_token")
-        if not token or token != token_get:
-            msg = "The CSRF token is invalid"
+            msg = "Other instance of Caravel is running elsewhere. The session UID in use and your session UID do not match"
             print(msg)
             return render_template('500.html', e=[msg])
 
@@ -277,11 +285,11 @@ def background_options():
 
 
 @app.route("/action", methods=['GET', 'POST'])
+@token_required
 def action():
-    global token
     global act
     user_token = request.form['token']
-    if not token == user_token:
+    if not session['token'] == user_token:
         return render_template("invalid_token.html"), 403
     opt = list(set(request.form.getlist('opt')))
     print("\nSelected flags:\n " + '\n'.join(opt))
