@@ -57,11 +57,11 @@ def token_required(func):
 
 def random_string(N):
     """
-    Generates a random string of length N
+    Generates a random string of length N (token), prints a message
     :param N: length of the string to be generated
     :return: random string
     """
-    print("token generated")
+    eprint("CSRF token generated")
     return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(N))
 
 @app.route("/login")
