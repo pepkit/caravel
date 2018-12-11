@@ -2,8 +2,11 @@
 <html>
   <head>
     {% block head %}
+      <!-- remote libraries -->
       <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='bootstrap.min.css') }}">
       <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='style.css') }}">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+      <!-- local stuff -->
       <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
       <title>Caravel - {% block title %}{% endblock %}</title>
     {% endblock %}
@@ -13,7 +16,7 @@
       <body>
         <img src="{{ url_for('static',filename='caravel.svg') }}">
         <form action="{{ url_for('shutdown') }}" method="get">
-          <button type="submit" class="btn btn-default" style="float: right;">Close</button>
+          <button type="submit" class="btn btn-default" style="float: right;">CLOSE <i class="fa fa-close"></i></button>
         </form>
         <br style = “line-height:6;”><br>
         {% block content %}{% endblock %}

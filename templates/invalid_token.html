@@ -2,6 +2,6 @@
 {% block title %}Token invalid{% endblock %}
 {% block content %}
   <h2>Invalid token</h2>
-  <p>The provided token is invalid or has expired, make sure you copy the token from the terminal correctly.</p>
+  <p>This action is protected by a token. The provided token is invalid or has expired, make sure you copy the token from the terminal correctly.</p>
   <p>Go back or <a href="{{ url_for('login') }}">start over.</a></p>
 {% endblock %}

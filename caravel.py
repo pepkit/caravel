@@ -54,16 +54,29 @@ def token_required(func):
 
     @wraps(func)
     def decorated(*args, **kwargs):
-        try:
-            token = session['token']
-            eprint("Token retrieved from the session")
-        except KeyError:
-            token = request.args.get('token')
-            if token is not None:
-                eprint("Usgin token from URL argument")
-            else:
+        # try:
+        #     token = session['token']
+        #     eprint("Token retrieved from the session")
+        # except KeyError:
+        #     token = request.args.get('token')
+        #     if token is not None:
+        #         eprint("Using token from URL argument")
+        #     else:
+        #         eprint("No token in session and no argument. Log in")
+        #         return render_template('redirect_login.html')
+
+        token = request.args.get('token')
+        if token is not None:
+            eprint("Using token from URL argument")
+        else:
+            try:
+                login_uid
+                token = session['token']
+                eprint("Token retrieved from the session")
+            except:
                 eprint("No token in session and no argument. Log in")
                 return render_template('redirect_login.html')
+
         try:
             jwt.decode(token, app.config['SECRET_KEY'])
         except:
