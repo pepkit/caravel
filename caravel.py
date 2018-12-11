@@ -23,7 +23,8 @@ summary = Blueprint('summary', __name__,
 
 CONFIG_ENV_VAR = "CARAVEL"
 CONFIG_PRJ_KEY = "projects"
-TOKEN_EXPIRATION = 100 # in seconds
+TOKEN_EXPIRATION = 100  # in seconds
+
 
 @app.errorhandler(Exception)
 def unhandled_exception(e):
@@ -54,17 +55,6 @@ def token_required(func):
 
     @wraps(func)
     def decorated(*args, **kwargs):
-        # try:
-        #     token = session['token']
-        #     eprint("Token retrieved from the session")
-        # except KeyError:
-        #     token = request.args.get('token')
-        #     if token is not None:
-        #         eprint("Using token from URL argument")
-        #     else:
-        #         eprint("No token in session and no argument. Log in")
-        #         return render_template('redirect_login.html')
-
         token = request.args.get('token')
         if token is not None:
             eprint("Using token from URL argument")
@@ -73,7 +63,7 @@ def token_required(func):
                 login_uid
                 token = session['token']
                 eprint("Token retrieved from the session")
-            except:
+            except NameError:
                 eprint("No token in session and no argument. Log in")
                 return render_template('redirect_login.html')
 
@@ -85,19 +75,22 @@ def token_required(func):
 
     return decorated
 
-def random_string(N):
+
+def random_string(n):
     """
     Generates a random string of length N (token), prints a message
-    :param N: length of the string to be generated
+    :param n: length of the string to be generated
     :return: random string
     """
     eprint("CSRF token generated")
-    return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(N))
+    return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(n))
+
 
 def eprint(*args, **kwargs):
-        print(*args, file=sys.stderr, **kwargs)
+    print(*args, file=sys.stderr, **kwargs)
 
-def geprint(txt, color=False):
+
+def geprint(txt):
     """
     Print the provided text to stderr in green. Used to print the token for the user.
     :param txt: string with text to be printed.
@@ -105,33 +98,37 @@ def geprint(txt, color=False):
     """
     eprint("\033[92m {}\033[00m".format(txt))
 
+
 @app.route('/shutdown', methods=['GET'])
 @token_required
 def shutdown():
     shutdown_server()
     return 'Server shutting down...'
 
+
 @app.route("/login")
 def login():
     auth = request.authorization
     token_exp = app.config["TOKEN_EXPIRATION"] or TOKEN_EXPIRATION
-    
-    if auth and auth.password == "abc":
+
+    if auth and auth.password == "a":
         global login_uid
         # verbosity for testing purposes
         try:
             eprint("Retrieved session UID: " + str(session['uid']))
-        except:
+        except KeyError:
             session['uid'] = uuid1()
             eprint("Generated session UID: " + str(session['uid']))
         try:
             eprint("Using existing login UID: " + str(login_uid))
-        except:
+        except NameError:
             login_uid = session['uid']
             eprint("Assigned new login UID: " + str(login_uid))
 
         if login_uid.int == session['uid'].int:
-            token = jwt.encode({'user': auth.username, 'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=token_exp)},app.config['SECRET_KEY'])
+            token = jwt.encode(
+                {'user': auth.username, 'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=token_exp)},
+                app.config['SECRET_KEY'])
             session['token'] = token
             session['user'] = auth.username
             eprint("\n\nYour token:\n")
@@ -140,7 +137,8 @@ def login():
             h, m = divmod(m, 60)
             eprint("It will expire in %d:%02d:%02dh\n\n" % (h, m, s))
         else:
-            msg = "Other instance of Caravel is running elsewhere. The session UID in use and your session UID do not match"
+            msg = "Other instance of Caravel is running elsewhere." \
+                  " The session UID in use and your session UID do not match"
             print(msg)
             return render_template('500.html', e=[msg])
         return render_template('token.html')
@@ -154,7 +152,7 @@ def csrf_protect():
         global login_uid
         try:
             login_uid.int
-        except:
+        except NameError:
             login_uid = session['uid']
         if login_uid.int == session['uid'].int:
             token = session['_csrf_token']
@@ -164,16 +162,20 @@ def csrf_protect():
                 print(msg)
                 return render_template('500.html', e=[msg])
         else:
-            msg = "Other instance of Caravel is running elsewhere. The session UID in use and your session UID do not match"
+            msg = "Other instance of Caravel is running elsewhere." \
+                  " The session UID in use and your session UID do not match"
             print(msg)
             return render_template('500.html', e=[msg])
+
 
 def generate_csrf_token():
     if '_csrf_token' not in session:
         session['_csrf_token'] = random_string(10)
     return session['_csrf_token']
 
-app.jinja_env.globals['csrf_token'] = generate_csrf_token 
+
+app.jinja_env.globals['csrf_token'] = generate_csrf_token
+
 
 @app.route("/")
 @token_required
@@ -228,16 +230,16 @@ def process():
 
     try:
         subprojects = list(p.subprojects.keys())
-    except:
+    except AttributeError:
         subprojects = None
 
     try:
-        selected_subproject = request.form.get('subprojects')
+        selected_subproject = request.form['subprojects']
         if selected_project is None:
             p = peppy.Project(config_file)
         else:
             p.activate_subproject(selected_subproject)
-    except:
+    except KeyError:
         selected_subproject = None
 
     p_info = {
