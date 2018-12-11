@@ -61,6 +61,7 @@ def random_string(N):
     :param N: length of the string to be generated
     :return: random string
     """
+    print("token generated")
     return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(N))
 
 @app.route("/login")
@@ -68,13 +69,17 @@ def login():
     auth = request.authorization
 
     token_exp = app.config["TOKEN_EXPIRATION"] or TOKEN_EXPIRATION
-    def pr_green(txt):
+    
+    def eprint(*args, **kwargs):
+        print(*args, file=sys.stderr, **kwargs)
+
+    def geprint(txt, color=False):
         """
         Print the provided text to stderr in green. Used to print the token for the user.
         :param txt: string with text to be printed.
         :return: None
         """
-        print("\033[92m {}\033[00m".format(txt), file=sys.stderr)
+        eprint("\033[92m {}\033[00m".format(txt))
 
     if auth and auth.password == "abc":
         global token
@@ -82,11 +87,11 @@ def login():
             {'user': auth.username, 'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=token_exp)},
             app.config['SECRET_KEY'])
         session['user'] = auth.username
-        print("\n\nYour token:\n")
-        pr_green(token.decode('UTF-8').strip() + "\n")
+        eprint("\n\nYour token:\n")
+        geprint(token.decode('UTF-8').strip() + "\n")
         m, s = divmod(token_exp, 60)
         h, m = divmod(m, 60)
-        print("It will expire in %d:%02d:%02dh\n\n" % (h, m, s), file=sys.stderr)
+        eprint("It will expire in %d:%02d:%02dh\n\n" % (h, m, s))
         return render_template('token.html')
     return make_response("Could not verify", 401, {'WWW-Authenticate': 'Basic realm="Login required"'})
 
@@ -94,12 +99,12 @@ def login():
 
 @app.before_request
 def csrf_protect():
-    print(request.method)
     if request.method == "POST":
-        token = session.pop('_csrf_token', None)
+        # token = session.pop('_csrf_token', None)
+        token = session['_csrf_token']
         token_get = request.form.get("_csrf_token")
         if not token or token != token_get:
-            msg = "The request CSRF token is invalid"
+            msg = "The CSRF token is invalid"
             print(msg)
             return render_template('500.html', e=[msg])
 
@@ -194,7 +199,7 @@ def process():
     except AssertionError:
         print("this blueprint was already registered")
 
-    return render_template('process.html', p_info=p_info, options=None, sp=selected_subproject)
+    return render_template('process.html', p_info=p_info)
 
 
 @app.route('/_background_subproject')
@@ -238,7 +243,6 @@ def action():
     global act
     user_token = request.form['token']
     if not token == user_token:
-        del token
         return render_template("invalid_token.html"), 403
     opt = list(set(request.form.getlist('opt')))
     print("\nSelected flags:\n " + '\n'.join(opt))
