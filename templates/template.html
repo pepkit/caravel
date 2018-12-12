@@ -14,7 +14,7 @@
   <div id="wrap">
     <div id="main">
       <body>
-        <img src="{{ url_for('static',filename='caravel.svg') }}">
+        <a href="{{ url_for('index') }}"><img src="{{ url_for('static',filename='caravel.svg') }}"></a>
         <form action="{{ url_for('shutdown') }}" method="get">
           <button type="submit" class="btn btn-default" style="float: right;">CLOSE <i class="fa fa-close"></i></button>
         </form>
