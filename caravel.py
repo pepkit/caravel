@@ -47,15 +47,27 @@ def flatten(x):
 
 def shutdown_server():
     func = request.environ.get('werkzeug.server.shutdown')
+    global login_uid
     if func is None:
         raise RuntimeError('Not running with the Werkzeug Server')
     try:
-        global login_uid
-        del login_uid
-    except NameError:
-        pass
-    session.pop('token', None)
-    func()
+        login_uid.int
+        if login_uid.int == session['uid'].int:
+                session.pop('token', None)
+                func()
+        else:
+            msg = "Other instance of Caravel is running elsewhere." \
+                  " The session UID in use and your session UID do not match"
+            print(msg)
+            return render_template('500.html', e=[msg])
+    except:
+        try:
+            del login_uid
+        except NameError:
+            pass
+        session.pop('token', None)
+        func()
+
 
 
 def token_required(func):
@@ -115,6 +127,8 @@ def geprint(txt):
 def generate_csrf_token():
     if '_csrf_token' not in session:
         session['_csrf_token'] = random_string(10)
+    else: 
+        eprint("CSRF token retrieved from the session")
     return session['_csrf_token']
 
 
@@ -184,9 +198,9 @@ def csrf_protect():
         except NameError:
             login_uid = session['uid']
         if login_uid.int == session['uid'].int:
-            token = session['_csrf_token']
-            token_get = request.form.get("_csrf_token")
-            if not token or token != token_get:
+            token_csrf = session['_csrf_token']
+            token_get_csrf = request.form.get("_csrf_token")
+            if not token_csrf or token_csrf != token_get_csrf:
                 msg = "The CSRF token is invalid"
                 print(msg)
                 return render_template('500.html', e=[msg])
