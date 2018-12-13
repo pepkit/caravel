@@ -59,7 +59,7 @@ def shutdown_server():
             msg = "Other instance of Caravel is running elsewhere." \
                   " The session UID in use and your session UID do not match"
             print(msg)
-            return render_template('500.html', e=[msg])
+            return render_template('error.html', e=[msg])
     except:
         try:
             del login_uid
@@ -85,7 +85,7 @@ def token_required(func):
             try:
                 jwt.decode(token, app.config['SECRET_KEY'])
                 eprint("Using token from URL argument")
-            except DecodeError:
+            except:
                 return render_template("invalid_token.html"), 403
         else:
             try:
@@ -96,7 +96,7 @@ def token_required(func):
                     msg = "Other instance of Caravel is running elsewhere." \
                           " The session UID in use and your session UID do not match"
                     print(msg)
-                    return render_template('500.html', e=[msg])
+                    return render_template('error.html', e=[msg])
                 token = session['token']
                 jwt.decode(token, app.config['SECRET_KEY'])
                 eprint("Token retrieved from the session")
@@ -104,7 +104,7 @@ def token_required(func):
             except (NameError, KeyError):
                 eprint("No token in session and no argument. Log in")
                 return redirect(url_for('login'))
-            except DecodeError:
+            except:
                 return render_template("invalid_token.html"), 403
         return func(*args, **kwargs)
     return decorated
@@ -148,7 +148,7 @@ app.jinja_env.globals['csrf_token'] = generate_csrf_token
 @app.errorhandler(Exception)
 def unhandled_exception(e):
     app.logger.error('Unhandled Exception: %s', (e))
-    return render_template('500.html', e=e), 500
+    return render_template('error.html', e=e), 500
 
 
 @app.route('/shutdown', methods=['GET'])
@@ -161,6 +161,7 @@ def shutdown():
 @app.route("/login")
 def login():
     global login_uid
+    session.pop('uid', None)
     # verbosity for testing purposes
     try:
         eprint("Retrieved session UID: " + str(session['uid']))
@@ -182,7 +183,7 @@ def login():
         msg = "Other instance of Caravel is running elsewhere." \
               " The session UID in use and your session UID do not match"
         print(msg)
-        return render_template('500.html', e=[msg])
+        return render_template('error.html', e=[msg])
     return render_template('token.html')
 
 
@@ -200,12 +201,12 @@ def csrf_protect():
             if not token_csrf or token_csrf != token_get_csrf:
                 msg = "The CSRF token is invalid"
                 print(msg)
-                return render_template('500.html', e=[msg])
+                return render_template('error.html', e=[msg])
         else:
             msg = "Other instance of Caravel is running elsewhere." \
                   " The session UID in use and your session UID do not match"
             print(msg)
-            return render_template('500.html', e=[msg])
+            return render_template('error.html', e=[msg])
 
 
 @app.route("/")
@@ -218,14 +219,14 @@ def index():
         msg = "Please set the environment variable {} or provide a YAML file " \
               "listing paths to project config files".format(CONFIG_ENV_VAR)
         print(msg)
-        return render_template('500.html', e=[msg])
+        return render_template('error.html', e=[msg])
 
     project_list_path = os.path.expanduser(project_list_path)
 
     if not os.path.isfile(project_list_path):
         msg = "Project configs list isn't a file: {}".format(project_list_path)
         print(msg)
-        return render_template('500.html', e=[msg])
+        return render_template('error.html', e=[msg])
 
     with open(project_list_path, 'r') as stream:
         pl = yaml.safe_load(stream)
