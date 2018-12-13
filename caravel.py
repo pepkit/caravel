@@ -18,12 +18,8 @@ from uuid import uuid1
 
 app = Flask(__name__)
 
-summary = Blueprint('summary', __name__,
-                    template_folder='/sfs/lustre/allocations/shefflab/processed/mpfc_neurons/')
-
 CONFIG_ENV_VAR = "CARAVEL"
 CONFIG_PRJ_KEY = "projects"
-TOKEN_EXPIRATION = 100  # in seconds
 
 # Helper functions
 def glob_if_exists(x):
@@ -270,10 +266,11 @@ def process():
         "config_file": p.config_file,
         "sample_count": p.num_samples,
         "summary_html": "{project_name}_summary.html".format(project_name=p.name),
+        "output_dir": p.metadata.output_dir,
         "subprojects": subprojects
     }
 
-    psummary = Blueprint(p.name, __name__, template_folder=p.metadata.output_dir)
+    psummary = Blueprint(p.name, __name__, template_folder=p.output_dir)
 
     @psummary.route("/{pname}/summary/<path:page_name>".format(pname=p.name), methods=['GET'])
     def render_static(page_name):
@@ -320,6 +317,16 @@ def background_options():
     act = request.args.get('act', type=str)
     options_act = options[act]
     return jsonify(options=render_template('options.html', options=options_act))
+
+
+@app.route('/_background_summary')
+def background_summary():
+    global p_info
+    act = request.args.get('act', type=str)
+    geprint(act)
+    summary_string = "{output_dir}/{summary_html}".format(output_dir=p_info["output_dir"], summary_html=p_info["summary_html"])
+    geprint(summary_string)
+    return jsonify(summary=render_template('summary.html', summary=summary_string))
 
 
 @app.route("/action", methods=['GET', 'POST'])

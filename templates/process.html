@@ -30,6 +30,18 @@
     });
   });
 </script>
+<script type=text/javascript>
+  $(function() {
+    $('a#show_summary').bind('click', function() {
+      $.getJSON($SCRIPT_ROOT + '/_background_summary', {
+        act: "test",
+      }, function(data) {
+        $("div#summary").html(data.summary);
+      });
+      return false;
+    });
+  });
+</script>
 {% endblock %}
 {% block title %}Index{% endblock %}
 {% block content %}
@@ -56,4 +68,6 @@
         </select>
         <a href='#' id=show_options><button type="submit" class="btn btn-default">SELECT</button></a>
     <div id="options"></div>
+    <a href='#' id=show_summary>Get summary</a>
+    <div id="summary"><p>Summary not available</p></div>
 {% endblock %}
