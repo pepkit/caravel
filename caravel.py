@@ -15,7 +15,6 @@ from functools import wraps
 import string
 import random
 from uuid import uuid1
-import signal
 
 app = Flask(__name__)
 
@@ -25,12 +24,6 @@ summary = Blueprint('summary', __name__,
 CONFIG_ENV_VAR = "CARAVEL"
 CONFIG_PRJ_KEY = "projects"
 TOKEN_EXPIRATION = 100  # in seconds
-
-def sigint_handler(signum, frame):
-    eprint('\nTo shut the server down use the CLOSE button in the right upper corner \
-        \nIf you closed the web browser, reconnect and then use the button.')
-
-signal.signal(signal.SIGINT, sigint_handler)
 
 # Helper functions
 def glob_if_exists(x):
