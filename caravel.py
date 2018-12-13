@@ -15,6 +15,7 @@ from functools import wraps
 import string
 import random
 from uuid import uuid1
+import signal
 
 app = Flask(__name__)
 
@@ -24,6 +25,12 @@ summary = Blueprint('summary', __name__,
 CONFIG_ENV_VAR = "CARAVEL"
 CONFIG_PRJ_KEY = "projects"
 TOKEN_EXPIRATION = 100  # in seconds
+
+def sigint_handler(signum, frame):
+    eprint('\nTo shut the server down use the CLOSE button in the right upper corner \
+        \nIf you closed the web browser, reconnect and then use the button.')
+
+signal.signal(signal.SIGINT, sigint_handler)
 
 # Helper functions
 def glob_if_exists(x):
@@ -77,27 +84,29 @@ def token_required(func):
     :param func: function to be decorated
     :return: decorated function
     """
-
     @wraps(func)
     def decorated(*args, **kwargs):
+        global login_uid
         token = request.args.get('token')
         if token is not None:
-            eprint("Using token from URL argument")
+            try:
+                jwt.decode(token, app.config['SECRET_KEY'])
+                eprint("Using token from URL argument")
+            except DecodeError:
+                return render_template("invalid_token.html"), 403
         else:
             try:
-                login_uid
+                # login_uid
                 token = session['token']
+                jwt.decode(token, app.config['SECRET_KEY'])
                 eprint("Token retrieved from the session")
+                eprint(token)
             except (NameError, KeyError):
                 eprint("No token in session and no argument. Log in")
-                return render_template('redirect_login.html')
-
-        try:
-            jwt.decode(token, app.config['SECRET_KEY'])
-        except:
-            return render_template("invalid_token.html"), 403
+                return redirect(url_for('login'))
+            except DecodeError:
+                return render_template("invalid_token.html"), 403
         return func(*args, **kwargs)
-
     return decorated
 
 
@@ -151,42 +160,30 @@ def shutdown():
 
 @app.route("/login")
 def login():
-    auth = request.authorization
-    token_exp = app.config["TOKEN_EXPIRATION"] or TOKEN_EXPIRATION
+    global login_uid
+    # verbosity for testing purposes
+    try:
+        eprint("Retrieved session UID: " + str(session['uid']))
+    except KeyError:
+        session['uid'] = uuid1()
+        eprint("Generated session UID: " + str(session['uid']))
+    try:
+        eprint("Using existing login UID: " + str(login_uid))
+    except NameError:
+        login_uid = session['uid']
+        eprint("Assigned new login UID: " + str(login_uid))
 
-    if auth and auth.password == "aaaa":
-        global login_uid
-        # verbosity for testing purposes
-        try:
-            eprint("Retrieved session UID: " + str(session['uid']))
-        except KeyError:
-            session['uid'] = uuid1()
-            eprint("Generated session UID: " + str(session['uid']))
-        try:
-            eprint("Using existing login UID: " + str(login_uid))
-        except NameError:
-            login_uid = session['uid']
-            eprint("Assigned new login UID: " + str(login_uid))
-
-        if login_uid.int == session['uid'].int:
-            token = jwt.encode(
-                {'user': auth.username, 'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=token_exp)},
-                app.config['SECRET_KEY'])
-            session['token'] = token
-            session['user'] = auth.username
-            eprint("\n\nYour token:\n")
-            geprint(token.decode('UTF-8').strip() + "\n")
-            m, s = divmod(token_exp, 60)
-            h, m = divmod(m, 60)
-            eprint("It will expire in %dh:%02dm:%02ds\n\n" % (h, m, s))
-        else:
-            msg = "Other instance of Caravel is running elsewhere." \
-                  " The session UID in use and your session UID do not match"
-            print(msg)
-            return render_template('500.html', e=[msg])
-        return render_template('token.html')
+    if login_uid.int == session['uid'].int:
+        token = jwt.encode({"payload" : session['uid'].int}, app.config['SECRET_KEY'])
+        session['token'] = token
+        eprint("\n\nCaravel is protected with a token.\nCopy this link to your browser to authenticate:\n")
+        geprint("http://localhost:5000/?token=" + token.decode('UTF-8').strip() + "\n")
     else:
-        return make_response("Wrong password", 401, {'WWW-Authenticate': 'Basic realm="Login required"'})
+        msg = "Other instance of Caravel is running elsewhere." \
+              " The session UID in use and your session UID do not match"
+        print(msg)
+        return render_template('500.html', e=[msg])
+    return render_template('token.html')
 
 
 @app.before_request
@@ -328,9 +325,6 @@ def background_options():
 @token_required
 def action():
     global act
-    user_token = request.form['token']
-    if not session['token'] == user_token:
-        return render_template("invalid_token.html"), 403
     opt = list(set(request.form.getlist('opt')))
     print("\nSelected flags:\n " + '\n'.join(opt))
     print("\nSelected action: " + act)
