@@ -89,7 +89,14 @@ def token_required(func):
                 return render_template("invalid_token.html"), 403
         else:
             try:
-                # login_uid
+                session['uid']
+                if login_uid.int == session['uid'].int:
+                    pass
+                else:
+                    msg = "Other instance of Caravel is running elsewhere." \
+                          " The session UID in use and your session UID do not match"
+                    print(msg)
+                    return render_template('500.html', e=[msg])
                 token = session['token']
                 jwt.decode(token, app.config['SECRET_KEY'])
                 eprint("Token retrieved from the session")
@@ -167,7 +174,7 @@ def login():
         eprint("Assigned new login UID: " + str(login_uid))
 
     if login_uid.int == session['uid'].int:
-        token = jwt.encode({"payload" : session['uid'].int}, app.config['SECRET_KEY'])
+        token = jwt.encode({"payload" : login_uid.int}, app.config['SECRET_KEY'])
         session['token'] = token
         eprint("\n\nCaravel is protected with a token.\nCopy this link to your browser to authenticate:\n")
         geprint("http://localhost:5000/?token=" + token.decode('UTF-8').strip() + "\n")
