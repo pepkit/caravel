@@ -20,6 +20,7 @@ app = Flask(__name__)
 CONFIG_ENV_VAR = "CARAVEL"
 CONFIG_PRJ_KEY = "projects"
 
+
 # Helper functions
 def glob_if_exists(x):
     """
@@ -32,6 +33,7 @@ def glob_if_exists(x):
     else:
         return glob.glob(x) if len(glob.glob(x)) > 0 else [x]
 
+
 def flatten(x):
     """
     Flatten one level of nesting
@@ -40,31 +42,36 @@ def flatten(x):
     """
     return list(chain.from_iterable(x))
 
-def shutdown_server():
-    func = request.environ.get('werkzeug.server.shutdown')
-    global login_uid
-    if func is None:
-        raise RuntimeError('Not running with the Werkzeug Server')
-    try:
-        login_uid.int
-        if login_uid.int == session['uid'].int:
-                session.pop('token', None)
-                session.pop('_csrf_token', None)
-                func()
-        else:
-            msg = "Other instance of Caravel is running elsewhere." \
-                  " The session UID in use and your session UID do not match"
-            print(msg)
-            return render_template('error.html', e=[msg])
-    except:
-        try:
-            del login_uid
-        except NameError:
-            pass
-        session.pop('token', None)
-        session.pop('_csrf_token', None)
-        func()
 
+def clear_session_data(keys):
+    """
+    Removes the non default data (created in the app lifetime) from the flask.session object.
+    :param keys: a list of keys to be removed from the session
+    :return: None
+    """
+    if isinstance(keys, (list,)):
+        for key in keys:
+            try:
+                session.pop(key, None)
+            except KeyError:
+                eprint("{k} not found in the session".format(k=key))
+    else:
+        raise TypeError("The keys argument has to be a list.")
+
+
+def shutdown_server():
+    shut_func = request.environ.get('werkzeug.server.shutdown')
+    global login_uid
+    if shut_func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    if login_uid.int == session['uid'].int:
+            clear_session_data(keys=['token', '_csrf_token', 'uid'])
+            shut_func()
+    else:
+        msg = "Other instance of Caravel is running elsewhere." \
+              " The session UID in use and your session UID do not match"
+        print(msg)
+        return render_template('error.html', e=[msg])
 
 
 def token_required(func):
@@ -82,7 +89,7 @@ def token_required(func):
             try:
                 jwt.decode(token, app.config['SECRET_KEY'])
                 eprint("Using token from URL argument")
-            except:
+            except jwt.exceptions.InvalidTokenError:
                 return render_template("invalid_token.html"), 403
         else:
             try:
@@ -100,7 +107,7 @@ def token_required(func):
             except (NameError, KeyError):
                 eprint("No token in session and no argument. Log in")
                 return redirect(url_for('login'))
-            except:
+            except jwt.exceptions.InvalidTokenError:
                 return render_template("invalid_token.html"), 403
         return func(*args, **kwargs)
     return decorated
@@ -117,6 +124,10 @@ def random_string(n):
 
 
 def eprint(*args, **kwargs):
+    """
+    Print the provided text to stderr.
+    :return: None
+    """
     print(*args, file=sys.stderr, **kwargs)
 
 
@@ -129,9 +140,14 @@ def geprint(txt):
     eprint("\033[92m {}\033[00m".format(txt))
 
 
-def generate_csrf_token():
+def generate_csrf_token(n=100):
+    """
+    Generate a CSRF token
+    :param n: length of a token
+    :return: flask.session with "_csrf_token_key"
+    """
     if '_csrf_token' not in session:
-        session['_csrf_token'] = random_string(10)
+        session['_csrf_token'] = random_string(n)
     else: 
         eprint("CSRF token retrieved from the session")
     return session['_csrf_token']
@@ -170,7 +186,7 @@ def login():
         eprint("Assigned new login UID: " + str(login_uid))
 
     if login_uid.int == session['uid'].int:
-        token = jwt.encode({"payload" : login_uid.int}, app.config['SECRET_KEY'])
+        token = jwt.encode({"payload": login_uid.int}, app.config['SECRET_KEY'])
         session['token'] = token
         eprint("\n\nCaravel is protected with a token.\nCopy this link to your browser to authenticate:\n")
         geprint("http://localhost:5000/?token=" + token.decode('UTF-8').strip() + "\n")
@@ -310,9 +326,11 @@ def background_options():
 @app.route('/_background_summary')
 def background_summary():
     global p_info
-    summary_location = "{output_dir}/{summary_html}".format(output_dir=p_info["output_dir"],summary_html=p_info["summary_html"])
+    summary_location = "{output_dir}/{summary_html}".format(output_dir=p_info["output_dir"],
+                                                            summary_html=p_info["summary_html"])
     if os.path.isfile(summary_location):
         psummary = Blueprint(p.name, __name__, template_folder=p_info["output_dir"])
+
         @psummary.route("/{pname}/summary/<path:page_name>".format(pname=p_info["name"]), methods=['GET'])
         def render_static(page_name):
             return render_template('%s' % page_name)
@@ -321,7 +339,8 @@ def background_summary():
             app.register_blueprint(psummary)
         except AssertionError:
             eprint("this blueprint was already registered")
-        summary_string = "{name}/summary/{summary_html}".format(name=p_info["name"], summary_html=p_info["summary_html"])
+        summary_string = "{name}/summary/{summary_html}".format(name=p_info["name"],
+                                                                summary_html=p_info["summary_html"])
     else:
         summary_string = "Summary not available"
     return jsonify(summary=render_template('summary.html', summary=summary_string, file_name=p_info["summary_html"]))
@@ -331,6 +350,7 @@ def background_summary():
 @token_required
 def action():
     global act
+    # To be changed in future version. Looper will be imported and run within Caravel
     opt = list(set(request.form.getlist('opt')))
     eprint("\nSelected flags:\n " + '\n'.join(opt))
     eprint("\nSelected action: " + act)
