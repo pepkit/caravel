@@ -10,7 +10,6 @@ import yaml
 import peppy
 from flask import Blueprint, Flask, render_template, redirect, url_for, request, jsonify, make_response, session
 import jwt
-import datetime
 from functools import wraps
 import string
 import random
@@ -158,7 +157,6 @@ def shutdown():
 @app.route("/login")
 def login():
     global login_uid
-    session.pop('uid', None)
     # verbosity for testing purposes
     try:
         eprint("Retrieved session UID: " + str(session['uid']))
@@ -351,6 +349,5 @@ def action():
 
 if __name__ == "__main__":
     app.config["project_configs"] = sys.argv[1] if len(sys.argv) > 1 else None
-    app.config["TOKEN_EXPIRATION"] = int(sys.argv[2]) if len(sys.argv) > 2 else None
     app.config['SECRET_KEY'] = 'thisisthesecretkey'
     app.run()
