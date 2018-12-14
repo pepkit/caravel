@@ -50,6 +50,7 @@ def shutdown_server():
         login_uid.int
         if login_uid.int == session['uid'].int:
                 session.pop('token', None)
+                session.pop('_csrf_token', None)
                 func()
         else:
             msg = "Other instance of Caravel is running elsewhere." \
@@ -62,6 +63,7 @@ def shutdown_server():
         except NameError:
             pass
         session.pop('token', None)
+        session.pop('_csrf_token', None)
         func()
 
 
@@ -96,7 +98,6 @@ def token_required(func):
                 token = session['token']
                 jwt.decode(token, app.config['SECRET_KEY'])
                 eprint("Token retrieved from the session")
-                eprint(token)
             except (NameError, KeyError):
                 eprint("No token in session and no argument. Log in")
                 return redirect(url_for('login'))
