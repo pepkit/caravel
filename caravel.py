@@ -270,17 +270,6 @@ def process():
         "subprojects": subprojects
     }
 
-    psummary = Blueprint(p.name, __name__, template_folder=p.output_dir)
-
-    @psummary.route("/{pname}/summary/<path:page_name>".format(pname=p.name), methods=['GET'])
-    def render_static(page_name):
-        return render_template('%s' % page_name)
-
-    try:
-        app.register_blueprint(psummary)
-    except AssertionError:
-        print("this blueprint was already registered")
-
     return render_template('process.html', p_info=p_info)
 
 
@@ -322,11 +311,21 @@ def background_options():
 @app.route('/_background_summary')
 def background_summary():
     global p_info
-    act = request.args.get('act', type=str)
-    geprint(act)
-    summary_string = "{output_dir}/{summary_html}".format(output_dir=p_info["output_dir"], summary_html=p_info["summary_html"])
-    geprint(summary_string)
-    return jsonify(summary=render_template('summary.html', summary=summary_string))
+    summary_location = "{output_dir}/{summary_html}".format(output_dir=p_info["output_dir"],summary_html=p_info["summary_html"])
+    if os.path.isfile(summary_location):
+        psummary = Blueprint(p.name, __name__, template_folder=p_info["output_dir"])
+        @psummary.route("/{pname}/summary/<path:page_name>".format(pname=p_info["name"]), methods=['GET'])
+        def render_static(page_name):
+            return render_template('%s' % page_name)
+
+        try:
+            app.register_blueprint(psummary)
+        except AssertionError:
+            eprint("this blueprint was already registered")
+        summary_string = "{name}/summary/{summary_html}".format(name=p_info["name"], summary_html=p_info["summary_html"])
+    else:
+        summary_string = "Summary not available"
+    return jsonify(summary=render_template('summary.html', summary=summary_string, file_name=p_info["summary_html"]))
 
 
 @app.route("/action", methods=['GET', 'POST'])
@@ -334,12 +333,12 @@ def background_summary():
 def action():
     global act
     opt = list(set(request.form.getlist('opt')))
-    print("\nSelected flags:\n " + '\n'.join(opt))
-    print("\nSelected action: " + act)
+    eprint("\nSelected flags:\n " + '\n'.join(opt))
+    eprint("\nSelected action: " + act)
     cmd = "looper " + act + " " + ' '.join(opt) + " " + config_file
-    print("\nCreated Command: " + cmd)
+    eprint("\nCreated Command: " + cmd)
     tmpdirname = tempfile.mkdtemp("tmpdir")
-    print("\nCreated temporary directory: " + tmpdirname)
+    eprint("\nCreated temporary directory: " + tmpdirname)
     file_run = open(tmpdirname + "/output.txt", "w")
     proc_run = psutil.Popen(cmd, shell=True, stdout=file_run)
     proc_run.wait()
