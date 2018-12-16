@@ -46,8 +46,12 @@ def clear_session_data(keys):
     Removes the non default data (created in the app lifetime) from the flask.session object.
     :param keys: a list of keys to be removed from the session
     """
-    if not isinstance(keys, list):
-        raise TypeError("The keys argument has to be a list; "
+    if sys.version_info < (3, 3):
+        from collections import Iterable
+    else:
+        from collections.abc import Iterable
+    if not isinstance(keys, Iterable) or isinstance(keys, str):
+        raise TypeError("Keys to clear must be collection-like; "
                         "got {}".format(type(keys)))
     for key in keys:
         try:
