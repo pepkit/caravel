@@ -28,10 +28,7 @@ def glob_if_exists(x):
     :param x: a string with path containing globs
     :return: a list of paths
     """
-    if isinstance(x, list):
-        return [glob.glob(e) if len(glob.glob(e)) > 0 else e for e in x]
-    else:
-        return glob.glob(x) if len(glob.glob(x)) > 0 else [x]
+    return [glob.glob(e) or e for e in x] if isinstance(x, list) else (glob.glob(x) or x)
 
 
 def flatten(x):
