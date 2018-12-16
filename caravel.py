@@ -1,19 +1,20 @@
 from __future__ import print_function
 from itertools import chain
+from functools import wraps
 import glob
 import os
+import random
 import shutil
+import string
 import sys
 import tempfile
-import psutil
-import yaml
-import peppy
-from flask import Blueprint, Flask, render_template, redirect, url_for, request, jsonify, make_response, session
-import jwt
-from functools import wraps
-import string
-import random
 from uuid import uuid1
+
+from flask import Blueprint, Flask, render_template, redirect, url_for, request, jsonify, session
+import jwt
+import psutil
+import peppy
+import yaml
 
 app = Flask(__name__)
 
@@ -26,7 +27,7 @@ def glob_if_exists(x):
     """
     Return all matches in the directory for x and x if nothing matches
     :param x: a string with path containing globs
-    :return: a list of paths
+    :return list[str]: a list of paths
     """
     return [glob.glob(e) or e for e in x] if isinstance(x, list) else (glob.glob(x) or x)
 
@@ -35,7 +36,7 @@ def flatten(x):
     """
     Flatten one level of nesting
     :param x: a list to flatten
-    :return: a flat list
+    :return list[str]: a flat list
     """
     return list(chain.from_iterable(x))
 
@@ -44,16 +45,15 @@ def clear_session_data(keys):
     """
     Removes the non default data (created in the app lifetime) from the flask.session object.
     :param keys: a list of keys to be removed from the session
-    :return: None
     """
-    if isinstance(keys, (list,)):
-        for key in keys:
-            try:
-                session.pop(key, None)
-            except KeyError:
-                eprint("{k} not found in the session".format(k=key))
-    else:
-        raise TypeError("The keys argument has to be a list.")
+    if not isinstance(keys, list):
+        raise TypeError("The keys argument has to be a list; "
+                        "got {}".format(type(keys)))
+    for key in keys:
+        try:
+            session.pop(key, None)
+        except KeyError:
+            eprint("{k} not found in the session".format(k=key))
 
 
 def shutdown_server():
@@ -75,8 +75,8 @@ def token_required(func):
     """
     This decorator checks for a token, verifies if it is valid
     and redirects to the login page if needed
-    :param func: function to be decorated
-    :return: decorated function
+    :param callable func: function to be decorated
+    :return callable: decorated function
     """
     @wraps(func)
     def decorated(*args, **kwargs):
@@ -113,8 +113,8 @@ def token_required(func):
 def random_string(n):
     """
     Generates a random string of length N (token), prints a message
-    :param n: length of the string to be generated
-    :return: random string
+    :param int n: length of the string to be generated
+    :return str: random string
     """
     eprint("CSRF token generated")
     return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(n))
@@ -123,7 +123,6 @@ def random_string(n):
 def eprint(*args, **kwargs):
     """
     Print the provided text to stderr.
-    :return: None
     """
     print(*args, file=sys.stderr, **kwargs)
 
@@ -132,7 +131,6 @@ def geprint(txt):
     """
     Print the provided text to stderr in green. Used to print the token for the user.
     :param txt: string with text to be printed.
-    :return: None
     """
     eprint("\033[92m {}\033[00m".format(txt))
 
