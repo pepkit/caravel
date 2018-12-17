@@ -37,7 +37,7 @@ def glob_if_exists(x):
     return [glob.glob(e) or e for e in x] if coll_like(x) else (glob.glob(x) or [x])
 
 
-def get_subparser(parser):
+def get_subparsers(parser):
     """
     Get the argparse._SubParsersAction objects from argparse.ArgumentParser object
     :param parser: argparse.ArgumentParser object with subparser
@@ -47,15 +47,24 @@ def get_subparser(parser):
     return parser._actions[idx]
 
 
-
-
-def get_commands(parser):
+def get_commands_names(parser):
     """
     Get the commands from subparser in parser
     :param parser: argparse.ArgumentParser object with subparser
     :return: list[str]: a list of commands available in subparser
     """
-    subparser = get_subparser(parser)
+    subparser = get_subparsers(parser)
     subcommands_subparsers = subparser.choices
-    commands = subcommands_subparsers.keys()
-    return commands
+    commands_names = subcommands_subparsers.keys()
+    return commands_names
+
+
+def get_arglist_by_name(parser, command_name):
+    """
+    Get the list of options associated with the command in subparser
+    :param parser: argparse.ArgumentParser object with subparser
+    :param command_name: string with command name
+    :return: list with actions
+    """
+    subparser = get_subparsers(parser)
+    return subparser.choices[command_name]._actions
