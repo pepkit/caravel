@@ -8,6 +8,7 @@ if sys.version_info < (3, 3):
 else:
     from collections.abc import Iterable
 import argparse
+from collections import defaultdict
 
 
 def coll_like(c):
@@ -59,12 +60,24 @@ def get_commands_names(parser):
     return commands_names
 
 
-def get_arglist_by_name(parser, command_name):
+def get_argdict_by_name(parser, command_name):
     """
-    Get the list of options associated with the command in subparser
+    Get the dict of options associated with the command in subparser.
     :param parser: argparse.ArgumentParser object with subparser
     :param command_name: string with command name
-    :return: list with actions
+    :return: dict[dict] action dict with command option values
     """
     subparser = get_subparsers(parser)
-    return subparser.choices[command_name]._actions
+    arglist =  subparser.choices[command_name]._actions
+    command_dict = defaultdict(dict)
+    command_dict[command_name] = {}
+    for arg in arglist:
+        arg_dict = arg.__dict__
+        print(arg_dict["option_strings"])
+        try:
+            # catch empty option_strings which holds config file action. Will be handled later on
+            option_name = arg_dict["option_strings"][-1]
+            command_dict[command_name][option_name] = arg_dict
+        except IndexError:
+            pass
+    return command_dict
