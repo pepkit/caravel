@@ -12,7 +12,9 @@ import jwt
 import psutil
 import peppy
 import yaml
-from .helpers import *
+from helpers import *
+from looper import looper
+import argparse
 
 app = Flask(__name__)
 
@@ -293,6 +295,8 @@ def background_options():
         "destroy": ["--file-checks", "--force-yes", "--dry-run", "--exclude-protocols", "--include-protocols", "--sp"],
         "summarize": ["--file-checks", "--dry-run", "--exclude-protocols", "--include-protocols", "--sp"]
     }
+    parser = looper.build_parser()
+    args = get_arguments(parser)
     act = request.args.get('act', type=str)
     options_act = options[act]
     return jsonify(options=render_template('options.html', options=options_act))
