@@ -1,9 +1,6 @@
-from __future__ import print_function
 from functools import wraps
 import os
-import random
 import shutil
-import string
 import tempfile
 from uuid import uuid1
 
@@ -20,7 +17,6 @@ CONFIG_ENV_VAR = "CARAVEL"
 CONFIG_PRJ_KEY = "projects"
 
 
-# Helper functions
 def clear_session_data(keys):
     """
     Removes the non default data (created in the app lifetime) from the flask.session object.
@@ -88,31 +84,6 @@ def token_required(func):
                 return render_template("invalid_token.html"), 403
         return func(*args, **kwargs)
     return decorated
-
-
-def random_string(n):
-    """
-    Generates a random string of length N (token), prints a message
-    :param int n: length of the string to be generated
-    :return str: random string
-    """
-    eprint("CSRF token generated")
-    return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(n))
-
-
-def eprint(*args, **kwargs):
-    """
-    Print the provided text to stderr.
-    """
-    print(*args, file=sys.stderr, **kwargs)
-
-
-def geprint(txt):
-    """
-    Print the provided text to stderr in green. Used to print the token for the user.
-    :param txt: string with text to be printed.
-    """
-    eprint("\033[92m {}\033[00m".format(txt))
 
 
 def generate_csrf_token(n=100):
