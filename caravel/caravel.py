@@ -1,12 +1,9 @@
 from __future__ import print_function
-from itertools import chain
 from functools import wraps
-import glob
 import os
 import random
 import shutil
 import string
-import sys
 import tempfile
 from uuid import uuid1
 
@@ -15,6 +12,7 @@ import jwt
 import psutil
 import peppy
 import yaml
+from .helpers import *
 
 app = Flask(__name__)
 
@@ -23,34 +21,12 @@ CONFIG_PRJ_KEY = "projects"
 
 
 # Helper functions
-def glob_if_exists(x):
-    """
-    Return all matches in the directory for x and x if nothing matches
-    :param x: a string with path containing globs
-    :return list[str]: a list of paths
-    """
-    return [glob.glob(e) or e for e in x] if isinstance(x, list) else (glob.glob(x) or [x])
-
-
-def flatten(x):
-    """
-    Flatten one level of nesting
-    :param x: a list to flatten
-    :return list[str]: a flat list
-    """
-    return list(chain.from_iterable(x))
-
-
 def clear_session_data(keys):
     """
     Removes the non default data (created in the app lifetime) from the flask.session object.
     :param keys: a list of keys to be removed from the session
     """
-    if sys.version_info < (3, 3):
-        from collections import Iterable
-    else:
-        from collections.abc import Iterable
-    if not isinstance(keys, Iterable) or isinstance(keys, str):
+    if not coll_like(keys):
         raise TypeError("Keys to clear must be collection-like; "
                         "got {}".format(type(keys)))
     for key in keys:
