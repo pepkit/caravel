@@ -66,7 +66,6 @@ def token_required(func):
                 return render_template("invalid_token.html"), 403
         else:
             try:
-                session['uid']
                 if login_uid.int == session['uid'].int:
                     pass
                 else:
