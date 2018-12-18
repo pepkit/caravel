@@ -39,9 +39,9 @@ Then point browser to: http://127.0.0.1:5000
 
 
 
-To run in debug/development mode, set `FLASK_ENV`: 
+To run in debug/development mode: 
 ```
-export FLASK_ENV=development
+python caravel.py -c configs.yaml -d
 ```
 
 # Run on a remote server (like a head cluster node):
