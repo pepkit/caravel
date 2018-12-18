@@ -4,20 +4,18 @@ from functools import wraps
 import os
 import shutil
 import tempfile
-from uuid import uuid1
-
 from flask import Blueprint, Flask, render_template, redirect, url_for, request, jsonify, session
-import jwt
 import psutil
 import peppy
 import yaml
+import warnings
 from helpers import *
 
 app = Flask(__name__)
 
 CONFIG_ENV_VAR = "CARAVEL"
 CONFIG_PRJ_KEY = "projects"
-
+TOKEN_LEN = 10
 
 def clear_session_data(keys):
     """
@@ -34,57 +32,83 @@ def clear_session_data(keys):
             eprint("{k} not found in the session".format(k=key))
 
 
-def shutdown_server():
-    shut_func = request.environ.get('werkzeug.server.shutdown')
-    global login_uid
-    if shut_func is None:
-        raise RuntimeError('Not running with the Werkzeug Server')
-    if login_uid.int == session['uid'].int:
-            clear_session_data(keys=['token', '_csrf_token', 'uid'])
-            shut_func()
-    else:
-        msg = "Other instance of Caravel is running elsewhere." \
-              " The session UID in use and your session UID do not match"
-        print(msg)
-        return render_template('error.html', e=[msg])
+def generate_token(n=TOKEN_LEN):
+    """
+    Set the global app variable g_token and session["token"] to the generated random string of length n.
+    Print info to the terminal
+    :param n: length of the token
+    :return: flask.render_template
+    """
+    global g_token
+    g_token = random_string(n)
+    session["token"] = g_token
+    eprint("\n\nCaravel is protected with a token.\nCopy this link to your browser to authenticate:\n")
+    geprint("http://localhost:5000/?token=" + g_token + "\n")
+    return render_template('token.html')
 
 
 def token_required(func):
     """
-    This decorator checks for a token, verifies if it is valid
-    and redirects to the login page if needed
+    Used for authentication
     :param callable func: function to be decorated
     :return callable: decorated function
     """
     @wraps(func)
     def decorated(*args, **kwargs):
-        global login_uid
-        token = request.args.get('token')
-        if token is not None:
-            try:
-                jwt.decode(token, app.config['SECRET_KEY'])
-                eprint("Using token from URL argument")
-            except jwt.exceptions.InvalidTokenError:
-                return render_template("invalid_token.html"), 403
-        else:
-            try:
-                if login_uid.int == session['uid'].int:
-                    pass
+        global g_token
+        if not app.config["DEBUG"]:
+            url_token = request.args.get('token')
+            if url_token is not None:
+                    eprint("Using token from URL argument")
+                    try:
+                        if url_token == g_token:
+                            session["token"] = url_token
+                            pass
+                        else:
+                            msg = "Invalid token"
+                            eprint(msg)
+                            clear_session_data("token")
+                            return render_template('error.html', e=[msg])
+                    except KeyError:
+                        msg = "No token in session"
+                        eprint(msg)
+                        return render_template('error.html', e=[msg])
+            else:
+                try:
+                    session["token"]
+                except KeyError:
+                    try:
+                        g_token
+                    except NameError:
+                        return generate_token()
+                    else:
+                        msg = "Other instance of caravel is running elsewhere." \
+                              " Log in using the URL printed to the terminal when it was started."
+                        print(msg)
+                        return render_template('error.html', e=[msg])
                 else:
-                    msg = "Other instance of Caravel is running elsewhere." \
-                          " The session UID in use and your session UID do not match"
-                    print(msg)
-                    return render_template('error.html', e=[msg])
-                token = session['token']
-                jwt.decode(token, app.config['SECRET_KEY'])
-                eprint("Token retrieved from the session")
-            except (NameError, KeyError):
-                eprint("No token in session and no argument. Log in")
-                return redirect(url_for('login'))
-            except jwt.exceptions.InvalidTokenError:
-                return render_template("invalid_token.html"), 403
+                    try:
+                        if session["token"] != g_token:
+                            msg = "Invalid token"
+                            eprint(msg)
+                            return render_template('error.html', e=[msg])
+                        else:
+                            pass
+                    except NameError:
+                        return generate_token()
+        else:
+            warnings.warn("You have entered debug mode. The server-client connection is not secure!")
         return func(*args, **kwargs)
     return decorated
+
+
+@token_required
+def shutdown_server():
+    shut_func = request.environ.get('werkzeug.server.shutdown')
+    if shut_func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    clear_session_data(keys=['token', '_csrf_token'])
+    shut_func()
 
 
 def generate_csrf_token(n=100):
@@ -106,6 +130,7 @@ app.jinja_env.globals['csrf_token'] = generate_csrf_token
 # Routes
 @app.errorhandler(Exception)
 def unhandled_exception(e):
+    clear_session_data(keys=['token', '_csrf_token'])
     app.logger.error('Unhandled Exception: %s', (e))
     return render_template('error.html', e=e), 500
 
@@ -117,52 +142,13 @@ def shutdown():
     return 'Server shutting down...'
 
 
-@app.route("/login")
-def login():
-    global login_uid
-    # verbosity for testing purposes
-    try:
-        eprint("Retrieved session UID: " + str(session['uid']))
-    except KeyError:
-        session['uid'] = uuid1()
-        eprint("Generated session UID: " + str(session['uid']))
-    try:
-        eprint("Using existing login UID: " + str(login_uid))
-    except NameError:
-        login_uid = session['uid']
-        eprint("Assigned new login UID: " + str(login_uid))
-
-    if login_uid.int == session['uid'].int:
-        token = jwt.encode({"payload": login_uid.int}, app.config['SECRET_KEY'])
-        session['token'] = token
-        eprint("\n\nCaravel is protected with a token.\nCopy this link to your browser to authenticate:\n")
-        geprint("http://localhost:5000/?token=" + token.decode('UTF-8').strip() + "\n")
-    else:
-        msg = "Other instance of Caravel is running elsewhere." \
-              " The session UID in use and your session UID do not match"
-        print(msg)
-        return render_template('error.html', e=[msg])
-    return render_template('token.html')
-
-
 @app.before_request
 def csrf_protect():
     if request.method == "POST":
-        global login_uid
-        try:
-            login_uid.int
-        except NameError:
-            login_uid = session['uid']
-        if login_uid.int == session['uid'].int:
-            token_csrf = session['_csrf_token']
-            token_get_csrf = request.form.get("_csrf_token")
-            if not token_csrf or token_csrf != token_get_csrf:
-                msg = "The CSRF token is invalid"
-                print(msg)
-                return render_template('error.html', e=[msg])
-        else:
-            msg = "Other instance of Caravel is running elsewhere." \
-                  " The session UID in use and your session UID do not match"
+        token_csrf = session['_csrf_token']
+        token_get_csrf = request.form.get("_csrf_token")
+        if not token_csrf or token_csrf != token_get_csrf:
+            msg = "The CSRF token is invalid"
             print(msg)
             return render_template('error.html', e=[msg])
 
@@ -170,9 +156,7 @@ def csrf_protect():
 @app.route("/")
 @token_required
 def index():
-
     project_list_path = app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
-
     if project_list_path is None:
         msg = "Please set the environment variable {} or provide a YAML file " \
               "listing paths to project config files".format(CONFIG_ENV_VAR)
@@ -193,7 +177,6 @@ def index():
         projects = pl[CONFIG_PRJ_KEY]
         # get all globs and return unnested list
         projects = flatten([glob_if_exists(os.path.expanduser(os.path.expandvars(prj))) for prj in projects])
-
     return render_template('index.html', projects=projects)
 
 
@@ -318,6 +301,6 @@ if __name__ == "__main__":
     parser = build_parser()
     args = parser.parse_args()
     app.config["project_configs"] = args.config
-    app.config["DEBUG"] = args.debug
+    app.config["DEBUG"] = args.debug # no token
     app.config['SECRET_KEY'] = 'thisisthesecretkey'
     app.run()

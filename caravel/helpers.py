@@ -92,7 +92,7 @@ def build_parser():
             "-d", "--debug-mode",
             action="store_true",
             dest="debug",
-            help="Use this option if you want to enter the debug mode.")
+            help="Use this option if you want to enter the debug mode. Unsecured.")
     return parser
 
 
