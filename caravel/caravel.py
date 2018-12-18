@@ -315,6 +315,8 @@ def action():
 
 
 if __name__ == "__main__":
-    app.config["project_configs"] = sys.argv[1] if len(sys.argv) > 1 else None
+    parser = build_parser()
+    args = parser.parse_args()
+    app.config["project_configs"] = args.config
     app.config['SECRET_KEY'] = 'thisisthesecretkey'
     app.run()

@@ -10,7 +10,9 @@ if sys.version_info < (3, 3):
     from collections import Iterable
 else:
     from collections.abc import Iterable
+import argparse
 
+__version__ = 0.1
 
 def coll_like(c):
     """
@@ -62,3 +64,35 @@ def random_string(n):
     """
     eprint("CSRF token generated")
     return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(n))
+
+
+def build_parser():
+    """
+    Building argument parser.
+    :return argparse.ArgumentParser
+    """
+
+    # Main looper program help text messages
+    banner = "%(prog)s - Run a web interface for looper."
+
+    parser = _VersionInHelpParser(
+            description=banner,
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument(
+            "-V", "--version",
+            action="version",
+            version="%(prog)s {v}".format(v=__version__))
+
+    # Logging control
+    parser.add_argument(
+            "-c", "--config",
+            dest="config",
+            help="Config file (YAML)")
+    return parser
+
+
+class _VersionInHelpParser(argparse.ArgumentParser):
+    def format_help(self):
+        """ Add version information to help text. """
+        return "version: {}\n".format(__version__) + \
+               super(_VersionInHelpParser, self).format_help()
