@@ -15,7 +15,7 @@ app = Flask(__name__)
 
 CONFIG_ENV_VAR = "CARAVEL"
 CONFIG_PRJ_KEY = "projects"
-TOKEN_LEN = 10
+TOKEN_LEN = 15
 
 def clear_session_data(keys):
     """
@@ -34,17 +34,15 @@ def clear_session_data(keys):
 
 def generate_token(n=TOKEN_LEN):
     """
-    Set the global app variable g_token and session["token"] to the generated random string of length n.
+    Set the global app variable login_token to the generated random string of length n.
     Print info to the terminal
     :param n: length of the token
     :return: flask.render_template
     """
-    global g_token
-    g_token = random_string(n)
-    session["token"] = g_token
+    global login_token
+    login_token = random_string(n)
     eprint("\n\nCaravel is protected with a token.\nCopy this link to your browser to authenticate:\n")
-    geprint("http://localhost:5000/?token=" + g_token + "\n")
-    return render_template('token.html')
+    geprint("http://localhost:5000/?token=" + login_token + "\n")
 
 
 def token_required(func):
@@ -55,19 +53,17 @@ def token_required(func):
     """
     @wraps(func)
     def decorated(*args, **kwargs):
-        global g_token
+        global login_token
         if not app.config["DEBUG"]:
             url_token = request.args.get('token')
             if url_token is not None:
                     eprint("Using token from URL argument")
                     try:
-                        if url_token == g_token:
+                        if url_token == login_token:
                             session["token"] = url_token
-                            pass
                         else:
                             msg = "Invalid token"
                             eprint(msg)
-                            clear_session_data("token")
                             return render_template('error.html', e=[msg])
                     except KeyError:
                         msg = "No token in session"
@@ -78,7 +74,7 @@ def token_required(func):
                     session["token"]
                 except KeyError:
                     try:
-                        g_token
+                        login_token
                     except NameError:
                         return generate_token()
                     else:
@@ -88,16 +84,12 @@ def token_required(func):
                         return render_template('error.html', e=[msg])
                 else:
                     try:
-                        if session["token"] != g_token:
+                        if session["token"] != login_token:
                             msg = "Invalid token"
                             eprint(msg)
                             return render_template('error.html', e=[msg])
-                        else:
-                            pass
                     except NameError:
                         return generate_token()
-        else:
-            warnings.warn("You have entered debug mode. The server-client connection is not secure!")
         return func(*args, **kwargs)
     return decorated
 
@@ -260,7 +252,6 @@ def background_summary():
                                                             summary_html=p_info["summary_html"])
     if os.path.isfile(summary_location):
         psummary = Blueprint(p.name, __name__, template_folder=p_info["output_dir"])
-
         @psummary.route("/{pname}/summary/<path:page_name>".format(pname=p_info["name"]), methods=['GET'])
         def render_static(page_name):
             return render_template('%s' % page_name)
@@ -301,6 +292,10 @@ if __name__ == "__main__":
     parser = build_parser()
     args = parser.parse_args()
     app.config["project_configs"] = args.config
-    app.config["DEBUG"] = args.debug # no token
+    app.config["DEBUG"] = args.debug
     app.config['SECRET_KEY'] = 'thisisthesecretkey'
+    if not app.config["DEBUG"]:
+        generate_token()
+    else:
+        warnings.warn("You have entered the debug mode. The server-client connection is not secure!")
     app.run()
