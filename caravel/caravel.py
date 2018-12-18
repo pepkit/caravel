@@ -318,5 +318,6 @@ if __name__ == "__main__":
     parser = build_parser()
     args = parser.parse_args()
     app.config["project_configs"] = args.config
+    app.config["DEBUG"] = args.debug
     app.config['SECRET_KEY'] = 'thisisthesecretkey'
     app.run()

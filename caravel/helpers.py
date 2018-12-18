@@ -87,6 +87,12 @@ def build_parser():
             "-c", "--config",
             dest="config",
             help="Config file (YAML). If not provided the environment variable $CARAVEL will be used instead.")
+
+    parser.add_argument(
+            "-d", "--debug-mode",
+            action="store_true",
+            dest="debug",
+            help="Use this option if you want to enter the debug mode.")
     return parser
 
 
