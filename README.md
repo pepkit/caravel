@@ -1,4 +1,4 @@
-<img src="static/caravel.svg" alt="caravel logo" height="70" align="left"/>
+<img src="caravel/static/caravel.svg" alt="caravel logo" height="70" align="left"/>
 
 # caravel
 
