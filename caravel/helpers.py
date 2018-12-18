@@ -1,6 +1,7 @@
 """ General-purpose functions """
 
 from __future__ import print_function
+import argparse
 import glob
 from itertools import chain
 import random
@@ -10,9 +11,8 @@ if sys.version_info < (3, 3):
     from collections import Iterable
 else:
     from collections.abc import Iterable
-import argparse
+from _version import __version__
 
-__version__ = 0.1
 
 def coll_like(c):
     """
