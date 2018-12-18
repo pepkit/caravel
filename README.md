@@ -35,14 +35,14 @@ python caravel.py -c configs.yaml
 ```
 to point directly to a file declaring a list of project config filepaths.
 
-Then point browser to: http://127.0.0.1:5000
-
+Then point browser to the URL printed to your terminal.
 
 
 To run in debug/development mode: 
 ```
 python caravel.py -c configs.yaml -d
 ```
+This will trigger the unsecured mode (no URL token required; point the browser to: http://127.0.0.1:5000
 
 # Run on a remote server (like a head cluster node):
 
