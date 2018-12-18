@@ -42,7 +42,7 @@ To run in debug/development mode:
 ```
 python caravel.py -c configs.yaml -d
 ```
-This will trigger the unsecured mode (no URL token required; point the browser to: http://127.0.0.1:5000
+This will trigger the unsecured mode (no URL token required); point the browser to: http://127.0.0.1:5000
 
 # Run on a remote server (like a head cluster node):
 
