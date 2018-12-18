@@ -1,3 +1,5 @@
+""" Main UI application for using looper """
+
 from functools import wraps
 import os
 import shutil
@@ -9,7 +11,7 @@ import jwt
 import psutil
 import peppy
 import yaml
-from .helpers import *
+from helpers import *
 
 app = Flask(__name__)
 
