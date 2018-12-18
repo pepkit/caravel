@@ -19,15 +19,18 @@
   });
 </script>
 <script type=text/javascript>
-  $(function() {
-    $('select#show_options').bind('change', function() {
-      $.getJSON($SCRIPT_ROOT + '/_background_options', {
+  function render_options() {
+          $.getJSON($SCRIPT_ROOT + '/_background_options', {
         act: $('select[name="actions"]').val(),
       }, function(data) {
         $("div#options").html(data.options);
       });
       return false;
-    });
+  }
+  $(function() {
+    // The function is triggered on page load and with the "select#show_options" change
+    render_options()
+    $('select#show_options').bind('change', render_options);
   });
 </script>
 <script type=text/javascript>
