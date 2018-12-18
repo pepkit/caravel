@@ -28,7 +28,7 @@ if you have the `CARAVEL` environment variable pointing to a list of project con
 Or like:
 
 ```
-python caravel.py configs.yaml
+python caravel.py -c configs.yaml
 ```
 to point directly to a file declaring a list of project config filepaths.
 
@@ -56,20 +56,6 @@ So a complete one-line command to run `caravel` remotely with a local web GUI wo
 ```
 ssh -L 5000:localhost:5000 user@server "python ${REMOTE_CODEBASE}/caravel/caravel.py"
 ```
-
-# How it works
-
-* The application will read each project configuration file and let you select the project of interest from a dropdown list
-
-* [`peppy`](https://peppy.readthedocs.io/en/latest/index.html) will read the project (*PEP*) and the application will display its info
-
-* You will have an option to activate a subproject, if available
-
-* Depending on your choice [`looper`](https://looper.readthedocs.io/en/latest/) will `run`/`check`/`destroy` the pipeline specified in the seleted project
-
-* The output produced by `looper` will be displayed
-
-* ...
 
 # The vision
 
