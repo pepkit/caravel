@@ -72,7 +72,7 @@ def build_parser():
     :return argparse.ArgumentParser
     """
 
-    # Main looper program help text messages
+    # Main caravel program help text messages
     banner = "%(prog)s - Run a web interface for looper."
 
     parser = _VersionInHelpParser(
@@ -83,11 +83,10 @@ def build_parser():
             action="version",
             version="%(prog)s {v}".format(v=__version__))
 
-    # Logging control
     parser.add_argument(
             "-c", "--config",
             dest="config",
-            help="Config file (YAML)")
+            help="Config file (YAML). If not provided the environment variable $CARAVEL will be used instead.")
     return parser
 
 
