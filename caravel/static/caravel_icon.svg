@@ -15,7 +15,10 @@
    inkscape:version="0.91 r13725"
    sodipodi:docname="caravel_icon.svg"
    width="120"
-   height="120">
+   height="120"
+   inkscape:export-filename="/home/nsheff/code/caravel/caravel/static/caravel.ico"
+   inkscape:export-xdpi="100.03056"
+   inkscape:export-ydpi="100.03056">
   <metadata
      id="metadata12">
     <rdf:RDF>
@@ -68,16 +71,22 @@
   <path
      inkscape:connector-curvature="0"
      id="path4153"
-     d="m 117.2661,103.80906 -10.57135,10.57132 -93.421153,0 L 2.7022571,103.80906 C 0.48964971,101.59644 1.227186,99.62967 4.4231731,99.62967 l 111.1220069,0 c 3.19598,0 3.93351,1.96677 1.72092,4.17939 z"
-     style="fill:#000000;fill-opacity:1;stroke:#f2f2f2;stroke-width:2.20623422;stroke-miterlimit:4;stroke-dasharray:none" />
+     d="m 116.31239,98.16934 -10.39534,10.39531 -91.865754,0 L 3.6559619,98.16934 C 1.480193,95.993555 2.2054498,94.059531 5.3482259,94.059531 l 109.2719041,0 c 3.14277,0 3.86802,1.934024 1.69226,4.109809 z"
+     style="fill:#000000;fill-opacity:1;stroke:#999999;stroke-width:4.00000024;stroke-miterlimit:4;stroke-dasharray:none"
+     inkscape:export-xdpi="300"
+     inkscape:export-ydpi="300" />
   <path
      inkscape:connector-curvature="0"
      id="path4155"
-     d="m 58.509102,92.254336 47.448128,0 a 2.4584512,2.4584512 0 0 0 2.45844,-2.950143 L 90.468974,8.6669879 c -0.491681,-2.4584461 -1.229213,-2.4584461 -1.475065,0 C 86.289606,35.9558 75.964117,62.752917 56.296497,88.812511 a 2.4584512,2.4584512 0 0 0 2.212605,3.441825 z"
-     style="fill:#008080;stroke:#f2f2f2;stroke-width:2.20623422;stroke-miterlimit:4;stroke-dasharray:none" />
+     d="m 58.533661,86.806991 46.658149,0 a 2.4175197,2.4175197 0 0 0 2.41751,-2.901025 L 89.961423,4.6113152 c -0.483495,-2.4175146 -1.208748,-2.4175146 -1.450506,0 C 85.851639,31.445787 75.698062,57.796751 56.357894,83.42247 a 2.4175197,2.4175197 0 0 0 2.175767,3.384521 z"
+     style="fill:#008080;stroke:#999999;stroke-width:4.00000024;stroke-miterlimit:4;stroke-dasharray:none"
+     inkscape:export-xdpi="300"
+     inkscape:export-ydpi="300" />
   <path
      inkscape:connector-curvature="0"
      id="path4157"
-     d="m 13.273597,92.254336 34.910009,0 a 1.7209157,1.7209157 0 0 0 1.720917,-2.21261 L 36.874732,31.776441 c -0.491692,-2.458467 -1.229225,-2.212617 -1.475071,0 C 33.4329,51.444036 25.565855,70.865801 11.55268,89.550046 a 1.7209157,1.7209157 0 0 0 1.720917,2.70429 z"
-     style="fill:#0080a3;fill-opacity:1;stroke:#f2f2f2;stroke-width:2.20623422;stroke-miterlimit:4;stroke-dasharray:none" />
+     d="m 14.051296,86.806991 34.328781,0 a 1.6922636,1.6922636 0 0 0 1.692265,-2.175772 L 37.259489,27.336012 c -0.483506,-2.417535 -1.20876,-2.175779 -1.450513,0 -1.934015,19.340143 -9.670079,38.438549 -23.449945,56.811714 a 1.6922636,1.6922636 0 0 0 1.692265,2.659265 z"
+     style="fill:#0080a3;fill-opacity:1;stroke:#999999;stroke-width:4.00000024;stroke-miterlimit:4;stroke-dasharray:none"
+     inkscape:export-xdpi="300"
+     inkscape:export-ydpi="300" />
 </svg>
