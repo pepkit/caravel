@@ -52,16 +52,6 @@ def generate_token(n=TOKEN_LEN):
     geprint("http://localhost:5000/?token=" + login_token + "\n")
 
 
-def render_error_msg(msg):
-    """
-    Renders an error template with a message and prints to the terminal
-    :param msg:
-    :return:
-    """
-    eprint(msg)
-    return render_template('error.html', e=[msg])
-
-
 def token_required(func):
     """
     Used for authentication
