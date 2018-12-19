@@ -22,14 +22,14 @@ projects:
 
 From withn the root of the cloned repository
 
-Run like:
+**Run like**:
 
 ```
 python caravel/caravel.py
 ```
 if you have the `CARAVEL` environment variable pointing to a list of project config files.
 
-Or like:
+**Or like**:
 
 ```
 python caravel/caravel.py -c example_caravel.yaml
@@ -39,7 +39,7 @@ to point directly to a file declaring a list of project config filepaths.
 Then point browser to the URL printed to your terminal.
 
 
-To run in debug/development mode: 
+**To run in debug/development mode**: 
 ```
 python caravel/caravel.py -c example_caravel.yaml -d
 ```
