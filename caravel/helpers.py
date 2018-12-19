@@ -12,7 +12,7 @@ if sys.version_info < (3, 3):
 else:
     from collections.abc import Iterable
 from _version import __version__
-
+from flask import render_template
 
 def coll_like(c):
     """
@@ -64,6 +64,16 @@ def random_string(n):
     """
     eprint("CSRF token generated")
     return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(n))
+
+
+def render_error_msg(msg):
+    """
+    Renders an error template with a message and prints to the terminal
+    :param msg:
+    :return:
+    """
+    eprint(msg)
+    return render_template('error.html', e=[msg])
 
 
 def build_parser():
