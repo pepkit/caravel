@@ -20,18 +20,19 @@ projects:
 
 # Run a web server
 
+From withn the root of the cloned repository
 
 Run like:
 
 ```
-python caravel.py
+python caravel/caravel.py
 ```
 if you have the `CARAVEL` environment variable pointing to a list of project config files.
 
 Or like:
 
 ```
-python caravel.py -c configs.yaml
+python caravel/caravel.py -c example_caravel.yaml
 ```
 to point directly to a file declaring a list of project config filepaths.
 
@@ -40,7 +41,7 @@ Then point browser to the URL printed to your terminal.
 
 To run in debug/development mode: 
 ```
-python caravel.py -c configs.yaml -d
+python caravel/caravel.py -c example_caravel.yaml -d
 ```
 This will trigger the unsecured mode (no URL token required); point the browser to: http://127.0.0.1:5000
 
@@ -57,7 +58,7 @@ Since `flask` (and `caravel`) uses port 5000 by default, this maps your localhos
 So a complete one-line command to run `caravel` remotely with a local web GUI would be something like this:
 
 ```
-ssh -L 5000:localhost:5000 user@server "python ${REMOTE_CODEBASE}/caravel/caravel.py"
+ssh -L 5000:localhost:5000 user@server "python ${REMOTE_CODEBASE}/caravel/caravel/caravel.py -c caravel/example_caravel.yaml"
 ```
 
 # The vision
