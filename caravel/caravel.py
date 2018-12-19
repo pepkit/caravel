@@ -228,15 +228,11 @@ def background_subproject():
 
 @app.route('/_background_options')
 def background_options():
-    from looper.cli import CONFIG_FILE_OPTNAME, PROGRAM_CLI_PARSERS
     global p_info
     global selected_subproject
     global act
-    # TODO: the options have to be retrieved from the looper argument parser
-    # argparse.ArgumentParser._actions has all the info needed to determine what kind (or absence) of input is needed
-    options = {prog_spec.name: ["{}".format(opt.name) for opt in
-                                prog_spec.options if opt.name != CONFIG_FILE_OPTNAME]
-               for prog_spec in PROGRAM_CLI_PARSERS}
+    from looper_parser import get_long_optnames
+    options = get_long_optnames(parser)
     """
     options = {
         "run": ["--ignore-flags", "--allow-duplicate-names", "--compute", "--env", "--limit", "--lump", "--lumpn",
