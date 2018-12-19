@@ -1,4 +1,2 @@
 projects:
-  - ${CODE}/example_peps/*/project_config.yaml
-  - /invalid/path/for/tesing/file.yaml
-  - ${CODE}/microtest/config/microtest_config.tutorial.yaml
+  - examples/*/*.yaml
