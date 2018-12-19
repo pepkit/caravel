@@ -234,7 +234,7 @@ def background_options():
     global act
     # TODO: the options have to be retrieved from the looper argument parser
     # argparse.ArgumentParser._actions has all the info needed to determine what kind (or absence) of input is needed
-    options = {prog_spec.name: ["--{}".format(opt.name) for opt in
+    options = {prog_spec.name: ["{}".format(opt.name) for opt in
                                 prog_spec.options if opt.name != CONFIG_FILE_OPTNAME]
                for prog_spec in PROGRAM_CLI_PARSERS}
     """
