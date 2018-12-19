@@ -10,12 +10,19 @@ import peppy
 import yaml
 import warnings
 from helpers import *
+from _version import __version__
 
 app = Flask(__name__)
 
 CONFIG_ENV_VAR = "CARAVEL"
 CONFIG_PRJ_KEY = "projects"
 TOKEN_LEN = 15
+
+
+@app.context_processor
+def inject_dict_for_all_templates():
+    return dict(version=__version__)
+
 
 def clear_session_data(keys):
     """
@@ -45,6 +52,16 @@ def generate_token(n=TOKEN_LEN):
     geprint("http://localhost:5000/?token=" + login_token + "\n")
 
 
+def render_error_msg(msg):
+    """
+    Renders an error template with a message and prints to the terminal
+    :param msg:
+    :return:
+    """
+    eprint(msg)
+    return render_template('error.html', e=[msg])
+
+
 def token_required(func):
     """
     Used for authentication
@@ -57,18 +74,14 @@ def token_required(func):
         if not app.config["DEBUG"]:
             url_token = request.args.get('token')
             if url_token is not None:
-                    eprint("Using token from URL argument")
+                    eprint("Using token from the URL argument")
                     try:
                         if url_token == login_token:
                             session["token"] = url_token
                         else:
-                            msg = "Invalid token"
-                            eprint(msg)
-                            return render_template('error.html', e=[msg])
+                            return render_error_msg("Invalid token")
                     except KeyError:
-                        msg = "No token in session"
-                        eprint(msg)
-                        return render_template('error.html', e=[msg])
+                        return render_error_msg("No token in session")
             else:
                 try:
                     session["token"]
@@ -76,20 +89,15 @@ def token_required(func):
                     try:
                         login_token
                     except NameError:
-                        return generate_token()
+                        return render_error_msg("No login token and session token found.")
                     else:
-                        msg = "Other instance of caravel is running elsewhere." \
-                              " Log in using the URL printed to the terminal when it was started."
-                        print(msg)
-                        return render_template('error.html', e=[msg])
+                        return render_error_msg("Other instance of caravel is running elsewhere."
+                                                " Log in using the URL printed to the terminal when it was started.")
                 else:
-                    try:
-                        if session["token"] != login_token:
-                            msg = "Invalid token"
-                            eprint(msg)
-                            return render_template('error.html', e=[msg])
-                    except NameError:
-                        return generate_token()
+                    eprint("Using the token from the session")
+                    if session["token"] != login_token:
+                        return render_error_msg("Invalid token")
+
         return func(*args, **kwargs)
     return decorated
 
@@ -99,6 +107,7 @@ def shutdown_server():
     shut_func = request.environ.get('werkzeug.server.shutdown')
     if shut_func is None:
         raise RuntimeError('Not running with the Werkzeug Server')
+    eprint("Shutting down...")
     clear_session_data(keys=['token', '_csrf_token'])
     shut_func()
 
