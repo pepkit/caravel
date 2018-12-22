@@ -1,0 +1,8 @@
+<div id="vertical">
+	{% if summary == "Summary not available" %}
+		<p><i>{{ summary }}. Run <code>summarize</code> action to get it. </i></p>
+	{% else %}
+		<a href="{{ summary }}">{{ file_name }}</a>
+	{% endif %}
+</div>
+

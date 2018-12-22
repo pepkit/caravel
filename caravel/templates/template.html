@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+  <head>
+    {% block head %}
+      <!-- remote libraries -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+      <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='style.css') }}">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+      <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+      <!-- local stuff -->
+      <link rel="shortcut icon" href="{{ url_for('static', filename='caravel.ico') }}">
+      <title>Caravel - {% block title %}{% endblock %}</title>
+    {% endblock %}
+  </head>
+  <div id="wrap">
+    <div id="main">
+      <body>
+        <a href="{{ url_for('index') }}">
+          <img src="{{ url_for('static',filename='caravel.svg') }}">
+        </a>
+        <a href="{{ url_for('shutdown') }}">
+          <button type="submit" class="btn btn-default" style="float: right;">CLOSE <i class="fa fa-close"></i></button>
+        </a>
+        <a href="{{ url_for('index') }}">
+          <button type="submit" class="btn btn-default" style="float: right;">START OVER <i class="fa fa-undo"></i></button>
+        </a>
+        <br style = “line-height:6;”><br>
+        {% block content %}{% endblock %}
+      </body>
+    </div>
+  </div>
+  {% block footer %}
+  <footer class="footer">
+  <div id="footer">
+    <span class="muted"><b>caravel v{{version}} </b>© 2018 <a href="http://databio.org/" target="_new">Sheffield Computational Biology Lab</a> at the University of Virginia</span>
+  </div>
+  </footer>
+  {% endblock %}
+</html>

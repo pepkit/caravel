@@ -1,0 +1,7 @@
+{% extends "template.html" %}
+{% block title %}Token invalid{% endblock %}
+{% block content %}
+  <h2>Invalid token</h2>
+  <p>This action is protected by a token. The provided token is invalid, make sure you copy the token from the terminal correctly.</p>
+  <p><b>Try again</b> or <a href="{{ url_for('login') }}"></b>get new one.</b></a></p>
+{% endblock %}

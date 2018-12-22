@@ -1,0 +1,32 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+#vertical {
+    padding: 5px;
+}
+
+#wrap {
+  min-height: 100%;
+  padding: 20px;
+}
+
+#main {
+  overflow: auto;
+  padding-bottom: 40px;
+  /* must be same height as the footer */
+}
+
+#footer {
+  position: relative;
+  margin-top: -40px;
+  /* negative value of footer height */
+  height: 40px;
+  padding-left: 40px;
+}

@@ -1,4 +1,4 @@
-<img src="static/caravel.svg" alt="caravel logo" height="70" align="left"/>
+<img src="caravel/static/caravel.svg" alt="caravel logo" height="70" align="left"/>
 
 # caravel
 
@@ -20,29 +20,30 @@ projects:
 
 # Run a web server
 
+From withn the root of the cloned repository
 
-Run like:
+**Run like**:
 
 ```
-python caravel.py
+python caravel/caravel.py
 ```
 if you have the `CARAVEL` environment variable pointing to a list of project config files.
 
-Or like:
+**Or like**:
 
 ```
-python caravel.py configs.yaml
+python caravel/caravel.py -c example_caravel.yaml
 ```
 to point directly to a file declaring a list of project config filepaths.
 
-Then point browser to: http://127.0.0.1:5000
+Then point browser to the URL printed to your terminal.
 
 
-
-To run in debug/development mode, set `FLASK_ENV`: 
+**To run in debug/development mode**: 
 ```
-export FLASK_ENV=development
+python caravel/caravel.py -c example_caravel.yaml -d
 ```
+This will trigger the unsecured mode (no URL token required); point the browser to: http://127.0.0.1:5000
 
 # Run on a remote server (like a head cluster node):
 
@@ -57,22 +58,8 @@ Since `flask` (and `caravel`) uses port 5000 by default, this maps your localhos
 So a complete one-line command to run `caravel` remotely with a local web GUI would be something like this:
 
 ```
-ssh -L 5000:localhost:5000 user@server "python ${REMOTE_CODEBASE}/caravel/caravel.py"
+ssh -L 5000:localhost:5000 user@server "python ${REMOTE_CODEBASE}/caravel/caravel/caravel.py -c caravel/example_caravel.yaml"
 ```
-
-# How it works
-
-* The application will read each project configuration file and let you select the project of interest from a dropdown list
-
-* [`peppy`](https://peppy.readthedocs.io/en/latest/index.html) will read the project (*PEP*) and the application will display its info
-
-* You will have an option to activate a subproject, if available
-
-* Depending on your choice [`looper`](https://looper.readthedocs.io/en/latest/) will `run`/`check`/`destroy` the pipeline specified in the seleted project
-
-* The output produced by `looper` will be displayed
-
-* ...
 
 # The vision
 

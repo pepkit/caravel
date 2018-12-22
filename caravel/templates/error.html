@@ -1,0 +1,12 @@
+{% extends "template.html" %}
+{% block title %}Error{% endblock %}
+{% block content %}
+<h2>Caravel server encountered exception(s):</h2>
+<ol>
+  {% for ei in e %}
+  <li><code>{{ ei }}</code></li>
+  {% endfor %}
+</ol>
+<br style = “line-height:2;”><br>
+<p>Go back to the <a href="{{ url_for('index') }}"><b>Home page</b></a>
+{% endblock %}

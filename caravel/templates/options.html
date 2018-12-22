@@ -1,0 +1,16 @@
+<form class="form-inline" method="POST" action="{{ url_for('action') }}">
+	<input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
+    <div id="vertical">
+        <h3>Options</h3>
+        {% for item in options %}
+            <input type="checkbox" name="opt" value="{{ item }}">{{ item }}<br>
+        {% endfor %}
+    </div>
+    <div id=vertical>
+        <button type="submit" class="btn btn-default">GO</button>
+    </div>
+</form>
+</br>
+<div>
+	<p>See <a href="https://looper.readthedocs.io/en/latest/usage.html" target="_new">looper documentation</a> for the options explanation.</p>
+</div>
