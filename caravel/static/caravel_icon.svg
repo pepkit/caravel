@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   viewBox="0 0 120.00001 120"
+   x="0px"
+   y="0px"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="caravel_icon.svg"
+   width="120"
+   height="120"
+   inkscape:export-filename="/home/nsheff/code/caravel/caravel/static/caravel.ico"
+   inkscape:export-xdpi="100.03056"
+   inkscape:export-ydpi="100.03056">
+  <metadata
+     id="metadata12">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>sailing</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs10" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="640"
+     inkscape:window-height="480"
+     id="namedview8"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:zoom="2"
+     inkscape:cx="123.00672"
+     inkscape:cy="-54.245854"
+     inkscape:current-layer="svg2">
+    <inkscape:grid
+       type="xygrid"
+       id="grid4150"
+       originx="-39.998282"
+       originy="128.62964" />
+    <sodipodi:guide
+       position="-62.168706,246.87191"
+       orientation="0,1"
+       id="guide4152" />
+  </sodipodi:namedview>
+  <title
+     id="title4">sailing</title>
+  <path
+     inkscape:connector-curvature="0"
+     id="path4153"
+     d="m 116.31239,98.16934 -10.39534,10.39531 -91.865754,0 L 3.6559619,98.16934 C 1.480193,95.993555 2.2054498,94.059531 5.3482259,94.059531 l 109.2719041,0 c 3.14277,0 3.86802,1.934024 1.69226,4.109809 z"
+     style="fill:#000000;fill-opacity:1;stroke:#999999;stroke-width:4.00000024;stroke-miterlimit:4;stroke-dasharray:none"
+     inkscape:export-xdpi="300"
+     inkscape:export-ydpi="300" />
+  <path
+     inkscape:connector-curvature="0"
+     id="path4155"
+     d="m 58.533661,86.806991 46.658149,0 a 2.4175197,2.4175197 0 0 0 2.41751,-2.901025 L 89.961423,4.6113152 c -0.483495,-2.4175146 -1.208748,-2.4175146 -1.450506,0 C 85.851639,31.445787 75.698062,57.796751 56.357894,83.42247 a 2.4175197,2.4175197 0 0 0 2.175767,3.384521 z"
+     style="fill:#008080;stroke:#999999;stroke-width:4.00000024;stroke-miterlimit:4;stroke-dasharray:none"
+     inkscape:export-xdpi="300"
+     inkscape:export-ydpi="300" />
+  <path
+     inkscape:connector-curvature="0"
+     id="path4157"
+     d="m 14.051296,86.806991 34.328781,0 a 1.6922636,1.6922636 0 0 0 1.692265,-2.175772 L 37.259489,27.336012 c -0.483506,-2.417535 -1.20876,-2.175779 -1.450513,0 -1.934015,19.340143 -9.670079,38.438549 -23.449945,56.811714 a 1.6922636,1.6922636 0 0 0 1.692265,2.659265 z"
+     style="fill:#0080a3;fill-opacity:1;stroke:#999999;stroke-width:4.00000024;stroke-miterlimit:4;stroke-dasharray:none"
+     inkscape:export-xdpi="300"
+     inkscape:export-ydpi="300" />
+</svg>
