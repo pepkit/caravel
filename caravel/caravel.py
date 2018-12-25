@@ -10,7 +10,8 @@ import peppy
 import yaml
 import warnings
 from helpers import *
-from _version import __version__
+from _version import __version__ as caravel_version
+from looper import __version__ as looper_version
 
 app = Flask(__name__)
 
@@ -21,7 +22,7 @@ TOKEN_LEN = 15
 
 @app.context_processor
 def inject_dict_for_all_templates():
-    return dict(version=__version__)
+    return dict(caravel_version=caravel_version, looper_version=looper_version)
 
 
 def clear_session_data(keys):
