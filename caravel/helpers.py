@@ -31,7 +31,9 @@ def build_parser():
     parser.add_argument(
             "-V", "--version",
             action="version",
-            version="%(prog)s {v}".format(v=__version__))
+            version="caravel version: {caravel_version}; "
+                    "looper version: {looper_version}".format(caravel_version=caravel_version,
+                                                              looper_version=looper_version))
 
     parser.add_argument(
             "-c", "--config",
@@ -108,5 +110,7 @@ def render_error_msg(msg):
 class _VersionInHelpParser(argparse.ArgumentParser):
     def format_help(self):
         """ Add version information to help text. """
-        return "version: {}\n".format(__version__) + \
-               super(_VersionInHelpParser, self).format_help()
+        return "caravel version: {caravel_version}\n" \
+               "looper version: {looper_version}\n".format(caravel_version=caravel_version,
+                                                         looper_version=looper_version)\
+               + super(_VersionInHelpParser, self).format_help()
