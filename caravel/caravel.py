@@ -4,7 +4,7 @@ from functools import wraps
 import os
 import shutil
 import tempfile
-from flask import Blueprint, Flask, render_template, request, jsonify, session
+from flask import Blueprint, Flask, render_template, redirect, url_for, request, jsonify, session, Response
 import psutil
 import peppy
 import yaml
@@ -12,6 +12,8 @@ import warnings
 from helpers import *
 from _version import __version__ as caravel_version
 from looper import __version__ as looper_version
+import time
+from watchdog.events import PatternMatchingEventHandler
 
 app = Flask(__name__)
 
@@ -55,8 +57,7 @@ def generate_token(n=TOKEN_LEN):
 
 def token_required(func):
     """
-    This decorator checks for a token, verifies if it is valid
-    and redirects to the login page if needed
+    Used for authentication
     :param callable func: function to be decorated
     :return callable: decorated function
     """
@@ -141,29 +142,21 @@ def csrf_protect():
         token_csrf = session['_csrf_token']
         token_get_csrf = request.form.get("_csrf_token")
         if not token_csrf or token_csrf != token_get_csrf:
-            msg = "The CSRF token is invalid"
-            print(msg)
-            return render_template('error.html', e=[msg])
+            return render_error_msg("The CSRF token is invalid")
 
 
 @app.route("/")
 @token_required
 def index():
-
     project_list_path = app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
-
     if project_list_path is None:
-        msg = "Please set the environment variable {} or provide a YAML file " \
-              "listing paths to project config files".format(CONFIG_ENV_VAR)
-        print(msg)
-        return render_template('error.html', e=[msg])
+        return render_error_msg("Please set the environment variable {} or provide a YAML file "
+                                "listing paths to project config files".format(CONFIG_ENV_VAR))
 
     project_list_path = os.path.expanduser(project_list_path)
 
     if not os.path.isfile(project_list_path):
-        msg = "Project configs list isn't a file: {}".format(project_list_path)
-        print(msg)
-        return render_template('error.html', e=[msg])
+        return render_error_msg("Project configs list isn't a file: {}".format(project_list_path))
 
     with open(project_list_path, 'r') as stream:
         pl = yaml.safe_load(stream)
@@ -172,8 +165,55 @@ def index():
         projects = pl[CONFIG_PRJ_KEY]
         # get all globs and return unnested list
         projects = flatten([glob_if_exists(os.path.expanduser(os.path.expandvars(prj))) for prj in projects])
-
     return render_template('index.html', projects=projects)
+
+
+class ChangeHandler(PatternMatchingEventHandler):
+    """
+    Class defining the change event handler for watchdog. It sets the global flag variable
+    """
+
+    def __init__(self, pattern):
+        PatternMatchingEventHandler.__init__(self, patterns=pattern)
+        if 'f' not in globals():
+            global f
+        f = False
+
+    def on_modified(self, event):
+        global f
+        f = True
+        info = "Change detected"
+        geprint(info)
+
+
+def render_html_message(path):
+    global f
+    while not f:
+        time.sleep(0.5)
+    f = False
+    with open(path, 'r') as content_file:
+        content = content_file.read()
+    content = content.replace("\n", "</br>")
+    html_output = \
+        """\
+        <h3>Watched file update:</h3>\
+        <p>Content of <code>{path}</code> has changed:</p>\
+        <code>{content}</code>
+        """.format(content=content, path=path)
+    return html_output
+
+
+@app.route('/status')
+def status():
+    watched_dir = "./temp_dir"
+    watched_regex = ["*.tsv", "*.csv"]
+    watch_files(path=watched_dir, handler=ChangeHandler(pattern=watched_regex), verbose=True)
+
+    def event():
+        while True:
+            yield 'data: {data}\n\n'.format(data=render_html_message(watched_dir + "/test.csv"))
+
+    return Response(event(), mimetype="text/event-stream")
 
 
 @app.route("/process", methods=['GET', 'POST'])
@@ -183,6 +223,7 @@ def process():
     global config_file
     global p_info
     global selected_subproject
+
     selected_project = request.form.get('select_project')
 
     config_file = os.path.expandvars(os.path.expanduser(selected_project))
@@ -211,7 +252,7 @@ def process():
         "subprojects": subprojects
     }
 
-    return render_template('process.html', p_info=p_info)
+    return render_template('process.html', p_info=p_info, change=None)
 
 
 @app.route('/_background_subproject')
@@ -235,10 +276,17 @@ def background_options():
     global p_info
     global selected_subproject
     global act
-    from looper_parser import get_long_optnames
-    options = get_long_optnames(parser)
+    # from looper_parser import get_long_optnames
+    # options = get_long_optnames(parser)
 
-    act = request.args.get('act', type=str)
+    options = {
+        "run": ["--ignore-flags", "--allow-duplicate-names", "--compute", "--env", "--limit", "--lump", "--lumpn",
+                "--file-checks", "--dry-run", "--exclude-protocols", "--include-protocols", "--sp"],
+        "check": ["--all-folders", "--file-checks", "--dry-run", "--exclude-protocols", "--include-protocols", "--sp"],
+        "destroy": ["--file-checks", "--force-yes", "--dry-run", "--exclude-protocols", "--include-protocols", "--sp"],
+        "summarize": ["--file-checks", "--dry-run", "--exclude-protocols", "--include-protocols", "--sp"]
+    }
+    act = request.args.get('act', type=str) or "run"
     options_act = options[act]
     return jsonify(options=render_template('options.html', options=options_act))
 
@@ -250,6 +298,7 @@ def background_summary():
                                                             summary_html=p_info["summary_html"])
     if os.path.isfile(summary_location):
         psummary = Blueprint(p.name, __name__, template_folder=p_info["output_dir"])
+
         @psummary.route("/{pname}/summary/<path:page_name>".format(pname=p_info["name"]), methods=['GET'])
         def render_static(page_name):
             return render_template('%s' % page_name)
