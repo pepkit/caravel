@@ -13,7 +13,8 @@ else:
     from collections.abc import Iterable
 from collections import defaultdict
 
-from _version import __version__
+from _version import __version__ as caravel_version
+from looper import __version__ as looper_version
 
 
 def build_parser():
