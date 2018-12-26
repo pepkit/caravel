@@ -113,6 +113,7 @@ def generate_csrf_token(n=100):
     """
     if '_csrf_token' not in session:
         session['_csrf_token'] = random_string(n)
+        eprint("CSRF token generated")
     else: 
         eprint("CSRF token retrieved from the session")
     return session['_csrf_token']

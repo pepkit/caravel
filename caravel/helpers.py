@@ -66,7 +66,6 @@ def random_string(n):
     :param int n: length of the string to be generated
     :return str: random string
     """
-    eprint("CSRF token generated")
     return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(n))
 
 
