@@ -17,6 +17,7 @@ app = Flask(__name__)
 
 CONFIG_ENV_VAR = "CARAVEL"
 CONFIG_PRJ_KEY = "projects"
+CONFIG_TOKEN_KEY = "token"
 TOKEN_LEN = 15
 
 
@@ -40,7 +41,7 @@ def clear_session_data(keys):
             eprint("{k} not found in the session".format(k=key))
 
 
-def generate_token(n=TOKEN_LEN):
+def generate_token(config_token=None, n=TOKEN_LEN):
     """
     Set the global app variable login_token to the generated random string of length n.
     Print info to the terminal
@@ -48,10 +49,9 @@ def generate_token(n=TOKEN_LEN):
     :return: flask.render_template
     """
     global login_token
-    login_token = random_string(n)
-    eprint("\n\nCaravel is protected with a token.\nCopy this link to your browser to authenticate:\n")
+    login_token = random_string(n) if config_token is None else config_token
+    eprint("\nCaravel is protected with a token.\nCopy this link to your browser to authenticate:\n")
     geprint("http://localhost:5000/?token=" + login_token + "\n")
-
 
 def token_required(func):
     """
@@ -146,33 +146,49 @@ def csrf_protect():
             return render_template('error.html', e=[msg])
 
 
-@app.route("/")
-@token_required
-def index():
-
+def parse_config_file(component):
+    """
+    Parses the config file (YAML) provided in as an CLI argument or in a environment variable ($CARAVEL).
+    The CLI argument is given the priority.
+    Path to the PEP projects and predefined token are extracted if file is read successfully.
+    :param component: list of string names indicating the component(s) of config file to retrieve.
+     Either "projects" or "token" or both
+    :return: tuple of project list and string with the token.
+     If wither is not requested in component arguments, None is returned instead
+    """
+    projects = config_token = None
     project_list_path = app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
-
     if project_list_path is None:
-        msg = "Please set the environment variable {} or provide a YAML file " \
-              "listing paths to project config files".format(CONFIG_ENV_VAR)
-        print(msg)
-        return render_template('error.html', e=[msg])
+        return render_error_msg("Please set the environment variable {} or provide a YAML file "
+                                "listing paths to project config files".format(CONFIG_ENV_VAR))
 
     project_list_path = os.path.expanduser(project_list_path)
 
     if not os.path.isfile(project_list_path):
-        msg = "Project configs list isn't a file: {}".format(project_list_path)
-        print(msg)
-        return render_template('error.html', e=[msg])
+        return render_error_msg("Project configs list isn't a file: {}".format(project_list_path))
 
     with open(project_list_path, 'r') as stream:
         pl = yaml.safe_load(stream)
-        assert CONFIG_PRJ_KEY in pl, \
-            "'{}' key not in the projects list file.".format(CONFIG_PRJ_KEY)
-        projects = pl[CONFIG_PRJ_KEY]
-        # get all globs and return unnested list
-        projects = flatten([glob_if_exists(os.path.expanduser(os.path.expandvars(prj))) for prj in projects])
+        if "projects" in component:
+            assert CONFIG_PRJ_KEY in pl, \
+                "'{}' key not in the projects list file.".format(CONFIG_PRJ_KEY)
+            projects = pl[CONFIG_PRJ_KEY]
+            projects = flatten([glob_if_exists(os.path.expanduser(os.path.expandvars(prj))) for prj in projects])
+        if "token" in component:
+            if CONFIG_TOKEN_KEY in pl:
+                token_unique_len = len(''.join(set(pl[CONFIG_TOKEN_KEY])))
+                assert token_unique_len >= 5, \
+                    "The predefined authentication token in the config file has to be composed " \
+                    "of at least 5 unique characters, got {len} in {token}.".format(
+                        len=token_unique_len, token=pl[CONFIG_TOKEN_KEY])
+                config_token = pl[CONFIG_TOKEN_KEY]
+    return projects, config_token
 
+
+@app.route("/")
+@token_required
+def index():
+    projects, _ = parse_config_file("projects")
     return render_template('index.html', projects=projects)
 
 
@@ -292,8 +308,10 @@ if __name__ == "__main__":
     app.config["project_configs"] = args.config
     app.config["DEBUG"] = args.debug
     app.config['SECRET_KEY'] = 'thisisthesecretkey'
+    _, config_token = parse_config_file("token")
     if not app.config["DEBUG"]:
-        generate_token()
+        generate_token(config_token=config_token)
     else:
         warnings.warn("You have entered the debug mode. The server-client connection is not secure!")
     app.run()
+
