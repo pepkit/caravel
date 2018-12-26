@@ -201,7 +201,7 @@ def render_html_message(path):
     return html_output
 
 
-@app.route('/status')
+@app.route('/_status')
 def status():
     watched_dir = "./temp_dir"
     watched_regex = ["*.tsv", "*.csv"]

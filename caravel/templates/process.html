@@ -50,7 +50,7 @@
 <script type="text/javascript">
   $( document ).ready(function() {
     var targetContainer = document.getElementById("target_div");
-    var eventSource = new EventSource("/status")
+    var eventSource = new EventSource("/_status")
       eventSource.onmessage = function(e) {
       targetContainer.innerHTML = e.data;
     };
