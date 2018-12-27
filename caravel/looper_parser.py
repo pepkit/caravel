@@ -18,7 +18,7 @@ def get_long_optnames(p):
         return _has_long_opt(a) and not isinstance(a, argparse._HelpAction)
 
     def get_name(a):
-        for n in a.option_choices:
+        for n in a.option_strings:
             if _is_long_optname(n):
                 return n
         raise ValueError("No long option names for action: {}".format(a))
