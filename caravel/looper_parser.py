@@ -59,7 +59,7 @@ def _get_subparser(p):
 def _has_long_opt(act):
     """ Determine whether the given option defines a long option name. """
     try:
-        opts = act.option_choices
+        opts = act.option_strings
     except AttributeError:
         opts = []
     for n in opts:
