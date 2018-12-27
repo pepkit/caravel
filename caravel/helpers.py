@@ -4,6 +4,7 @@ from __future__ import print_function
 import argparse
 import glob
 from itertools import chain
+import os
 import random
 import string
 import sys
@@ -13,6 +14,7 @@ else:
     from collections.abc import Iterable
 from _version import __version__
 from flask import render_template
+
 
 def coll_like(c):
     """
@@ -28,6 +30,26 @@ def eprint(*args, **kwargs):
     Print the provided text to stderr.
     """
     print(*args, file=sys.stderr, **kwargs)
+
+
+def expand_path(p, root=""):
+    """
+    Attempt to make a path absolute, by expanding user/env vars.
+
+    :param str p: path to expand
+    :param str root: root on which to base relative paths
+    :return str: expanded path
+    """
+    if root:
+        if not os.path.isabs(root):
+            raise ValueError("Non-absolute root path: {}".format(root))
+        def absolutize(x):
+            return os.path.join(root, x)
+    else:
+        def absolutize(x):
+            return x
+    exp = os.path.expanduser(os.path.expandvars(p))
+    return exp if os.path.isabs(exp) else absolutize(exp)
 
 
 def geprint(txt):

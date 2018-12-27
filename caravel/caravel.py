@@ -167,7 +167,8 @@ def index():
             "'{}' key not in the projects list file.".format(CONFIG_PRJ_KEY)
         projects = pl[CONFIG_PRJ_KEY]
         # get all globs and return unnested list
-        projects = flatten([glob_if_exists(os.path.expanduser(os.path.expandvars(prj))) for prj in projects])
+        projects = flatten([glob_if_exists(expand_path(
+            prj, root=os.path.dirname(project_list_path))) for prj in projects])
     return render_template('index.html', projects=projects)
 
 
