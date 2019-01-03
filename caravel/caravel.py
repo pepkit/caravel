@@ -167,7 +167,8 @@ def index():
             "'{}' key not in the projects list file.".format(CONFIG_PRJ_KEY)
         projects = pl[CONFIG_PRJ_KEY]
         # get all globs and return unnested list
-        projects = flatten([glob_if_exists(os.path.expanduser(os.path.expandvars(prj))) for prj in projects])
+        projects = flatten([glob_if_exists(expand_path(
+            prj, root=os.path.dirname(project_list_path))) for prj in projects])
     return render_template('index.html', projects=projects)
 
 
@@ -231,16 +232,8 @@ def background_options():
     global selected_subproject
     global act
     from looper_parser import get_long_optnames
-    options = get_long_optnames(parser)
-    """
-    options = {
-        "run": ["--ignore-flags", "--allow-duplicate-names", "--compute", "--env", "--limit", "--lump", "--lumpn",
-                "--file-checks", "--dry-run", "--exclude-protocols", "--include-protocols", "--sp"],
-        "check": ["--all-folders", "--file-checks", "--dry-run", "--exclude-protocols", "--include-protocols", "--sp"],
-        "destroy": ["--file-checks", "--force-yes", "--dry-run", "--exclude-protocols", "--include-protocols", "--sp"],
-        "summarize": ["--file-checks", "--dry-run", "--exclude-protocols", "--include-protocols", "--sp"]
-    }
-    """
+    from looper.looper import build_parser as blp
+    options = get_long_optnames(blp())
     act = request.args.get('act', type=str) or "run"
     options_act = options[act]
     return jsonify(options=render_template('options.html', options=options_act))
