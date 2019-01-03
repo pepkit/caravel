@@ -5,7 +5,7 @@
 [![PEP compatible](http://pepkit.github.io/img/PEP-compatible-green.svg)](http://pepkit.github.io)
 
 
-`Caravel` is a local web GUI for [looper](https://looper.readthedocs.io/). Please see the documentation (in the [/docs[(/docs) folder]]) is hosted at [http://code.databio.org/caravel](http://code.databio.org/caravel/).
+`Caravel` is a local web GUI for [looper](https://looper.readthedocs.io/). Please see the documentation (in the [/docs folder](/docs)) is hosted at [http://code.databio.org/caravel](http://code.databio.org/caravel/).
 
 ## Docs
 
