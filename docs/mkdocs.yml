@@ -1,0 +1,17 @@
+site_name: Caravel
+nav:
+  - Introduction: README.md
+    
+  - How-to Guides:
+    - How to configure caravel: configure-caravel.md
+
+  - Reference:
+    - Features: features.md
+    - Usage: usage.md
+    - FAQ: faq.md
+    - Support: support.md
+    - Contributing: contributing.md
+
+  - Changelog: changelog.md
+
+#theme: readthedocs

@@ -4,6 +4,7 @@ from __future__ import print_function
 import argparse
 import glob
 from itertools import chain
+import os
 import random
 import string
 import sys
@@ -11,42 +12,6 @@ if sys.version_info < (3, 3):
     from collections import Iterable
 else:
     from collections.abc import Iterable
-from collections import defaultdict
-
-from _version import __version__ as caravel_version
-from looper import __version__ as looper_version
-
-
-def build_parser():
-    """
-    Building argument parser.
-    :return argparse.ArgumentParser
-    """
-
-    # Main caravel program help text messages
-    banner = "%(prog)s - Run a web interface for looper."
-
-    parser = _VersionInHelpParser(
-            description=banner,
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument(
-            "-V", "--version",
-            action="version",
-            version="caravel version: {caravel_version}; "
-                    "looper version: {looper_version}".format(caravel_version=caravel_version,
-                                                              looper_version=looper_version))
-
-    parser.add_argument(
-            "-c", "--config",
-            dest="config",
-            help="Config file (YAML). If not provided the environment variable $CARAVEL will be used instead.")
-
-    parser.add_argument(
-            "-d", "--debug-mode",
-            action="store_true",
-            dest="debug",
-            help="Use this option if you want to enter the debug mode. Unsecured.")
-    return parser
 
 
 def coll_like(c):
@@ -63,6 +28,26 @@ def eprint(*args, **kwargs):
     Print the provided text to stderr.
     """
     print(*args, file=sys.stderr, **kwargs)
+
+
+def expand_path(p, root=""):
+    """
+    Attempt to make a path absolute, by expanding user/env vars.
+
+    :param str p: path to expand
+    :param str root: root on which to base relative paths
+    :return str: expanded path
+    """
+    if root:
+        if not os.path.isabs(root):
+            raise ValueError("Non-absolute root path: {}".format(root))
+        def absolutize(x):
+            return os.path.join(root, x)
+    else:
+        def absolutize(x):
+            return x
+    exp = os.path.expanduser(os.path.expandvars(p))
+    return exp if os.path.isabs(exp) else absolutize(exp)
 
 
 def flatten(x):
@@ -108,10 +93,39 @@ def render_error_msg(msg):
     return render_template('error.html', e=[msg])
 
 
-class _VersionInHelpParser(argparse.ArgumentParser):
+class CaravelParser(argparse.ArgumentParser):
+    """ CLI parser tailored for this project """
+
+    def __init__(self):
+
+        super(CaravelParser, self).__init__(
+            description="%(prog)s - Run a web interface for looper.",
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+        self.add_argument(
+            "-V", "--version",
+            action="version",
+            version=_version_text(sep="; "))
+
+        self.add_argument(
+            "-c", "--config",
+            dest="config",
+            help="Config file (YAML). If not provided the environment variable "
+                 "CARAVEL will be used instead.")
+
+        self.add_argument(
+            "-d", "--debug-mode",
+            action="store_true",
+            dest="debug",
+            help="Use this option if you want to enter the debug mode. Unsecured.")
+
     def format_help(self):
         """ Add version information to help text. """
-        return "caravel version: {caravel_version}\n" \
-               "looper version: {looper_version}\n".format(caravel_version=caravel_version,
-                                                         looper_version=looper_version)\
-               + super(_VersionInHelpParser, self).format_help()
+        return _version_text(sep="\n") + super(CaravelParser, self).format_help()
+
+
+def _version_text(sep):
+    from _version import __version__ as caravel_version
+    from looper import __version__ as looper_version
+    return "caravel version: {}".format(caravel_version) + sep + \
+           "looper version: {}".format(looper_version)

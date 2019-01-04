@@ -18,7 +18,7 @@ def get_long_optnames(p):
         return _has_long_opt(a) and not isinstance(a, argparse._HelpAction)
 
     def get_name(a):
-        for n in a.option_choices:
+        for n in a.option_strings:
             if _is_long_optname(n):
                 return n
         raise ValueError("No long option names for action: {}".format(a))
@@ -26,7 +26,7 @@ def get_long_optnames(p):
     return opts_by_prog(p, get_name=get_name, use_act=use_act)
 
 
-def opts_by_prog(p, get_name, use_act=lambda act: len(act.option_choices) > 0):
+def opts_by_prog(p, get_name, use_act):
     """
     Bind each program/subcommand name to a collection of option names for it.
 
@@ -58,7 +58,11 @@ def _get_subparser(p):
 
 def _has_long_opt(act):
     """ Determine whether the given option defines a long option name. """
-    for n in act.option_choices:
+    try:
+        opts = act.option_strings
+    except AttributeError:
+        opts = []
+    for n in opts:
         if _is_long_optname(n):
             return True
     return False

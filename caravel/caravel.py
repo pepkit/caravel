@@ -53,6 +53,7 @@ def generate_token(config_token=None, n=TOKEN_LEN):
     eprint("\nCaravel is protected with a token.\nCopy this link to your browser to authenticate:\n")
     geprint("http://localhost:5000/?token=" + login_token + "\n")
 
+
 def token_required(func):
     """
     This decorator checks for a token, verifies if it is valid
@@ -252,9 +253,9 @@ def background_options():
     global selected_subproject
     global act
     from looper_parser import get_long_optnames
-    options = get_long_optnames(parser)
-
-    act = request.args.get('act', type=str)
+    from looper.looper import build_parser as blp
+    options = get_long_optnames(blp())
+    act = request.args.get('act', type=str) or "run"
     options_act = options[act]
     return jsonify(options=render_template('options.html', options=options_act))
 
@@ -303,7 +304,7 @@ def action():
 
 
 if __name__ == "__main__":
-    parser = build_parser()
+    parser = CaravelParser()
     args = parser.parse_args()
     app.config["project_configs"] = args.config
     app.config["DEBUG"] = args.debug
@@ -314,4 +315,3 @@ if __name__ == "__main__":
     else:
         warnings.warn("You have entered the debug mode. The server-client connection is not secure!")
     app.run()
-
