@@ -1,7 +1,6 @@
 """ Main UI application for using looper """
 
 from functools import wraps
-import os
 import shutil
 import tempfile
 from flask import Blueprint, Flask, render_template, redirect, url_for, request, jsonify, session, Response
@@ -19,6 +18,7 @@ app = Flask(__name__)
 
 CONFIG_ENV_VAR = "CARAVEL"
 CONFIG_PRJ_KEY = "projects"
+CONFIG_TOKEN_KEY = "token"
 TOKEN_LEN = 15
 
 
@@ -42,7 +42,7 @@ def clear_session_data(keys):
             eprint("{k} not found in the session".format(k=key))
 
 
-def generate_token(n=TOKEN_LEN):
+def generate_token(config_token=None, n=TOKEN_LEN):
     """
     Set the global app variable login_token to the generated random string of length n.
     Print info to the terminal
@@ -50,14 +50,15 @@ def generate_token(n=TOKEN_LEN):
     :return: flask.render_template
     """
     global login_token
-    login_token = random_string(n)
-    eprint("\n\nCaravel is protected with a token.\nCopy this link to your browser to authenticate:\n")
+    login_token = random_string(n) if config_token is None else config_token
+    eprint("\nCaravel is protected with a token.\nCopy this link to your browser to authenticate:\n")
     geprint("http://localhost:5000/?token=" + login_token + "\n")
 
 
 def token_required(func):
     """
-    Used for authentication
+    This decorator checks for a token, verifies if it is valid
+    and redirects to the login page if needed
     :param callable func: function to be decorated
     :return callable: decorated function
     """
@@ -68,10 +69,13 @@ def token_required(func):
             url_token = request.args.get('token')
             if url_token is not None:
                     eprint("Using token from the URL argument")
-                    if url_token == login_token:
-                        session["token"] = url_token
-                    else:
-                        return render_error_msg("Invalid token")
+                    try:
+                        if url_token == login_token:
+                            session["token"] = url_token
+                        else:
+                            return render_error_msg("Invalid token")
+                    except KeyError:
+                        return render_error_msg("No token in session")
             else:
                 try:
                     session["token"]
@@ -111,7 +115,7 @@ def generate_csrf_token(n=100):
     if '_csrf_token' not in session:
         session['_csrf_token'] = random_string(n)
         eprint("CSRF token generated")
-    else: 
+    else:
         eprint("CSRF token retrieved from the session")
     return session['_csrf_token']
 
@@ -143,9 +147,17 @@ def csrf_protect():
             return render_error_msg("The CSRF token is invalid")
 
 
-@app.route("/")
-@token_required
-def index():
+def parse_config_file(component):
+    """
+    Parses the config file (YAML) provided in as an CLI argument or in a environment variable ($CARAVEL).
+    The CLI argument is given the priority.
+    Path to the PEP projects and predefined token are extracted if file is read successfully.
+    :param component: list of string names indicating the component(s) of config file to retrieve.
+     Either "projects" or "token" or both
+    :return: tuple of project list and string with the token.
+     If wither is not requested in component arguments, None is returned instead
+    """
+    projects = config_token = None
     project_list_path = app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
     if project_list_path is None:
         return render_error_msg("Please set the environment variable {} or provide a YAML file "
@@ -158,11 +170,26 @@ def index():
 
     with open(project_list_path, 'r') as stream:
         pl = yaml.safe_load(stream)
-        assert CONFIG_PRJ_KEY in pl, \
-            "'{}' key not in the projects list file.".format(CONFIG_PRJ_KEY)
-        projects = pl[CONFIG_PRJ_KEY]
-        # get all globs and return unnested list
-        projects = flatten([glob_if_exists(os.path.expanduser(os.path.expandvars(prj))) for prj in projects])
+        if "projects" in component:
+            assert CONFIG_PRJ_KEY in pl, \
+                "'{}' key not in the projects list file.".format(CONFIG_PRJ_KEY)
+            projects = pl[CONFIG_PRJ_KEY]
+            projects = flatten([glob_if_exists(os.path.expanduser(os.path.expandvars(prj))) for prj in projects])
+        if "token" in component:
+            if CONFIG_TOKEN_KEY in pl:
+                token_unique_len = len(''.join(set(pl[CONFIG_TOKEN_KEY])))
+                assert token_unique_len >= 5, \
+                    "The predefined authentication token in the config file has to be composed " \
+                    "of at least 5 unique characters, got {len} in {token}.".format(
+                        len=token_unique_len, token=pl[CONFIG_TOKEN_KEY])
+                config_token = pl[CONFIG_TOKEN_KEY]
+    return projects, config_token
+
+
+@app.route("/")
+@token_required
+def index():
+    projects, _ = parse_config_file("projects")
     return render_template('index.html', projects=projects)
 
 
@@ -274,16 +301,9 @@ def background_options():
     global p_info
     global selected_subproject
     global act
-    # from looper_parser import get_long_optnames
-    # options = get_long_optnames(parser)
-
-    options = {
-        "run": ["--ignore-flags", "--allow-duplicate-names", "--compute", "--env", "--limit", "--lump", "--lumpn",
-                "--file-checks", "--dry-run", "--exclude-protocols", "--include-protocols", "--sp"],
-        "check": ["--all-folders", "--file-checks", "--dry-run", "--exclude-protocols", "--include-protocols", "--sp"],
-        "destroy": ["--file-checks", "--force-yes", "--dry-run", "--exclude-protocols", "--include-protocols", "--sp"],
-        "summarize": ["--file-checks", "--dry-run", "--exclude-protocols", "--include-protocols", "--sp"]
-    }
+    from looper_parser import get_long_optnames
+    from looper.looper import build_parser as blp
+    options = get_long_optnames(blp())
     act = request.args.get('act', type=str) or "run"
     options_act = options[act]
     return jsonify(options=render_template('options.html', options=options_act))
@@ -334,13 +354,14 @@ def action():
 
 
 if __name__ == "__main__":
-    parser = build_parser()
+    parser = CaravelParser()
     args = parser.parse_args()
     app.config["project_configs"] = args.config
     app.config["DEBUG"] = args.debug
     app.config['SECRET_KEY'] = 'thisisthesecretkey'
+    _, config_token = parse_config_file("token")
     if not app.config["DEBUG"]:
-        generate_token()
+        generate_token(config_token=config_token)
     else:
         warnings.warn("You have entered the debug mode. The server-client connection is not secure!")
     app.run()
