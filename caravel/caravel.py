@@ -156,12 +156,15 @@ def parse_config_file(sections):
     :return list[str], str: tuple of project list and string with the token.
         If neither is requested, None is returned instead
     """
+
+    sections = sections if coll_like(sections) else ([sections] if sections else [])
+
     projects = config_token = None
+
     project_list_path = app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
     if project_list_path is None:
         return render_error_msg("Please set the environment variable {} or provide a YAML file "
                                 "listing paths to project config files".format(CONFIG_ENV_VAR))
-
     project_list_path = os.path.expanduser(project_list_path)
 
     if not os.path.isfile(project_list_path):
