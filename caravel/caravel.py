@@ -163,12 +163,12 @@ def parse_config_file(sections):
 
     project_list_path = app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
     if project_list_path is None:
-        return render_error_msg("Please set the environment variable {} or provide a YAML file "
-                                "listing paths to project config files".format(CONFIG_ENV_VAR))
+        raise ValueError("Please set the environment variable {} or provide a YAML file listing paths to project "
+                         "config files".format(CONFIG_ENV_VAR))
     project_list_path = os.path.expanduser(project_list_path)
 
     if not os.path.isfile(project_list_path):
-        return render_error_msg("Project configs list isn't a file: {}".format(project_list_path))
+        raise ValueError("Project configs list isn't a file: {}".format(project_list_path))
 
     with open(project_list_path, 'r') as stream:
         pl = yaml.safe_load(stream)
@@ -176,7 +176,7 @@ def parse_config_file(sections):
             assert CONFIG_PRJ_KEY in pl, \
                 "'{}' key not in the projects list file.".format(CONFIG_PRJ_KEY)
             projects = pl[CONFIG_PRJ_KEY]
-            projects = flatten([glob_if_exists(os.path.expanduser(os.path.expandvars(prj))) for prj in projects])
+            projects = sorted(flatten([glob_if_exists(os.path.expanduser(os.path.expandvars(prj))) for prj in projects]))
         if "token" in sections:
             if CONFIG_TOKEN_KEY in pl:
                 token_unique_len = len(''.join(set(pl[CONFIG_TOKEN_KEY])))
