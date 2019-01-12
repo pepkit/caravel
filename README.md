@@ -1,6 +1,4 @@
-[logo]: img/logo_caravel.svg
-
-# ![logo][logo] caravel
+# <img src="caravel/static/caravel.svg" alt="caravel logo" height="70" align="left"/> caravel
 
 
 [![PEP compatible](http://pepkit.github.io/img/PEP-compatible-green.svg)](http://pepkit.github.io)
