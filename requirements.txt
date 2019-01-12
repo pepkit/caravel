@@ -2,3 +2,4 @@ flask
 looper
 peppy
 psutil
+watchdog

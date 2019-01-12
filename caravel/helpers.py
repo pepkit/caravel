@@ -12,11 +12,13 @@ if sys.version_info < (3, 3):
     from collections import Iterable
 else:
     from collections.abc import Iterable
+from watchdog.observers import Observer
 
 
 def coll_like(c):
     """
-    Determine whether an object is collection-like
+    Determine whether an object is collection-like.
+
     :param object c: object to test
     :return bool: whether the argument is a (non-string) collection
     """
@@ -53,6 +55,7 @@ def expand_path(p, root=""):
 def flatten(x):
     """
     Flatten one level of nesting
+
     :param x: a list to flatten
     :return list[str]: a flat list
     """
@@ -62,6 +65,7 @@ def flatten(x):
 def geprint(txt):
     """
     Print the provided text to stderr in green. Used to print the token for the user.
+
     :param txt: string with text to be printed.
     """
     eprint("\033[92m {}\033[00m".format(txt))
@@ -70,6 +74,7 @@ def geprint(txt):
 def glob_if_exists(x):
     """
     Return all matches in the directory for x and x if nothing matches
+
     :param x: a string with path containing globs
     :return list[str]: a list of paths
     """
@@ -79,10 +84,10 @@ def glob_if_exists(x):
 def random_string(n):
     """
     Generates a random string of length N (token), prints a message
+
     :param int n: length of the string to be generated
     :return str: random string
     """
-    eprint("CSRF token generated")
     return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(n))
 
 
@@ -91,6 +96,22 @@ def render_error_msg(msg):
     from flask import render_template
     eprint(msg)
     return render_template('error.html', e=[msg])
+
+
+def watch_files(path, handler, verbose=False):
+    """
+    Watch files in a specified directories and trigger event when modified
+
+    :param path: string with path to the directory which will be observed
+    :param handler: an object of watchdog.events.EventHandler class
+    :param verbose: bool indicating whether info about watching should be logged to the terminal
+    """
+    observer = Observer()
+    observer.schedule(handler, path, recursive=True)
+    observer.start()
+    if verbose:
+        eprint("Watching pattern: {} in: {}".
+               format(", ".join(handler.patterns), path))
 
 
 class CaravelParser(argparse.ArgumentParser):

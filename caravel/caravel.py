@@ -1,10 +1,9 @@
 """ Main UI application for using looper """
 
 from functools import wraps
-import os
 import shutil
 import tempfile
-from flask import Blueprint, Flask, render_template, request, jsonify, session
+from flask import Blueprint, Flask, render_template, request, jsonify, session, Response
 import psutil
 import peppy
 import yaml
@@ -12,6 +11,8 @@ import warnings
 from helpers import *
 from _version import __version__ as caravel_version
 from looper import __version__ as looper_version
+import time
+from watchdog.events import PatternMatchingEventHandler
 
 app = Flask(__name__)
 
@@ -67,14 +68,11 @@ def token_required(func):
         if not app.config["DEBUG"]:
             url_token = request.args.get('token')
             if url_token is not None:
-                    eprint("Using token from the URL argument")
-                    try:
-                        if url_token == login_token:
-                            session["token"] = url_token
-                        else:
-                            return render_error_msg("Invalid token")
-                    except KeyError:
-                        return render_error_msg("No token in session")
+                eprint("Using token from the URL argument")
+                if url_token == login_token:
+                    session["token"] = url_token
+                else:
+                    return render_error_msg("Invalid token")
             else:
                 try:
                     session["token"]
@@ -113,7 +111,8 @@ def generate_csrf_token(n=100):
     """
     if '_csrf_token' not in session:
         session['_csrf_token'] = random_string(n)
-    else: 
+        eprint("CSRF token generated")
+    else:
         eprint("CSRF token retrieved from the session")
     return session['_csrf_token']
 
@@ -142,27 +141,30 @@ def csrf_protect():
         token_csrf = session['_csrf_token']
         token_get_csrf = request.form.get("_csrf_token")
         if not token_csrf or token_csrf != token_get_csrf:
-            msg = "The CSRF token is invalid"
-            print(msg)
-            return render_template('error.html', e=[msg])
+            return render_error_msg("The CSRF token is invalid")
 
 
-def parse_config_file(component):
+def parse_config_file(sections):
     """
-    Parses the config file (YAML) provided in as an CLI argument or in a environment variable ($CARAVEL).
+    Parses the config file (YAML) provided as an CLI argument or in a environment variable ($CARAVEL).
+
     The CLI argument is given the priority.
     Path to the PEP projects and predefined token are extracted if file is read successfully.
-    :param component: list of string names indicating the component(s) of config file to retrieve.
-     Either "projects" or "token" or both
-    :return: tuple of project list and string with the token.
-     If wither is not requested in component arguments, None is returned instead
+
+    :param list[str] sections: list of string names indicating the sections(s) of config file to retrieve.
+        Options: "projects", "token" or both
+    :return list[str], str: tuple of project list and string with the token.
+        If neither is requested, None is returned instead
     """
+
+    sections = sections if coll_like(sections) else ([sections] if sections else [])
+
     projects = config_token = None
+
     project_list_path = app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
     if project_list_path is None:
         return render_error_msg("Please set the environment variable {} or provide a YAML file "
                                 "listing paths to project config files".format(CONFIG_ENV_VAR))
-
     project_list_path = os.path.expanduser(project_list_path)
 
     if not os.path.isfile(project_list_path):
@@ -170,12 +172,12 @@ def parse_config_file(component):
 
     with open(project_list_path, 'r') as stream:
         pl = yaml.safe_load(stream)
-        if "projects" in component:
+        if "projects" in sections:
             assert CONFIG_PRJ_KEY in pl, \
                 "'{}' key not in the projects list file.".format(CONFIG_PRJ_KEY)
             projects = pl[CONFIG_PRJ_KEY]
             projects = flatten([glob_if_exists(os.path.expanduser(os.path.expandvars(prj))) for prj in projects])
-        if "token" in component:
+        if "token" in sections:
             if CONFIG_TOKEN_KEY in pl:
                 token_unique_len = len(''.join(set(pl[CONFIG_TOKEN_KEY])))
                 assert token_unique_len >= 5, \
@@ -193,6 +195,54 @@ def index():
     return render_template('index.html', projects=projects)
 
 
+class ChangeHandler(PatternMatchingEventHandler):
+    """
+    Class defining the change event handler for watchdog. It sets the global flag variable
+    """
+
+    def __init__(self, pattern):
+        PatternMatchingEventHandler.__init__(self, patterns=pattern)
+        if 'f' not in globals():
+            global f
+        f = False
+
+    def on_modified(self, event):
+        global f
+        f = True
+        info = "Change detected"
+        geprint(info)
+
+
+def render_html_message(path):
+    global f
+    while not f:
+        time.sleep(0.5)
+    f = False
+    with open(path, 'r') as content_file:
+        content = content_file.read()
+    content = content.replace("\n", "</br>")
+    html_output = \
+        """\
+        <h3>Watched file update:</h3>\
+        <p>Content of <code>{path}</code> has changed:</p>\
+        <code>{content}</code>
+        """.format(content=content, path=path)
+    return html_output
+
+
+@app.route('/_status')
+def status():
+    watched_dir = "./temp_dir"
+    watched_regex = ["*.tsv", "*.csv"]
+    watch_files(path=watched_dir, handler=ChangeHandler(pattern=watched_regex), verbose=True)
+
+    def event():
+        while True:
+            yield 'data: {data}\n\n'.format(data=render_html_message(watched_dir + "/test.csv"))
+
+    return Response(event(), mimetype="text/event-stream")
+
+
 @app.route("/process", methods=['GET', 'POST'])
 @token_required
 def process():
@@ -200,6 +250,7 @@ def process():
     global config_file
     global p_info
     global selected_subproject
+
     selected_project = request.form.get('select_project')
 
     config_file = os.path.expandvars(os.path.expanduser(selected_project))
@@ -228,7 +279,7 @@ def process():
         "subprojects": subprojects
     }
 
-    return render_template('process.html', p_info=p_info)
+    return render_template('process.html', p_info=p_info, change=None)
 
 
 @app.route('/_background_subproject')
@@ -267,6 +318,7 @@ def background_summary():
                                                             summary_html=p_info["summary_html"])
     if os.path.isfile(summary_location):
         psummary = Blueprint(p.name, __name__, template_folder=p_info["output_dir"])
+
         @psummary.route("/{pname}/summary/<path:page_name>".format(pname=p_info["name"]), methods=['GET'])
         def render_static(page_name):
             return render_template('%s' % page_name)
