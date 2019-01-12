@@ -68,14 +68,11 @@ def token_required(func):
         if not app.config["DEBUG"]:
             url_token = request.args.get('token')
             if url_token is not None:
-                    eprint("Using token from the URL argument")
-                    try:
-                        if url_token == login_token:
-                            session["token"] = url_token
-                        else:
-                            return render_error_msg("Invalid token")
-                    except KeyError:
-                        return render_error_msg("No token in session")
+                eprint("Using token from the URL argument")
+                if url_token == login_token:
+                    session["token"] = url_token
+                else:
+                    return render_error_msg("Invalid token")
             else:
                 try:
                     session["token"]
