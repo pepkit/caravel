@@ -149,13 +149,13 @@ def csrf_protect():
 
 def parse_config_file(component):
     """
-    Parses the config file (YAML) provided in as an CLI argument or in a environment variable ($CARAVEL).
+    Parses the config file (YAML) provided as an CLI argument or in a environment variable ($CARAVEL).
     The CLI argument is given the priority.
     Path to the PEP projects and predefined token are extracted if file is read successfully.
     :param component: list of string names indicating the component(s) of config file to retrieve.
-     Either "projects" or "token" or both
+     Options: "projects", "token" or both
     :return: tuple of project list and string with the token.
-     If wither is not requested in component arguments, None is returned instead
+     If either is not requested in component arguments, None is returned instead
     """
     projects = config_token = None
     project_list_path = app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
