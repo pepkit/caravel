@@ -144,15 +144,17 @@ def csrf_protect():
             return render_error_msg("The CSRF token is invalid")
 
 
-def parse_config_file(component):
+def parse_config_file(sections):
     """
     Parses the config file (YAML) provided as an CLI argument or in a environment variable ($CARAVEL).
+
     The CLI argument is given the priority.
     Path to the PEP projects and predefined token are extracted if file is read successfully.
-    :param component: list of string names indicating the component(s) of config file to retrieve.
-     Options: "projects", "token" or both
-    :return: tuple of project list and string with the token.
-     If either is not requested in component arguments, None is returned instead
+
+    :param list[str] sections: list of string names indicating the sections(s) of config file to retrieve.
+        Options: "projects", "token" or both
+    :return list[str], str: tuple of project list and string with the token.
+        If neither is requested, None is returned instead
     """
     projects = config_token = None
     project_list_path = app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
@@ -167,12 +169,12 @@ def parse_config_file(component):
 
     with open(project_list_path, 'r') as stream:
         pl = yaml.safe_load(stream)
-        if "projects" in component:
+        if "projects" in sections:
             assert CONFIG_PRJ_KEY in pl, \
                 "'{}' key not in the projects list file.".format(CONFIG_PRJ_KEY)
             projects = pl[CONFIG_PRJ_KEY]
             projects = flatten([glob_if_exists(os.path.expanduser(os.path.expandvars(prj))) for prj in projects])
-        if "token" in component:
+        if "token" in sections:
             if CONFIG_TOKEN_KEY in pl:
                 token_unique_len = len(''.join(set(pl[CONFIG_TOKEN_KEY])))
                 assert token_unique_len >= 5, \
