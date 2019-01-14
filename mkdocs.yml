@@ -7,17 +7,20 @@ repo_url: http://github.com/databio/caravel
 nav:
   - Getting started:
     - Introduction: README.md
-    
   - How-to Guides:
     - How to configure caravel: configure-caravel.md
-
   - Reference:
     - Features: features.md
     - Usage: usage.md
     - FAQ: faq.md
     - Support: support.md
     - Contributing: contributing.md
-
   - Changelog: changelog.md
 
 theme: databio
+
+navbar:
+  left:
+    - text: Live demo
+      icon: fa-play
+      href: "#"
