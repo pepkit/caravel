@@ -12,7 +12,6 @@ from helpers import *
 from _version import __version__ as caravel_version
 from looper import __version__ as looper_version
 import time
-from watchdog.events import PatternMatchingEventHandler
 
 app = Flask(__name__)
 
@@ -193,54 +192,6 @@ def parse_config_file(sections):
 def index():
     projects, _ = parse_config_file("projects")
     return render_template('index.html', projects=projects)
-
-
-class ChangeHandler(PatternMatchingEventHandler):
-    """
-    Class defining the change event handler for watchdog. It sets the global flag variable
-    """
-
-    def __init__(self, pattern):
-        PatternMatchingEventHandler.__init__(self, patterns=pattern)
-        if 'f' not in globals():
-            global f
-        f = False
-
-    def on_modified(self, event):
-        global f
-        f = True
-        info = "Change detected"
-        geprint(info)
-
-
-def render_html_message(path):
-    global f
-    while not f:
-        time.sleep(0.5)
-    f = False
-    with open(path, 'r') as content_file:
-        content = content_file.read()
-    content = content.replace("\n", "</br>")
-    html_output = \
-        """\
-        <h3>Watched file update:</h3>\
-        <p>Content of <code>{path}</code> has changed:</p>\
-        <code>{content}</code>
-        """.format(content=content, path=path)
-    return html_output
-
-
-@app.route('/_status')
-def status():
-    watched_dir = "./temp_dir"
-    watched_regex = ["*.tsv", "*.csv"]
-    watch_files(path=watched_dir, handler=ChangeHandler(pattern=watched_regex), verbose=True)
-
-    def event():
-        while True:
-            yield 'data: {data}\n\n'.format(data=render_html_message(watched_dir + "/test.csv"))
-
-    return Response(event(), mimetype="text/event-stream")
 
 
 @app.route("/process", methods=['GET', 'POST'])
