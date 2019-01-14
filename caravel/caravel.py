@@ -12,7 +12,6 @@ from helpers import *
 from _version import __version__ as caravel_version
 from looper import __version__ as looper_version
 import time
-from watchdog.events import PatternMatchingEventHandler
 
 app = Flask(__name__)
 
@@ -195,54 +194,6 @@ def index():
     return render_template('index.html', projects=projects)
 
 
-class ChangeHandler(PatternMatchingEventHandler):
-    """
-    Class defining the change event handler for watchdog. It sets the global flag variable
-    """
-
-    def __init__(self, pattern):
-        PatternMatchingEventHandler.__init__(self, patterns=pattern)
-        if 'f' not in globals():
-            global f
-        f = False
-
-    def on_modified(self, event):
-        global f
-        f = True
-        info = "Change detected"
-        geprint(info)
-
-
-def render_html_message(path):
-    global f
-    while not f:
-        time.sleep(0.5)
-    f = False
-    with open(path, 'r') as content_file:
-        content = content_file.read()
-    content = content.replace("\n", "</br>")
-    html_output = \
-        """\
-        <h3>Watched file update:</h3>\
-        <p>Content of <code>{path}</code> has changed:</p>\
-        <code>{content}</code>
-        """.format(content=content, path=path)
-    return html_output
-
-
-@app.route('/_status')
-def status():
-    watched_dir = "./temp_dir"
-    watched_regex = ["*.tsv", "*.csv"]
-    watch_files(path=watched_dir, handler=ChangeHandler(pattern=watched_regex), verbose=True)
-
-    def event():
-        while True:
-            yield 'data: {data}\n\n'.format(data=render_html_message(watched_dir + "/test.csv"))
-
-    return Response(event(), mimetype="text/event-stream")
-
-
 @app.route("/process", methods=['GET', 'POST'])
 @token_required
 def process():
@@ -266,7 +217,12 @@ def process():
         if selected_project is None:
             p = peppy.Project(config_file)
         else:
-            p.activate_subproject(selected_subproject)
+            try:
+                p.activate_subproject(selected_subproject)
+            except AttributeError:
+                return render_error_msg("Your peppy version does not implement the subproject activation "
+                                        "functionality. Consider upgrading it to version > 0.18.2. "
+                                        "See: https://github.com/pepkit/peppy/releases")
     except KeyError:
         selected_subproject = None
 
@@ -290,12 +246,15 @@ def background_subproject():
     if sp == "reset":
         output = "No subproject activated"
         p = peppy.Project(config_file)
-        sps = p.num_samples
     else:
-        output = "Activated suproject: " + sp
-        p.activate_subproject(sp)
-        sps = p.num_samples
-    return jsonify(subproj_txt=output, sample_count=sps)
+        try:
+            p.activate_subproject(sp)
+            output = "Activated suproject: " + sp
+        except AttributeError:
+            output="Upgrade peppy, see terminal for details"
+            eprint("Your peppy version does not implement the subproject activation functionality. "
+                             "Consider upgrading it to version > 0.18.2. See: https://github.com/pepkit/peppy/releases")
+    return jsonify(subproj_txt=output, sample_count=p.num_samples)
 
 
 @app.route('/_background_options')

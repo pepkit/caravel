@@ -73,7 +73,7 @@ python caravel/caravel.py -c example_caravel.yaml -d
 ```
 This will trigger the unsecured mode (no URL token required); point the browser to: http://127.0.0.1:5000
 
-## Run on a remote server (head cluster node):
+## Run on a remote server
 
 Caravel runs a very basic web server that lets you interact with it through the browser. What if you want to use a local browser, but connect to data and `looper` processing that lives on a remote server? You can use an `SSH` tunnel to map a local port to the remote port. It's quite simple, actually. When you `ssh` into the server, you use the `-L` flag to map the port like this:
 
