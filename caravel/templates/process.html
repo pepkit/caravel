@@ -47,9 +47,19 @@
     $('a#show_summary').bind('click', render_summary_link);
   });
 </script>
+<script type="text/javascript">
+  $( document ).ready(function() {
+    var targetContainer = document.getElementById("target_div");
+    var eventSource = new EventSource("/_status")
+      eventSource.onmessage = function(e) {
+      targetContainer.innerHTML = e.data;
+    };
+  });
+</script>
 {% endblock %}
 {% block title %}Index{% endblock %}
 {% block content %}
+  <div id="target_div">Watch this space...</div>
     <h2>Selected PEP info:</h2>
     {% for item in p_info %} 
         <p><b>{{ item }}: </b><code id="{{ item }}">{{ p_info[item] }}</code></p>
