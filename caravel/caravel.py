@@ -11,7 +11,7 @@ import warnings
 from helpers import *
 from _version import __version__ as caravel_version
 from looper import __version__ as looper_version
-from peppy import coll_like
+from peppy.utils import coll_like
 
 app = Flask(__name__)
 
