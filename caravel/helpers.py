@@ -8,10 +8,6 @@ import os
 import random
 import string
 import sys
-if sys.version_info < (3, 3):
-    from collections import Iterable
-else:
-    from collections.abc import Iterable
 from peppy.utils import coll_like
 
 
