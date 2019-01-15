@@ -131,7 +131,7 @@ def unhandled_exception(e):
 @token_required
 def shutdown():
     shutdown_server()
-    return 'Server shutting down...'
+    return 'Server was shut down successfully'
 
 
 @app.before_request
