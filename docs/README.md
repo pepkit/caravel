@@ -10,7 +10,7 @@
 
 ## Installing
 
-Release versions are posted on the GitHub [caravel releases page](https://github.com/pepkit/caravel/releases). You can install the latest release directly from GitHub using pip:
+Release versions are posted on the GitHub [caravel releases page](https://github.com/databio/caravel/releases). You can install the latest release directly from GitHub using pip:
 
 ```
 pip install --user https://github.com/pepkit/caravel/zipball/master

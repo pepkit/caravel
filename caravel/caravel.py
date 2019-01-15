@@ -119,14 +119,13 @@ def generate_csrf_token(n=100):
 app.jinja_env.globals['csrf_token'] = generate_csrf_token
 
 
-# Routes
 @app.errorhandler(Exception)
 def unhandled_exception(e):
-    clear_session_data(keys=['token', '_csrf_token'])
     app.logger.error('Unhandled Exception: %s', (e))
     return render_template('error.html', e=e), 500
 
 
+# Routes
 @app.route('/shutdown', methods=['GET'])
 @token_required
 def shutdown():
@@ -201,7 +200,6 @@ def process():
     global config_file
     global p_info
     global selected_subproject
-
     selected_project = request.form.get('select_project')
 
     config_file = os.path.expandvars(os.path.expanduser(selected_project))
