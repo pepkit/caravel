@@ -3,7 +3,7 @@
 from functools import wraps
 import shutil
 import tempfile
-from flask import Blueprint, Flask, render_template, request, jsonify, session, Response
+from flask import Blueprint, Flask, render_template, request, jsonify, session
 import psutil
 import peppy
 import yaml
@@ -11,7 +11,7 @@ import warnings
 from helpers import *
 from _version import __version__ as caravel_version
 from looper import __version__ as looper_version
-import time
+from peppy.utils import coll_like
 
 app = Flask(__name__)
 

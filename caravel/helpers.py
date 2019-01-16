@@ -8,20 +8,8 @@ import os
 import random
 import string
 import sys
-if sys.version_info < (3, 3):
-    from collections import Iterable
-else:
-    from collections.abc import Iterable
+from peppy.utils import coll_like
 
-
-def coll_like(c):
-    """
-    Determine whether an object is collection-like.
-
-    :param object c: object to test
-    :return bool: whether the argument is a (non-string) collection
-    """
-    return isinstance(c, Iterable) and not isinstance(c, str)
 
 
 def eprint(*args, **kwargs):
