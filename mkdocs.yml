@@ -1,17 +1,26 @@
 site_name: Caravel
+site_logo: img/logo_caravel_dark.svg
+site_url: http://code.databio.org/caravel/
+
+repo_url: http://github.com/databio/caravel
+
 nav:
-  - Introduction: README.md
-    
+  - Getting started:
+    - Introduction: README.md
   - How-to Guides:
     - How to configure caravel: configure-caravel.md
-
   - Reference:
     - Features: features.md
     - Usage: usage.md
     - FAQ: faq.md
     - Support: support.md
     - Contributing: contributing.md
-
   - Changelog: changelog.md
 
-#theme: readthedocs
+theme: databio
+
+navbar:
+  left:
+    - text: Live demo
+      icon: fa-play
+      href: "#"

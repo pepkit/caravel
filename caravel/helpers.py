@@ -8,21 +8,8 @@ import os
 import random
 import string
 import sys
-if sys.version_info < (3, 3):
-    from collections import Iterable
-else:
-    from collections.abc import Iterable
-from _version import __version__
-from flask import render_template
+from peppy.utils import coll_like
 
-
-def coll_like(c):
-    """
-    Determine whether an object is collection-like
-    :param object c: object to test
-    :return bool: whether the argument is a (non-string) collection
-    """
-    return isinstance(c, Iterable) and not isinstance(c, str)
 
 
 def eprint(*args, **kwargs):
@@ -52,26 +39,29 @@ def expand_path(p, root=""):
     return exp if os.path.isabs(exp) else absolutize(exp)
 
 
-def geprint(txt):
-    """
-    Print the provided text to stderr in green. Used to print the token for the user.
-    :param txt: string with text to be printed.
-    """
-    eprint("\033[92m {}\033[00m".format(txt))
-
-
 def flatten(x):
     """
     Flatten one level of nesting
+
     :param x: a list to flatten
     :return list[str]: a flat list
     """
     return list(chain.from_iterable(x))
 
 
+def geprint(txt):
+    """
+    Print the provided text to stderr in green. Used to print the token for the user.
+
+    :param txt: string with text to be printed.
+    """
+    eprint("\033[92m {}\033[00m".format(txt))
+
+
 def glob_if_exists(x):
     """
     Return all matches in the directory for x and x if nothing matches
+
     :param x: a string with path containing globs
     :return list[str]: a list of paths
     """
@@ -81,55 +71,53 @@ def glob_if_exists(x):
 def random_string(n):
     """
     Generates a random string of length N (token), prints a message
+
     :param int n: length of the string to be generated
     :return str: random string
     """
-    eprint("CSRF token generated")
     return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(n))
 
 
 def render_error_msg(msg):
-    """
-    Renders an error template with a message and prints to the terminal
-    :param msg:
-    :return:
-    """
+    """ Renders an error template with a message and prints to the terminal. """
+    from flask import render_template
     eprint(msg)
     return render_template('error.html', e=[msg])
 
 
-def build_parser():
-    """
-    Building argument parser.
-    :return argparse.ArgumentParser
-    """
+class CaravelParser(argparse.ArgumentParser):
+    """ CLI parser tailored for this project """
 
-    # Main caravel program help text messages
-    banner = "%(prog)s - Run a web interface for looper."
+    def __init__(self):
 
-    parser = _VersionInHelpParser(
-            description=banner,
+        super(CaravelParser, self).__init__(
+            description="%(prog)s - Run a web interface for looper.",
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument(
+
+        self.add_argument(
             "-V", "--version",
             action="version",
-            version="%(prog)s {v}".format(v=__version__))
+            version=_version_text(sep="; "))
 
-    parser.add_argument(
+        self.add_argument(
             "-c", "--config",
             dest="config",
-            help="Config file (YAML). If not provided the environment variable $CARAVEL will be used instead.")
+            help="Config file (YAML). If not provided the environment variable "
+                 "CARAVEL will be used instead.")
 
-    parser.add_argument(
+        self.add_argument(
             "-d", "--debug-mode",
             action="store_true",
             dest="debug",
             help="Use this option if you want to enter the debug mode. Unsecured.")
-    return parser
 
-
-class _VersionInHelpParser(argparse.ArgumentParser):
     def format_help(self):
         """ Add version information to help text. """
-        return "version: {}\n".format(__version__) + \
-               super(_VersionInHelpParser, self).format_help()
+        return _version_text(sep="\n") + super(CaravelParser, self).format_help()
+
+
+def _version_text(sep):
+    from _version import __version__ as caravel_version
+    from looper import __version__ as looper_version
+    return "caravel version: {}".format(caravel_version) + sep + \
+           "looper version: {}".format(looper_version)

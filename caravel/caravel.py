@@ -1,27 +1,29 @@
 """ Main UI application for using looper """
 
 from functools import wraps
-import os
 import shutil
 import tempfile
-from flask import Blueprint, Flask, render_template, redirect, url_for, request, jsonify, session
+from flask import Blueprint, Flask, render_template, request, jsonify, session
 import psutil
 import peppy
 import yaml
 import warnings
 from helpers import *
-from _version import __version__
+from _version import __version__ as caravel_version
+from looper import __version__ as looper_version
+from peppy.utils import coll_like
 
 app = Flask(__name__)
 
 CONFIG_ENV_VAR = "CARAVEL"
 CONFIG_PRJ_KEY = "projects"
+CONFIG_TOKEN_KEY = "token"
 TOKEN_LEN = 15
 
 
 @app.context_processor
 def inject_dict_for_all_templates():
-    return dict(version=__version__)
+    return dict(caravel_version=caravel_version, looper_version=looper_version)
 
 
 def clear_session_data(keys):
@@ -39,7 +41,7 @@ def clear_session_data(keys):
             eprint("{k} not found in the session".format(k=key))
 
 
-def generate_token(n=TOKEN_LEN):
+def generate_token(config_token=None, n=TOKEN_LEN):
     """
     Set the global app variable login_token to the generated random string of length n.
     Print info to the terminal
@@ -47,14 +49,15 @@ def generate_token(n=TOKEN_LEN):
     :return: flask.render_template
     """
     global login_token
-    login_token = random_string(n)
-    eprint("\n\nCaravel is protected with a token.\nCopy this link to your browser to authenticate:\n")
+    login_token = random_string(n) if config_token is None else config_token
+    eprint("\nCaravel is protected with a token.\nCopy this link to your browser to authenticate:\n")
     geprint("http://localhost:5000/?token=" + login_token + "\n")
 
 
 def token_required(func):
     """
-    Used for authentication
+    This decorator checks for a token, verifies if it is valid
+    and redirects to the login page if needed
     :param callable func: function to be decorated
     :return callable: decorated function
     """
@@ -64,14 +67,11 @@ def token_required(func):
         if not app.config["DEBUG"]:
             url_token = request.args.get('token')
             if url_token is not None:
-                    eprint("Using token from the URL argument")
-                    try:
-                        if url_token == login_token:
-                            session["token"] = url_token
-                        else:
-                            return render_error_msg("Invalid token")
-                    except KeyError:
-                        return render_error_msg("No token in session")
+                eprint("Using token from the URL argument")
+                if url_token == login_token:
+                    session["token"] = url_token
+                else:
+                    return render_error_msg("Invalid token")
             else:
                 try:
                     session["token"]
@@ -110,7 +110,8 @@ def generate_csrf_token(n=100):
     """
     if '_csrf_token' not in session:
         session['_csrf_token'] = random_string(n)
-    else: 
+        eprint("CSRF token generated")
+    else:
         eprint("CSRF token retrieved from the session")
     return session['_csrf_token']
 
@@ -118,19 +119,18 @@ def generate_csrf_token(n=100):
 app.jinja_env.globals['csrf_token'] = generate_csrf_token
 
 
-# Routes
 @app.errorhandler(Exception)
 def unhandled_exception(e):
-    clear_session_data(keys=['token', '_csrf_token'])
     app.logger.error('Unhandled Exception: %s', (e))
     return render_template('error.html', e=e), 500
 
 
+# Routes
 @app.route('/shutdown', methods=['GET'])
 @token_required
 def shutdown():
     shutdown_server()
-    return 'Server shutting down...'
+    return 'Server was shut down successfully'
 
 
 @app.before_request
@@ -139,36 +139,57 @@ def csrf_protect():
         token_csrf = session['_csrf_token']
         token_get_csrf = request.form.get("_csrf_token")
         if not token_csrf or token_csrf != token_get_csrf:
-            msg = "The CSRF token is invalid"
-            print(msg)
-            return render_template('error.html', e=[msg])
+            return render_error_msg("The CSRF token is invalid")
+
+
+def parse_config_file(sections):
+    """
+    Parses the config file (YAML) provided as an CLI argument or in a environment variable ($CARAVEL).
+
+    The CLI argument is given the priority.
+    Path to the PEP projects and predefined token are extracted if file is read successfully.
+
+    :param list[str] sections: list of string names indicating the sections(s) of config file to retrieve.
+        Options: "projects", "token" or both
+    :return list[str], str: tuple of project list and string with the token.
+        If neither is requested, None is returned instead
+    """
+
+    sections = sections if coll_like(sections) else ([sections] if sections else [])
+
+    projects = config_token = None
+
+    project_list_path = app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
+    if project_list_path is None:
+        raise ValueError("Please set the environment variable {} or provide a YAML file listing paths to project "
+                         "config files".format(CONFIG_ENV_VAR))
+    project_list_path = os.path.expanduser(project_list_path)
+
+    if not os.path.isfile(project_list_path):
+        raise ValueError("Project configs list isn't a file: {}".format(project_list_path))
+
+    with open(project_list_path, 'r') as stream:
+        pl = yaml.safe_load(stream)
+        if "projects" in sections:
+            assert CONFIG_PRJ_KEY in pl, \
+                "'{}' key not in the projects list file.".format(CONFIG_PRJ_KEY)
+            projects = pl[CONFIG_PRJ_KEY]
+            projects = sorted(flatten([glob_if_exists(os.path.expanduser(os.path.expandvars(prj))) for prj in projects]))
+        if "token" in sections:
+            if CONFIG_TOKEN_KEY in pl:
+                token_unique_len = len(''.join(set(pl[CONFIG_TOKEN_KEY])))
+                assert token_unique_len >= 5, \
+                    "The predefined authentication token in the config file has to be composed " \
+                    "of at least 5 unique characters, got {len} in {token}.".format(
+                        len=token_unique_len, token=pl[CONFIG_TOKEN_KEY])
+                config_token = pl[CONFIG_TOKEN_KEY]
+    return projects, config_token
 
 
 @app.route("/")
 @token_required
 def index():
-    project_list_path = app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
-    if project_list_path is None:
-        msg = "Please set the environment variable {} or provide a YAML file " \
-              "listing paths to project config files".format(CONFIG_ENV_VAR)
-        print(msg)
-        return render_template('error.html', e=[msg])
-
-    project_list_path = os.path.expanduser(project_list_path)
-
-    if not os.path.isfile(project_list_path):
-        msg = "Project configs list isn't a file: {}".format(project_list_path)
-        print(msg)
-        return render_template('error.html', e=[msg])
-
-    with open(project_list_path, 'r') as stream:
-        pl = yaml.safe_load(stream)
-        assert CONFIG_PRJ_KEY in pl, \
-            "'{}' key not in the projects list file.".format(CONFIG_PRJ_KEY)
-        projects = pl[CONFIG_PRJ_KEY]
-        # get all globs and return unnested list
-        projects = flatten([glob_if_exists(expand_path(
-            prj, root=os.path.dirname(project_list_path))) for prj in projects])
+    projects, _ = parse_config_file("projects")
     return render_template('index.html', projects=projects)
 
 
@@ -194,7 +215,12 @@ def process():
         if selected_project is None:
             p = peppy.Project(config_file)
         else:
-            p.activate_subproject(selected_subproject)
+            try:
+                p.activate_subproject(selected_subproject)
+            except AttributeError:
+                return render_error_msg("Your peppy version does not implement the subproject activation "
+                                        "functionality. Consider upgrading it to version > 0.18.2. "
+                                        "See: https://github.com/pepkit/peppy/releases")
     except KeyError:
         selected_subproject = None
 
@@ -207,7 +233,7 @@ def process():
         "subprojects": subprojects
     }
 
-    return render_template('process.html', p_info=p_info)
+    return render_template('process.html', p_info=p_info, change=None)
 
 
 @app.route('/_background_subproject')
@@ -218,12 +244,15 @@ def background_subproject():
     if sp == "reset":
         output = "No subproject activated"
         p = peppy.Project(config_file)
-        sps = p.num_samples
     else:
-        output = "Activated suproject: " + sp
-        p.activate_subproject(sp)
-        sps = p.num_samples
-    return jsonify(subproj_txt=output, sample_count=sps)
+        try:
+            p.activate_subproject(sp)
+            output = "Activated suproject: " + sp
+        except AttributeError:
+            output="Upgrade peppy, see terminal for details"
+            eprint("Your peppy version does not implement the subproject activation functionality. "
+                             "Consider upgrading it to version > 0.18.2. See: https://github.com/pepkit/peppy/releases")
+    return jsonify(subproj_txt=output, sample_count=p.num_samples)
 
 
 @app.route('/_background_options')
@@ -246,6 +275,7 @@ def background_summary():
                                                             summary_html=p_info["summary_html"])
     if os.path.isfile(summary_location):
         psummary = Blueprint(p.name, __name__, template_folder=p_info["output_dir"])
+
         @psummary.route("/{pname}/summary/<path:page_name>".format(pname=p_info["name"]), methods=['GET'])
         def render_static(page_name):
             return render_template('%s' % page_name)
@@ -283,13 +313,14 @@ def action():
 
 
 if __name__ == "__main__":
-    parser = build_parser()
+    parser = CaravelParser()
     args = parser.parse_args()
     app.config["project_configs"] = args.config
     app.config["DEBUG"] = args.debug
     app.config['SECRET_KEY'] = 'thisisthesecretkey'
+    _, config_token = parse_config_file("token")
     if not app.config["DEBUG"]:
-        generate_token()
+        generate_token(config_token=config_token)
     else:
         warnings.warn("You have entered the debug mode. The server-client connection is not secure!")
     app.run()
