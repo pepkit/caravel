@@ -42,6 +42,41 @@ def opts_by_prog(p, get_name, use_act):
             for n, sub in _get_subparser(p).choices.items()}
 
 
+def get_options_html_types(p, command=None):
+    """
+    Determine the type of the HTML form element from the looper parser/subparser.
+    _HelpAction objects (--help), _VersionAction objects and empty option_strings are omitted
+
+    :param argparse.ArgumentParser p: the parser to inspect
+    :param str command: looper command name if no name provided the main parser is used
+    :return: html_element_type: name of the html elements to use
+    :rtype: list
+    """
+    if command is None:
+        opts = p._actions
+    else:
+        subparser = _get_subparser(p)
+        opts = subparser.choices[command]._actions
+
+    html_elements_types = []
+    for opt in opts:
+        if isinstance(opt, (argparse._HelpAction, argparse._VersionAction)) or not opt.option_strings:
+            continue
+        elif isinstance(opt, argparse._StoreFalseAction) or isinstance(opt, argparse._StoreTrueAction):
+            html_elements_types.append("checkbox")
+        elif isinstance(opt, argparse._StoreAction):
+            if opt.choices is not None:
+                html_elements_types.append("select")
+            elif opt.type is not None and isinstance(opt.type(), (int, float)):
+                html_elements_types.append("slider")
+            else:
+                # will use custom type info from looper here
+                html_elements_types.append("unnknown")
+        else:
+            html_elements_types.append("unnknown")
+    return html_elements_types
+
+
 def _get_subparser(p):
     """
     Return the subparser associated with a CLI opt/arg parser.
