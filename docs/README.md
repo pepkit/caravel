@@ -8,9 +8,13 @@
 
 `Caravel` is a local web GUI for [looper](https://looper.readthedocs.io/). Caravel gives you a slick web interface to interact with your projects formatted as [PEPs](http://pepkit.github.io). You can use it to submit jobs to any cluster resource manager, monitor jobs, summarize results, and browse project summary web pages. `caravel` basically builds on top of `looper`, but uses the lightweight `flask` microframework to give you a web interface, making it even easier to manage your jobs for those who like pointy-clicky.
 
+Caravel is currently in *alpha*. It is functional but not very useful yet. We expect to release a useful version in February 2019.
+
 ## Installing
 
-Release versions are posted on the GitHub [caravel releases page](https://github.com/databio/caravel/releases). You can install the latest release directly from GitHub using pip:
+Release versions are posted on the GitHub [caravel releases page](https://github.com/databio/caravel/releases).  Eventually we will submit caravel to pypi but for now you just clone the git repository and then run it as described below.
+
+<!-- You can install the latest release directly from GitHub using pip:
 
 ```
 pip install --user https://github.com/pepkit/caravel/zipball/master
@@ -27,7 +31,7 @@ To put the ``caravel`` executable in your ``$PATH``, add the following line to y
 ```
 export PATH=~/.local/bin:$PATH
 ```
-
+ -->
 ## Hello, world!
 
 You can now try running it 
