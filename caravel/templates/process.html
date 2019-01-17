@@ -55,7 +55,7 @@
         <p><b>{{ item }}: </b><code id="{{ item }}">{{ p_info[item] }}</code></p>
     {% endfor %}
     {% if p_info["subprojects"] is not none %}
-        <select name="subprojects">
+        <select name="subprojects" class="custom-select" style="width:auto;">
             {% for i in p_info["subprojects"] %}
                 <option value="{{ i }}">{{ i }}</option>
             {% endfor %}
@@ -65,7 +65,7 @@
         <i><p id=subproj_txt>No subproject activated</p></i>
     {% endif %}
     <h2>Perform action on the PEP</h2>
-        <select id="show_options" name="actions">
+        <select id="show_options" name="actions" class="custom-select" style="width:auto;">
           <option value="run">Run</option>
           <option value="check">Check</option>
           <option value="destroy">Destroy</option>
