@@ -8,6 +8,7 @@ import psutil
 import peppy
 import yaml
 import warnings
+import traceback
 from helpers import *
 from _version import __version__ as caravel_version
 from looper import __version__ as looper_version
@@ -122,10 +123,10 @@ app.jinja_env.globals['csrf_token'] = generate_csrf_token
 @app.errorhandler(Exception)
 def unhandled_exception(e):
     app.logger.error('Unhandled Exception: %s', (e))
+    eprint(traceback.format_exc())
     return render_template('error.html', e=e), 500
 
 
-# Routes
 @app.route('/shutdown', methods=['GET'])
 @token_required
 def shutdown():
@@ -186,6 +187,7 @@ def parse_config_file(sections):
     return projects, config_token
 
 
+# Routes
 @app.route("/")
 @token_required
 def index():
