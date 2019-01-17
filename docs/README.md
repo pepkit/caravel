@@ -88,3 +88,19 @@ So a complete one-line command to run `caravel` remotely with a local web GUI wo
 ```
 ssh -L 5000:localhost:5000 user@server "python ${REMOTE_CODEBASE}/caravel/caravel/caravel.py -c caravel/example_caravel.yaml"
 ```
+
+## Security in `caravel`
+
+`Caravel` uses an authentication token printed to your terminal to provide security. This way others are not able to connect to your `caravel` session and execute `looper` commands as _you_ on the remote server. 
+
+By default the token is randomly generated upon `caravel` launch, but can be also set in the `caravel` configuration file like:
+
+```
+projects:
+  - path/to/project1_config.yaml
+  - path/to/project2_config.yaml
+
+token: ABCD1234
+```
+
+Keep in mind that this is a less secure way of authentication as the token is exposed to ones that have the access to your `caravel` configuration file.
