@@ -11,7 +11,6 @@ import sys
 from peppy.utils import coll_like
 
 
-
 def eprint(*args, **kwargs):
     """
     Print the provided text to stderr.

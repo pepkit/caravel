@@ -13,7 +13,8 @@ from helpers import *
 from _version import __version__ as caravel_version
 from looper import __version__ as looper_version
 from peppy.utils import coll_like
-
+import logging
+logging.getLogger().setLevel(logging.INFO)
 app = Flask(__name__)
 
 CONFIG_ENV_VAR = "CARAVEL"
@@ -40,7 +41,7 @@ def clear_session_data(keys):
         try:
             session.pop(key, None)
         except KeyError:
-            eprint("{k} not found in the session".format(k=key))
+            app.logger.info("{k} not found in the session".format(k=key))
 
 
 def generate_token(config_token=None, n=TOKEN_LEN):
@@ -71,7 +72,7 @@ def token_required(func):
         if not app.config["DEBUG"]:
             url_token = request.args.get('token')
             if url_token is not None:
-                eprint("Using token from the URL argument")
+                app.logger.info("Using token from the URL argument")
                 if url_token == login_token:
                     session["token"] = url_token
                 else:
@@ -88,7 +89,7 @@ def token_required(func):
                         return render_error_msg("Other instance of caravel is running elsewhere."
                                                 " Log in using the URL printed to the terminal when it was started.")
                 else:
-                    eprint("Using the token from the session")
+                    app.logger.info("Using the token from the session")
                     if session["token"] != login_token:
                         return render_error_msg("Invalid token")
 
@@ -101,7 +102,7 @@ def shutdown_server():
     shut_func = request.environ.get('werkzeug.server.shutdown')
     if shut_func is None:
         raise RuntimeError('Not running with the Werkzeug Server')
-    eprint("Shutting down...")
+    app.logger.info("Shutting down...")
     clear_session_data(keys=['token', '_csrf_token'])
     shut_func()
 
@@ -114,9 +115,9 @@ def generate_csrf_token(n=100):
     """
     if '_csrf_token' not in session:
         session['_csrf_token'] = random_string(n)
-        eprint("CSRF token generated")
+        app.logger.info("CSRF token generated")
     else:
-        eprint("CSRF token retrieved from the session")
+        app.logger.info("CSRF token retrieved from the session")
     return session['_csrf_token']
 
 
@@ -194,7 +195,7 @@ def parse_token_file(path=TOKEN_FILE_NAME):
         assert token_unique_len >= 5, "The predefined authentication token in the config file has to be composed " \
             "of at least 5 unique characters, got {len} in {token}.".format(len=token_unique_len, token=token)
     except IOError:
-        eprint("No {} file found, generating a random token...".format(TOKEN_FILE_NAME))
+        app.logger.info("No {} file found, generating a random token...".format(TOKEN_FILE_NAME))
         token = None
     return token
 
@@ -264,7 +265,7 @@ def background_subproject():
             output = "Activated suproject: " + sp
         except AttributeError:
             output="Upgrade peppy, see terminal for details"
-            eprint("Your peppy version does not implement the subproject activation functionality. "
+            app.logger.warning("Your peppy version does not implement the subproject activation functionality. "
                              "Consider upgrading it to version > 0.18.2. See: https://github.com/pepkit/peppy/releases")
     return jsonify(subproj_txt=output, sample_count=p.num_samples)
 
@@ -309,7 +310,7 @@ def background_summary():
 @token_required
 def action():
     global act
-    # To be changed in future version. Looper will be imported and run within Caravel
+    # To be changed in future version. Looper will be imported and run within caravel
     opt = list(set(request.form.getlist('opt')))
     eprint("\nSelected flags:\n " + '\n'.join(opt))
     eprint("\nSelected action: " + act)
