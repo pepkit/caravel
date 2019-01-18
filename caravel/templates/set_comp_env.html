@@ -1,0 +1,20 @@
+{% extends "template.html" %}
+{% block title %}Index{% endblock %}
+{% block content %}
+  {% if compute_packages is not none %}
+    <h2>Configure computing environment</h2>
+    <form class="form-inline" method="POST" action="{{ url_for('process') }}">
+      <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
+      <select id="show_options" name="actions" class="custom-select" style="width:auto;">
+      {% for item in compute_packages %} 
+          <option value="{{ item }} ">{{ item }}</option>
+      {% endfor %}
+      </select>
+    <button type="submit" class="btn btn-outline-dark ml-2">Select</button>
+    </form>
+  {% else %}
+    <h2>Environment variable pointing to the <code>DIVCFG</code> file not found</h2>
+    <p>The <code>{{ env_var_name }}</code> environment variable is not set. Set it and run <code>caravel</code> again.</p>
+    <p>Learn more about <a href="http://code.databio.org/divvy/configuration/"><code>DIVCFG</code></a> files concept <a href="http://code.databio.org/divvy/">here</a>.</p>
+  {% endif %}
+{% endblock %}
