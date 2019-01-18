@@ -14,6 +14,8 @@ from _version import __version__ as caravel_version
 from looper import __version__ as looper_version
 from peppy.utils import coll_like
 import logging
+from peppy import COMPUTE_SETTINGS_VARNAME
+import looper
 logging.getLogger().setLevel(logging.INFO)
 app = Flask(__name__)
 
@@ -193,9 +195,9 @@ def parse_token_file(path=TOKEN_FILE_NAME):
         token = out[CONFIG_TOKEN_KEY]
         token_unique_len = len(''.join(set(token)))
         assert token_unique_len >= 5, "The predefined authentication token in the config file has to be composed " \
-            "of at least 5 unique characters, got {len} in {token}.".format(len=token_unique_len, token=token)
+            "of at least 5 unique characters, got {len} in '{token}'.".format(len=token_unique_len, token=token)
+        app.logger.info("{} file found, using the predefined token".format(TOKEN_FILE_NAME))
     except IOError:
-        app.logger.info("No {} file found, generating a random token...".format(TOKEN_FILE_NAME))
         token = None
     return token
 
