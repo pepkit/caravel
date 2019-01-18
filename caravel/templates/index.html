@@ -1,10 +1,5 @@
 {% extends "template.html" %}
 {% block title %}Index{% endblock %}
-{% block navbar %}
-	<li class="nav-item active">
-		<a class="nav-link" href="#">Environment settings <i class="fas fa-cog"></i></a>
-	</li>
-{% endblock %}
 {% block content %}
 <h2>Select the input project:</h2>
 <form class="form-inline" method="POST" action="{{ url_for('process') }}">

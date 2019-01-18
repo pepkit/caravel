@@ -16,6 +16,7 @@ from peppy.utils import coll_like
 import logging
 from peppy import COMPUTE_SETTINGS_VARNAME
 import looper
+import divvy
 logging.getLogger().setLevel(logging.INFO)
 app = Flask(__name__)
 
@@ -206,8 +207,27 @@ def parse_token_file(path=TOKEN_FILE_NAME):
 @app.route("/")
 @token_required
 def index():
+    global projects
     projects = parse_config_file()
     return render_template('index.html', projects=projects)
+
+
+@app.route("/set_comp_env")
+@token_required
+def set_comp_env():
+    compute_packages = None
+    env_file_path = os.getenv(COMPUTE_SETTINGS_VARNAME)
+    if env_file_path is not None:
+        app.logger.info("Found the `{}` environment variable".format(COMPUTE_SETTINGS_VARNAME))
+        if not os.path.isfile(env_file_path):
+            raise ValueError("'{var_name}' environment variable points to '{file}', which does not exist"
+                             .format(var_name=COMPUTE_SETTINGS_VARNAME, file=env_file_path))
+        app.logger.info("File `{}` exists".format(env_file_path))
+        compute_config = divvy.ComputingConfiguration(env_file_path)
+        compute_packages = compute_config["compute_packages"].keys()
+    else:
+        app.logger.info("Didn't find the '{}' environment variable".format(COMPUTE_SETTINGS_VARNAME))
+    return render_template('set_comp_env.html', compute_packages=compute_packages)
 
 
 @app.route("/process", methods=['GET', 'POST'])
@@ -217,7 +237,22 @@ def process():
     global config_file
     global p_info
     global selected_subproject
-    selected_project = request.form.get('select_project')
+    global selected_project
+    global projects
+
+    # this try-except block is used to determine whether the user should be redirected to the index page
+    # to select the project when they land on the process subpage from the set_comp_env subpage
+    try:
+        selected_project
+    except NameError:
+        selected_project = request.form.get('select_project')
+        if selected_project is None:
+            app.logger.info("The project is not selected, redirecting to the index page.")
+            return render_template('index.html', projects=projects)
+    else:
+        new_selected_project = request.form.get('select_project')
+        if new_selected_project is not None and selected_project != new_selected_project:
+            selected_project = new_selected_project
 
     config_file = os.path.expandvars(os.path.expanduser(selected_project))
     p = peppy.Project(config_file)
