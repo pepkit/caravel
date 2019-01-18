@@ -227,7 +227,7 @@ def set_comp_env():
         compute_packages = compute_config["compute_packages"].keys()
     else:
         app.logger.info("Didn't find the '{}' environment variable".format(COMPUTE_SETTINGS_VARNAME))
-        return render_template('set_comp_env.html', compute_packages=None, env_var_name=COMPUTE_SETTINGS_VARNAME)
+        return render_template('set_comp_env.html', compute_packages=None, env_var_name=COMPUTE_SETTINGS_VARNAME, referrer=request.referrer)
     return render_template('set_comp_env.html', compute_packages=compute_packages)
 
 
