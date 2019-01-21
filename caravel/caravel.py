@@ -14,17 +14,11 @@ from _version import __version__ as caravel_version
 from looper import __version__ as looper_version
 from peppy.utils import coll_like
 import logging
-from peppy import COMPUTE_SETTINGS_VARNAME
+from const import *
 import looper
 import divvy
 logging.getLogger().setLevel(logging.INFO)
 app = Flask(__name__)
-
-CONFIG_ENV_VAR = "CARAVEL"
-CONFIG_PRJ_KEY = "projects"
-CONFIG_TOKEN_KEY = "token"
-TOKEN_FILE_NAME = ".caravel_token"
-TOKEN_LEN = 15
 
 
 @app.context_processor
