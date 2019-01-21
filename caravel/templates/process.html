@@ -37,7 +37,7 @@
   function render_summary_link() {
       $.getJSON($SCRIPT_ROOT + '/_background_summary', {
       }, function(data) {
-        $("div#summary").html(data.summary);
+        $("div#summary").html(data.active_settings);
       });
       return false;
     }

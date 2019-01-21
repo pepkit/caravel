@@ -15,7 +15,6 @@ from looper import __version__ as looper_version
 from peppy.utils import coll_like
 import logging
 from const import *
-import looper
 import divvy
 logging.getLogger().setLevel(logging.INFO)
 app = Flask(__name__)
@@ -209,20 +208,45 @@ def index():
 @app.route("/set_comp_env")
 @token_required
 def set_comp_env():
-    compute_packages = None
-    env_file_path = os.getenv(COMPUTE_SETTINGS_VARNAME)
-    if env_file_path is not None:
-        app.logger.info("Found the `{}` environment variable".format(COMPUTE_SETTINGS_VARNAME))
-        if not os.path.isfile(env_file_path):
-            raise ValueError("'{var_name}' environment variable points to '{file}', which does not exist"
-                             .format(var_name=COMPUTE_SETTINGS_VARNAME, file=env_file_path))
-        app.logger.info("File `{}` exists".format(env_file_path))
-        compute_config = divvy.ComputingConfiguration(env_file_path)
-        compute_packages = compute_config["compute_packages"].keys()
-    else:
-        app.logger.info("Didn't find the '{}' environment variable".format(COMPUTE_SETTINGS_VARNAME))
-        return render_template('set_comp_env.html', compute_packages=None, env_var_name=COMPUTE_SETTINGS_VARNAME, referrer=request.referrer)
-    return render_template('set_comp_env.html', compute_packages=compute_packages)
+    global compute_config
+    global selected_package
+    global compute_packages
+    global active_settings
+    global user_selected_package
+
+    try:
+        compute_config
+    except NameError:
+        env_file_path = os.getenv(COMPUTE_SETTINGS_VARNAME)
+        if env_file_path is not None:
+            app.logger.info("Found the `{}` environment variable".format(COMPUTE_SETTINGS_VARNAME))
+            if not os.path.isfile(env_file_path):
+                raise ValueError("'{var_name}' environment variable points to '{file}', which does not exist"
+                                 .format(var_name=COMPUTE_SETTINGS_VARNAME, file=env_file_path))
+            app.logger.info("File `{}` exists".format(env_file_path))
+            compute_config = divvy.ComputingConfiguration(env_file_path)
+            compute_packages = compute_config.list_compute_packages()
+        else:
+            app.logger.info("Didn't find the '{}' environment variable".format(COMPUTE_SETTINGS_VARNAME))
+            return render_template('set_comp_env.html', compute_packages=None, env_var_name=COMPUTE_SETTINGS_VARNAME,
+                                   referrer=request.referrer)
+    selected_package = request.args.get('compute', type=str)
+    try:
+        user_selected_package
+    except NameError:
+        user_selected_package = "default"
+    if selected_package is not None:
+        success = compute_config.activate_package(selected_package)
+        if not success:
+            msg = "Compute package '{}' cannot be activated".format(selected_package)
+            app.logger.warning(msg)
+            return jsonify(active_settings=render_template('compute_info.html', active_settings=None, msg=msg))
+        user_selected_package = selected_package
+        active_settings = compute_config.get_active_package()
+        return jsonify(active_settings=render_template('compute_info.html', active_settings=active_settings))
+    active_settings = compute_config.get_active_package()
+    return render_template('set_comp_env.html', compute_packages=compute_packages, active_settings=active_settings,
+                    referrer=request.referrer, user_selected_package=user_selected_package)
 
 
 @app.route("/process", methods=['GET', 'POST'])

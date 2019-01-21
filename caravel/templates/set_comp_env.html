@@ -1,21 +1,54 @@
 {% extends "template.html" %}
 {% block title %}Index{% endblock %}
+{% block head %}
+{{ super() }}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type=text/javascript>
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+<script type=text/javascript>
+  function render_compute_settings() {
+  	var send_data = {
+        compute: $('select[name="select_compute"]').val(),
+      };
+      $.getJSON($SCRIPT_ROOT + '/set_comp_env', send_data , function(data) {
+      	$("div#compute_info").html(data.active_settings);
+      });
+      return false;
+    }
+    $(function() {
+    	// The function is triggered on page load and with the "a#show_compute" click
+    	render_compute_settings
+        $('a#show_compute').bind('click', render_compute_settings)
+  });
+</script>
+{% endblock %}
 {% block content %}
-  {% if compute_packages is not none %}
-    <h2>Configure computing environment</h2>
-    <form class="form-inline" method="POST" action="{{ url_for('process') }}">
-      <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
-      <select id="show_options" name="actions" class="custom-select" style="width:auto;">
-      {% for item in compute_packages %} 
-          <option value="{{ item }} ">{{ item }}</option>
-      {% endfor %}
-      </select>
-    <button type="submit" class="btn btn-outline-dark ml-2">Select</button>
-    </form>
-  {% else %}
-    <h2>Environment variable pointing to the <code>DIVCFG</code> file not found</h2>
-    <p>The <code>{{ env_var_name }}</code> environment variable is not set. Set it with: <code>export PEPENV=path/to/file</code> and run <code>caravel</code> again.</p>
-    <p>Learn more about <a href="http://code.databio.org/divvy/configuration/" target="_blank"><code>DIVCFG</code></a> files concept <a href="http://code.databio.org/divvy/" target="_blank">here</a>.</p>
-    <a href="{{ referrer }}"><button type="submit" class="btn btn-outline-dark ml-2">Go back <i class="fas fa-arrow-left"></i></button></a>
-  {% endif %}
+	{% if compute_packages is not none %}
+		<div class="divider-15">
+			<h2>Configure computing environment</h2>
+				<select name="select_compute" class="custom-select" style="width:auto;">
+					{% for item in compute_packages %}
+					{% if item == user_selected_package %}
+						<option value="{{ item }}" selected="selected">{{ item }}</option>
+					{% else %}
+						<option value="{{ item }}">{{ item }}</option>
+					{% endif %}
+					{% endfor %}
+				</select>
+				<a href='#' id=show_compute><button type="submit" class="btn btn-outline-dark ml-2">Select</button></a>
+		</div>
+		<div id="compute_info" class="divider-15">
+			<h2>Selected compute package info:</h2>
+		    {% for item in active_settings %} 
+	        <p><b>{{ item }}: </b><code id="{{ item }}">{{ active_settings[item] }}</code></p>
+	    	{% endfor %}
+		</div>
+		<a href="{{ referrer }}"><button type="submit" class="btn btn-outline-dark ml-2">Go back <i class="fas fa-arrow-left"></i></button></a>
+	{% else %}
+		<h2>Environment variable pointing to the <code>DIVCFG</code> file not found</h2>
+		<p>The <code>{{ env_var_name }}</code> environment variable is not set. Set it with: <code>export PEPENV=path/to/file</code> and run <code>caravel</code> again.</p>
+		<p>Learn more about <a href="http://code.databio.org/divvy/configuration/" target="_blank"><code>DIVCFG</code></a> files concept <a href="http://code.databio.org/divvy/" target="_blank">here</a>.</p>
+		<a href="{{ referrer }}"><button type="submit" class="btn btn-outline-dark ml-2">Go back <i class="fas fa-arrow-left"></i></button></a>
+	{% endif %}
 {% endblock %}

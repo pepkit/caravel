@@ -30,3 +30,14 @@ body {
   height: 40px;
   padding-left: 40px;
 }
+
+.divider-15 {
+  /* adds spacing 15px */
+  width:90%; 
+  min-height:1px; 
+  margin-top:15px; 
+  margin-bottom:15px;
+  margin-left:15px;  
+  display:inline-block; 
+  position:relative;
+}

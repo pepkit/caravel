@@ -1,0 +1,9 @@
+<h2>Selected compute package info:</h2>
+{% if active_settings is not none %}
+    {% for item in active_settings %} 
+        <p><b>{{ item }}: </b><code id="{{ item }}">{{ active_settings[item] }}</code></p>
+    {% endfor %}
+{% else %}
+<p>Warning: <code>{{ msg }}</code></p>
+{% endif %}
+
