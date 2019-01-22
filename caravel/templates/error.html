@@ -2,11 +2,13 @@
 {% block title %}Error{% endblock %}
 {% block content %}
 <h2>Caravel server encountered exception(s):</h2>
-<ol>
-  {% for ei in e %}
-  <li><code>{{ ei }}</code></li>
-  {% endfor %}
-</ol>
+<div class="divider-15">
+	<ul>
+	  {% for ei in e %}
+	  <li><code>{{ ei }}</code></li>
+	  {% endfor %}
+	</ul>
+</div>
 <br style = “line-height:2;”><br>
 <p>Go back to the <a href="{{ url_for('index') }}"><b>Home page</b></a>
 {% endblock %}
