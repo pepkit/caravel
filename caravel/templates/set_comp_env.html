@@ -25,7 +25,6 @@
 {% endblock %}
 {% block content %}
 	{% if compute_packages is not none %}
-		<div class="divider-15">
 			<h2>Configure computing environment</h2>
 				<select name="select_compute" class="custom-select" style="width:auto;">
 					{% for item in compute_packages %}
@@ -37,22 +36,17 @@
 					{% endfor %}
 				</select>
 				<a href='#' id=show_compute><button type="submit" class="btn btn-outline-dark ml-2">Select</button></a>
-		</div>
-		<div id="compute_info" class="divider-15">
+		<div class="divider-vertical" id="compute_info">
 			<h2>Selected compute package info:</h2>
 		    {% for item in active_settings %} 
 	        <p><b>{{ item }}: </b><code id="{{ item }}">{{ active_settings[item] }}</code></p>
 	    	{% endfor %}
 		</div>
-		<div class="divider-15">
 			<a href="{{ referrer }}"><button type="submit" class="btn btn-outline-dark ml-2">Go back <i class="fas fa-arrow-left"></i></button></a>
-		</div>
 	{% else %}
 		<h2>Environment variable pointing to the <code>DIVCFG</code> file not found</h2>
 		<p>The <code>{{ env_var_name }}</code> environment variable is not set. Set it with: <code>export PEPENV=path/to/file</code> and run <code>caravel</code> again.</p>
 		<p>Learn more about <a href="http://code.databio.org/divvy/configuration/" target="_blank"><code>DIVCFG</code></a> files concept <a href="http://code.databio.org/divvy/" target="_blank">here</a>.</p>
-		<div class="divider-15">
-			<a href="{{ referrer }}"><button type="submit" class="btn btn-outline-dark ml-2">Go back <i class="fas fa-arrow-left"></i></button></a>
-		</div>
+		<a href="{{ referrer }}"><button type="submit" class="btn btn-outline-dark ml-2">Go back <i class="fas fa-arrow-left"></i></button></a>
 	{% endif %}
 {% endblock %}

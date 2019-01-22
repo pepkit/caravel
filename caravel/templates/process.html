@@ -64,14 +64,18 @@
         <a href='#' id=show_subproject><button type="submit" class="btn btn-outline-dark ml-2">ACTIVATE</button></a>
         <i><p id=subproj_txt>No subproject activated</p></i>
     {% endif %}
-    <h2>Perform action on the PEP</h2>
-        <select id="show_options" name="actions" class="custom-select" style="width:auto;">
-          <option value="run">Run</option>
-          <option value="check">Check</option>
-          <option value="destroy">Destroy</option>
-          <option value="summarize">Summarize</option>
-        </select>
-    <div id="options"></div>
-    <a href='#' id=show_summary><button type="button" class="btn btn-outline-dark">Get summary</button></a>
+    <hr class="col-xs-12">
+      <h2>Perform action on the PEP</h2>
+      <select id="show_options" name="actions" class="custom-select" style="width:auto;">
+        <option value="run">Run</option>
+        <option value="check">Check</option>
+        <option value="destroy">Destroy</option>
+        <option value="summarize">Summarize</option>
+      </select>
+    <div id="options" class="divider-vertical"></div>
+    <hr class="col-xs-12">
+    <div>
+      <a href='#' id=show_summary><button type="button" class="btn btn-outline-dark">Get summary</button></a>
+    </div>
     <div id="summary"></div>
 {% endblock %}

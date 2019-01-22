@@ -1,16 +1,14 @@
 {% extends "template.html" %}
 {% block title %}Index{% endblock %}
 {% block content %}
-<div class="divider-15">
-	<h2>Select the input project:</h2>
-	<form class="form-inline" method="POST" action="{{ url_for('process') }}">
-		<input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
-		<select name="select_project" class="custom-select" style="width:auto;">
-			{% for p in projects %}
-				<option value="{{ p }}">{{ p }}</option>
-			{% endfor %}
-		</select>
-		<button type="submit" class="btn btn-outline-dark ml-2">Go</button>
-	</form>
-</div>
+<h2>Select the input project:</h2>
+<form class="form-inline" method="POST" action="{{ url_for('process') }}">
+	<input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
+	<select name="select_project" class="custom-select" style="width:auto;">
+		{% for p in projects %}
+			<option value="{{ p }}">{{ p }}</option>
+		{% endfor %}
+	</select>
+	<button type="submit" class="btn btn-outline-dark ml-2">Go</button>
+</form>
 {% endblock %}

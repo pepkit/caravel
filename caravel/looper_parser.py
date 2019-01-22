@@ -2,7 +2,7 @@
 
 import argparse
 
-__all__ = ["get_long_optnames", "opts_by_prog"]
+# __all__ = ["get_long_optnames", "opts_by_prog"]
 
 
 def get_long_optnames(p):
@@ -45,12 +45,15 @@ def opts_by_prog(p, get_name, use_act):
 def get_options_html_types(p, command=None):
     """
     Determine the type of the HTML form element from the looper parser/subparser.
+    Addtionally, get a list of dictionaries with the HTML elements parameters and corresponding values
+    needed to construct the objects and the dest values.
     _HelpAction objects (--help), _VersionAction objects and empty option_strings are omitted
 
     :param argparse.ArgumentParser p: the parser to inspect
     :param str command: looper command name if no name provided the main parser is used
     :return: html_element_type: name of the html elements to use
-    :rtype: list
+    :return: html_params: parameters needed for HTML form elements construction
+    :rtype: (list, list[dict])
     """
     if command is None:
         opts = p._actions
@@ -59,22 +62,35 @@ def get_options_html_types(p, command=None):
         opts = subparser.choices[command]._actions
 
     html_elements_types = []
+    html_params = []
+    html_dest = []
     for opt in opts:
-        if isinstance(opt, (argparse._HelpAction, argparse._VersionAction)) or not opt.option_strings:
+        if isinstance(opt, (argparse._HelpAction, argparse._VersionAction)) or not opt.option_strings or opt.option_strings == ["--sp"]:
             continue
         elif isinstance(opt, argparse._StoreFalseAction) or isinstance(opt, argparse._StoreTrueAction):
             html_elements_types.append("checkbox")
+            html_params.append({"checked": "True"}) if opt.default else html_params.append({None: None})
+            html_dest.append(opt.dest)
         elif isinstance(opt, argparse._StoreAction):
             if opt.choices is not None:
                 html_elements_types.append("select")
+                html_dest.append(opt.dest)
+                if opt.choices is not None:
+                    html_params.append({"value": opt.choices})
             elif opt.type is not None and isinstance(opt.type(), (int, float)):
-                html_elements_types.append("slider")
+                html_elements_types.append("range")
+                html_params.append({"step": "1"}) if isinstance(opt.type(), int) else html_params.append({"step": "0.1"})
+                html_dest.append(opt.dest)
             else:
                 # will use custom type info from looper here
-                html_elements_types.append("unnknown")
+                html_elements_types.append("text")
+                html_params.append({"placeholder": "Unknown argument type"})
+                html_dest.append(opt.dest)
         else:
-            html_elements_types.append("unnknown")
-    return html_elements_types
+            html_elements_types.append("text")
+            html_params.append({"placeholder": "Unknown argument type"})
+            html_dest.append(opt.dest)
+    return html_elements_types, html_params, html_dest
 
 
 def _get_subparser(p):

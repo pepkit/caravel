@@ -12,6 +12,7 @@ import traceback
 from helpers import *
 from _version import __version__ as caravel_version
 from looper import __version__ as looper_version
+from looper_parser import *
 from peppy.utils import coll_like
 import logging
 from const import *
@@ -331,12 +332,13 @@ def background_options():
     global p_info
     global selected_subproject
     global act
-    from looper_parser import get_long_optnames
     from looper.looper import build_parser as blp
-    options = get_long_optnames(blp())
     act = request.args.get('act', type=str) or "run"
+    parser_looper = blp()
+    options = get_long_optnames(parser_looper)
+    opts_types_params_dest = get_options_html_types(parser_looper, act)
     options_act = options[act]
-    return jsonify(options=render_template('options.html', options=options_act))
+    return jsonify(options=render_template('options.html', options_names=options_act, opts_types_params_dest=opts_types_params_dest))
 
 
 @app.route('/_background_summary')
