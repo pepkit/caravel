@@ -4,6 +4,7 @@ import os
 from setuptools import setup
 import sys
 
+PACKAGE = "caravel"
 
 # Additional keyword arguments for setup().
 extra = {}
@@ -47,7 +48,7 @@ def get_static(name, condition=None):
 # scripts = get_static("scripts", condition="'.' in x")
 scripts = None
 
-with open("caravel/_version.py", 'r') as versionfile:
+with open("{}/_version.py".format(PACKAGE), 'r') as versionfile:
     version = versionfile.readline().split()[-1].strip("\"'\n")
 
 # Handle the pypi README formatting.
@@ -58,8 +59,8 @@ except(IOError, ImportError):
     long_description = open('README.md').read()
 
 setup(
-    name="caravel",
-    packages=["caravel"],
+    name=PACKAGE,
+    packages=[PACKAGE],
     version=version,
     description="A ",
     long_description=long_description,
@@ -73,14 +74,15 @@ setup(
         "Topic :: Scientific/Engineering :: Bio-Informatics"
     ],
     keywords="project, bioinformatics, sequencing, ngs, workflow, GUI",
-    url='https://github.com/pepkit/caravel/',
+    url="https://github.com/pepkit/{}/".format(PACKAGE),
     author=u"Nathan Sheffield, Vince Reuter, Michal Stolarczyk",
     license="BSD2",
     entry_points={
         "console_scripts": [
-            'caravel = caravel.caravel:main'
+            "{p} = {p}.{p}:main".format(p=PACKAGE)
         ],
     },
+    package_data={PACKAGE: ['templates/*']},
     scripts=scripts,
     include_package_data=True,
     **extra

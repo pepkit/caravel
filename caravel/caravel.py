@@ -2,6 +2,7 @@
 
 from functools import wraps
 import logging
+import os
 import shutil
 import tempfile
 import traceback
@@ -23,7 +24,11 @@ from peppy.utils import coll_like
 
 logging.getLogger().setLevel(logging.INFO)
 
-
+#TEMPLATES_FOLDER_PATH = os.path.join(os.path.dirname(__file__), "templates")
+# TODO: remove
+# DEBUG
+#print("TEMPLATES FOLDER: {}".format(TEMPLATES_FOLDER_PATH))
+#app = Flask(__name__, template_folder=TEMPLATES_FOLDER_PATH)
 app = Flask(__name__)
 
 
@@ -391,7 +396,7 @@ def action():
     return render_template("execute.html", output=output_run)
 
 
-if __name__ == "__main__":
+def main():
     parser = CaravelParser()
     args = parser.parse_args()
     app.config["project_configs"] = args.config
@@ -402,3 +407,7 @@ if __name__ == "__main__":
     else:
         generate_token(token=parse_token_file())
     app.run()
+
+
+if __name__ == "__main__":
+    main()
