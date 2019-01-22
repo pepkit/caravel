@@ -236,7 +236,7 @@ def set_comp_env():
     except NameError:
         user_selected_package = "default"
     if selected_package is not None:
-        success = compute_config.activate_package(selected_package)
+        success = compute_config.clean_start(selected_package)
         if not success:
             msg = "Compute package '{}' cannot be activated".format(selected_package)
             app.logger.warning(msg)
