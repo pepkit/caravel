@@ -14,6 +14,7 @@ import yaml
 from _version import __version__ as caravel_version
 from const import *
 from helpers import *
+from looper_parser import *
 
 import divvy
 from looper import __version__ as looper_version
@@ -339,7 +340,6 @@ def background_options():
     global p_info
     global selected_subproject
     global act
-    from looper_parser import get_long_optnames
     from looper.looper import build_parser as blp
     options = get_long_optnames(blp())
     act = request.args.get('act', type=str) or "run"
