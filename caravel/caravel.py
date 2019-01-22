@@ -397,9 +397,8 @@ if __name__ == "__main__":
     app.config["project_configs"] = args.config
     app.config["DEBUG"] = args.debug
     app.config['SECRET_KEY'] = 'thisisthesecretkey'
-    config_token = parse_token_file()
     if not app.config["DEBUG"]:
-        generate_token(token=config_token)
+        generate_token(token=parse_token_file())
     else:
         warnings.warn("You have entered the debug mode. The server-client connection is not secure!")
 
