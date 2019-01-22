@@ -76,6 +76,11 @@ setup(
     url='https://github.com/pepkit/caravel/',
     author=u"Nathan Sheffield, Vince Reuter, Michal Stolarczyk",
     license="BSD2",
+    entry_points={
+        "console_scripts": [
+            'caravel = caravel.caravel:main'
+        ],
+    },
     scripts=scripts,
     include_package_data=True,
     **extra
