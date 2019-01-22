@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.2 (unreleased)
+
+Changed: 
+
+  - Use logger instead of printing to the error for logging
+
+Added:
+
+  - New `bootstrap` UI
+  - Compute environment configuration page
+
 ## v0.1.1 (*2019-01-15*)
 
 Changed:
