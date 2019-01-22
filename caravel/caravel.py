@@ -1,23 +1,30 @@
 """ Main UI application for using looper """
 
 from functools import wraps
+import logging
 import shutil
 import tempfile
+import traceback
+import warnings
+
 from flask import Blueprint, Flask, render_template, request, jsonify, session
 import psutil
-import peppy
 import yaml
-import warnings
-import traceback
-from helpers import *
+
 from _version import __version__ as caravel_version
-from looper import __version__ as looper_version
-from looper_parser import *
-from peppy.utils import coll_like
-import logging
 from const import *
+from helpers import *
+from looper_parser import *
+
 import divvy
+from looper import __version__ as looper_version
+import peppy
+from peppy.utils import coll_like
+
+
 logging.getLogger().setLevel(logging.INFO)
+
+
 app = Flask(__name__)
 
 
