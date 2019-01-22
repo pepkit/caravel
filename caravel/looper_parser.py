@@ -2,7 +2,7 @@
 
 import argparse
 
-# __all__ = ["get_long_optnames", "opts_by_prog"]
+__all__ = ["get_long_optnames", "get_options_html_types", "opts_by_prog"]
 
 
 def get_long_optnames(p):
