@@ -2,7 +2,6 @@
 
 from functools import wraps
 import logging
-import os
 import shutil
 import tempfile
 import traceback
@@ -24,11 +23,7 @@ from peppy.utils import coll_like
 
 logging.getLogger().setLevel(logging.INFO)
 
-#TEMPLATES_FOLDER_PATH = os.path.join(os.path.dirname(__file__), "templates")
-# TODO: remove
-# DEBUG
-#print("TEMPLATES FOLDER: {}".format(TEMPLATES_FOLDER_PATH))
-#app = Flask(__name__, template_folder=TEMPLATES_FOLDER_PATH)
+
 app = Flask(__name__)
 
 
