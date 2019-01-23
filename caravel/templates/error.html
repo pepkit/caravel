@@ -6,7 +6,11 @@
 	<ul>
 	  {% for ei in e %}
 	  {% set i = loop.index - 1 %}
-	  <li><code><b>{{ types[i]}}</b>: {{ ei }}</code></li>
+		  {% if types is not none %}
+		  	<li><code><b>{{ types[i]}}</b>: {{ ei }}</code></li>
+		  {% else %}
+		  	<li><code>{{ ei }}</code></li>
+		  {% endif %}
 	  {% endfor %}
 	</ul>
 </div>

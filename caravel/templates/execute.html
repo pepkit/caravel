@@ -1,19 +1,13 @@
 {% extends "template.html" %}
 {% block title %}Looper results{% endblock %}
-{% block head %}
-{{ super() }}
-<script>
-function goBack() {
-    window.history.back();
-}
-</script>
-{% endblock %}
 {% block content %}
-  <h2>Looper results:</h2>
-    {% for line in output %}
-    	<code>{{ line }}</code>
-    {% endfor %}
-    <div>
-    	<button onclick="goBack()" class="btn btn-default">Go Back</button>
-	</div>
+<h2>Looper results:</h2>
+{% if output is not none %}
+	{% for line in output %}
+	<code>{{ line }}</code>
+	{% endfor %}
+{% else %}
+	<p>Nothing to be displayed</p>
+{% endif %}
+<a href="{{ referrer }}"><button type="submit" class="btn btn-outline-dark ml-2">Go back <i class="fas fa-arrow-left"></i></button></a>
 {% endblock %}

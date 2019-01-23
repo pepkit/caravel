@@ -6,6 +6,7 @@ import shutil
 import tempfile
 import traceback
 import warnings
+import argparse
 
 from flask import Blueprint, Flask, render_template, request, jsonify, session
 import psutil
@@ -16,6 +17,7 @@ from const import *
 from helpers import *
 from looper_parser import *
 
+import looper
 import divvy
 from looper import __version__ as looper_version
 import peppy
@@ -30,7 +32,7 @@ app = Flask(__name__)
 
 @app.context_processor
 def inject_dict_for_all_templates():
-    return dict(caravel_version=caravel_version, looper_version=looper_version)
+    return dict(caravel_version=caravel_version, looper_version=looper_version, referrer=request.referrer)
 
 
 def clear_session_data(keys):
@@ -237,8 +239,7 @@ def set_comp_env():
             compute_packages = compute_config.list_compute_packages()
         else:
             app.logger.info("Didn't find the '{}' environment variable".format(COMPUTE_SETTINGS_VARNAME))
-            return render_template('set_comp_env.html', compute_packages=None, env_var_name=COMPUTE_SETTINGS_VARNAME,
-                                   referrer=request.referrer)
+            return render_template('set_comp_env.html', compute_packages=None, env_var_name=COMPUTE_SETTINGS_VARNAME)
     selected_package = request.args.get('compute', type=str)
     try:
         user_selected_package
@@ -254,8 +255,7 @@ def set_comp_env():
         active_settings = compute_config.get_active_package()
         return jsonify(active_settings=render_template('compute_info.html', active_settings=active_settings))
     active_settings = compute_config.get_active_package()
-    return render_template('set_comp_env.html', compute_packages=compute_packages, active_settings=active_settings,
-                    referrer=request.referrer, user_selected_package=user_selected_package)
+    return render_template('set_comp_env.html', compute_packages=compute_packages, active_settings=active_settings, user_selected_package=user_selected_package)
 
 
 @app.route("/process", methods=['GET', 'POST'])
