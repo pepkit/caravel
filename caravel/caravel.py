@@ -132,7 +132,7 @@ app.jinja_env.globals['csrf_token'] = generate_csrf_token
 def unhandled_exception(e):
     app.logger.error('Unhandled Exception: %s', (e))
     eprint(traceback.format_exc())
-    return render_template('error.html', e=e), 500
+    return render_template('error.html', e=e, types=[e.__class__.__name__]), 500
 
 
 @app.route('/shutdown', methods=['GET'])
@@ -298,7 +298,7 @@ def process():
                 p.activate_subproject(selected_subproject)
             except AttributeError:
                 return render_error_msg("Your peppy version does not implement the subproject activation "
-                                        "functionality. Consider upgrading it to version > 0.18.2. "
+                                        "functionality. Consider upgrading it to version >= 0.19. "
                                         "See: https://github.com/pepkit/peppy/releases")
     except KeyError:
         selected_subproject = None

@@ -5,7 +5,8 @@
 <div class="divider-15">
 	<ul>
 	  {% for ei in e %}
-	  <li><code>{{ ei }}</code></li>
+	  {% set i = loop.index - 1 %}
+	  <li><code><b>{{ types[i]}}</b>: {{ ei }}</code></li>
 	  {% endfor %}
 	</ul>
 </div>
