@@ -48,17 +48,18 @@ def clear_session_data(keys):
             app.logger.info("{k} not found in the session".format(k=key))
 
 
-def generate_token(config_token=None, n=TOKEN_LEN):
+def generate_token(token=None, n=TOKEN_LEN):
     """
-    Set the global app variable login_token to the generated random string of length n.
-    If config_token provided, use its value.
-    Print info to the terminal
-    :param config_token: the token to use
+    Set global app variable login token.
+
+    If token provided, use its value. Print info to the terminal
+
+    :param token: the token to use
     :param n: length of the token to generate
     :return: flask.render_template
     """
     global login_token
-    login_token = random_string(n) if config_token is None else config_token
+    login_token = token or random_string(n)
     eprint("\nCaravel is protected with a token.\nCopy this link to your browser to authenticate:\n")
     geprint("http://localhost:5000/?token=" + login_token + "\n")
 
@@ -392,16 +393,18 @@ def action():
     return render_template("execute.html", output=output_run)
 
 
-if __name__ == "__main__":
+def main():
     parser = CaravelParser()
     args = parser.parse_args()
     app.config["project_configs"] = args.config
     app.config["DEBUG"] = args.debug
     app.config['SECRET_KEY'] = 'thisisthesecretkey'
-    config_token = parse_token_file()
-    if not app.config["DEBUG"]:
-        generate_token(config_token=config_token)
-    else:
+    if app.config["DEBUG"]:
         warnings.warn("You have entered the debug mode. The server-client connection is not secure!")
-
+    else:
+        generate_token(token=parse_token_file())
     app.run()
+
+
+if __name__ == "__main__":
+    main()

@@ -1,5 +1,6 @@
 flask
+divvy
 looper
-peppy
+peppy>0.19
 psutil
 watchdog
