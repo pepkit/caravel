@@ -55,7 +55,7 @@ with open("{}/_version.py".format(PACKAGE), 'r') as versionfile:
 try:
     import pypandoc
     long_description = pypandoc.convert_file('README.md', 'rst')
-except(IOError, ImportError):
+except(IOError, ImportError, OSError, RuntimeError):
     long_description = open('README.md').read()
 
 setup(

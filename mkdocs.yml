@@ -2,7 +2,7 @@ site_name: Caravel
 site_logo: img/logo_caravel_dark.svg
 site_url: http://code.databio.org/caravel/
 
-repo_url: http://github.com/databio/caravel
+repo_url: http://github.com/pepkit/caravel
 
 nav:
   - Getting started:
