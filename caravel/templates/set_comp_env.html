@@ -26,6 +26,7 @@
 {% block content %}
 	{% if compute_packages is not none %}
 			<h2>Configure computing environment</h2>
+			<p>Compute packages read from: <code>{{ env_conf_file }}</code></p>
 				<select name="select_compute" class="custom-select" style="width:auto;">
 					{% for item in compute_packages %}
 					{% if item == user_selected_package %}

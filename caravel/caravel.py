@@ -255,7 +255,7 @@ def set_comp_env():
         active_settings = compute_config.get_active_package()
         return jsonify(active_settings=render_template('compute_info.html', active_settings=active_settings))
     active_settings = compute_config.get_active_package()
-    return render_template('set_comp_env.html', compute_packages=compute_packages, active_settings=active_settings, user_selected_package=user_selected_package)
+    return render_template('set_comp_env.html', env_conf_file=env_file_path, compute_packages=compute_packages, active_settings=active_settings, user_selected_package=user_selected_package)
 
 
 @app.route("/process", methods=['GET', 'POST'])
@@ -329,9 +329,9 @@ def background_subproject():
             p.activate_subproject(sp)
             output = "Activated suproject: " + sp
         except AttributeError:
-            output="Upgrade peppy, see terminal for details"
+            output = "Upgrade peppy, see terminal for details"
             app.logger.warning("Your peppy version does not implement the subproject activation functionality. "
-                             "Consider upgrading it to version > 0.18.2. See: https://github.com/pepkit/peppy/releases")
+                             "Consider upgrading it to version >= 0.19. See: https://github.com/pepkit/peppy/releases")
     return jsonify(subproj_txt=output, sample_count=p.num_samples)
 
 
@@ -340,11 +340,13 @@ def background_options():
     global p_info
     global selected_subproject
     global act
+    global dests
     from looper.looper import build_parser as blp
     act = request.args.get('act', type=str) or "run"
     parser_looper = blp()
     options = get_long_optnames(parser_looper)
     opts_types_params_dest = get_options_html_types(parser_looper, act)
+    dests = opts_types_params_dest[2]
     options_act = options[act]
     return jsonify(options=render_template('options.html', options_names=options_act, opts_types_params_dest=opts_types_params_dest))
 
@@ -376,21 +378,70 @@ def background_summary():
 @token_required
 def action():
     global act
+    global p
+    global selected_subproject
+    global dests
     # To be changed in future version. Looper will be imported and run within caravel
-    opt = list(set(request.form.getlist('opt')))
-    eprint("\nSelected flags:\n " + '\n'.join(opt))
-    eprint("\nSelected action: " + act)
-    cmd = "looper " + act + " " + ' '.join(opt) + " " + config_file
-    eprint("\nCreated Command: " + cmd)
-    tmpdirname = tempfile.mkdtemp("tmpdir")
-    eprint("\nCreated temporary directory: " + tmpdirname)
-    file_run = open(tmpdirname + "/output.txt", "w")
-    proc_run = psutil.Popen(cmd, shell=True, stdout=file_run)
-    proc_run.wait()
-    with open(tmpdirname + "/output.txt", "r") as myfile:
-        output_run = myfile.readlines()
-    shutil.rmtree(tmpdirname)
-    return render_template("execute.html", output=output_run)
+    # opt = list(set(request.form.getlist('opt')))
+    # opt = request.form.getlist('opt')
+
+    # None if checkbox is unchecked, "on" if checked
+    args = argparse.Namespace()
+    args_dict = vars(args)
+
+    for arg in dests:
+        value = request.form.get(arg)
+        args_dict[arg] = value
+    geprint(p.config_file)
+    args_dict["config_file"] = p.config_file
+    args_dict["subproject"] = selected_subproject
+    geprint(args)
+
+    prj = looper.project.Project(
+        args.config_file, subproject=args.subproject,
+        file_checks=args.file_checks,
+        compute_env_file=getattr(args, 'env', None))
+
+    with peppy.ProjectContext(prj, include_protocols=args.include_protocols,
+                              exclude_protocols=args.exclude_protocols) as prj:
+
+        if act == "run":
+            if args.compute:
+                prj.set_compute(args.compute)
+
+            if not hasattr(prj.metadata, "pipelines_dir") or len(prj.metadata.pipelines_dir) == 0:
+                raise AttributeError(
+                    "Looper requires at least one pipeline(s) location; set "
+                    "with 'pipeline_interfaces' in the metadata section of a "
+                    "project config file.")
+
+            if not prj.interfaces_by_protocol:
+                raise Exception(
+                    "The Project knows no protocols. Does it point "
+                    "to at least one pipelines location that exists?")
+
+            run = looper.looper.Runner(prj)
+            try:
+                run(args)
+            except IOError:
+                raise Exception("{} pipelines_dir: '{}'".format(
+                    prj.__class__.__name__, prj.metadata.pipelines_dir))
+    # run = looper.looper.Runner(prj)
+    # run(args, "test")
+    return render_template("execute.html", output=None)
+    # eprint("\nSelected flags:\n " + '\n'.join(opt))
+    # eprint("\nSelected action: " + act)
+    # cmd = "looper " + act + " " + ' '.join(opt) + " " + config_file
+    # eprint("\nCreated Command: " + cmd)
+    # tmpdirname = tempfile.mkdtemp("tmpdir")
+    # eprint("\nCreated temporary directory: " + tmpdirname)
+    # file_run = open(tmpdirname + "/output.txt", "w")
+    # proc_run = psutil.Popen(cmd, shell=True, stdout=file_run)
+    # proc_run.wait()
+    # with open(tmpdirname + "/output.txt", "r") as myfile:
+    #     output_run = myfile.readlines()
+    # shutil.rmtree(tmpdirname)
+    # return render_template("execute.html", output=None)
 
 
 def main():

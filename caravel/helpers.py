@@ -81,7 +81,7 @@ def render_error_msg(msg):
     """ Renders an error template with a message and prints to the terminal. """
     from flask import render_template
     eprint(msg)
-    return render_template('error.html', e=[msg])
+    return render_template('error.html', e=[msg], types=None)
 
 
 class CaravelParser(argparse.ArgumentParser):
