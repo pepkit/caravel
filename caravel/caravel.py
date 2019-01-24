@@ -225,7 +225,7 @@ def set_comp_env():
     global active_settings
     global user_selected_package
     global env_file_path
-    
+
     try:
         compute_config
     except NameError:

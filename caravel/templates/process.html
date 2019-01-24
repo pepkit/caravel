@@ -47,6 +47,13 @@
     $('a#show_summary').bind('click', render_summary_link);
   });
 </script>
+<script>
+  function show_value(name, value) {
+    // This function is used in the form in the options.html file
+    // get the name of the element to control and the value that should be displayed
+   document.getElementById(name).innerHTML=value;
+  }
+</script>
 {% endblock %}
 {% block title %}Index{% endblock %}
 {% block content %}
@@ -74,7 +81,7 @@
       </select>
     <div id="options" class="divider-vertical"></div>
     <hr class="col-xs-12">
-    <div>
+    <div class="divider-vertical">
       <a href='#' id=show_summary><button type="button" class="btn btn-outline-dark">Get summary</button></a>
     </div>
     <div id="summary"></div>
