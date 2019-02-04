@@ -119,4 +119,4 @@ def _version_text(sep):
     from _version import __version__ as caravel_version
     from looper import __version__ as looper_version
     return "caravel version: {}".format(caravel_version) + sep + \
-           "looper version: {}".format(looper_version)
+           "looper version: {}\n".format(looper_version)
