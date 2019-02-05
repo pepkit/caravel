@@ -6,3 +6,4 @@ CONFIG_PRJ_KEY = "projects"
 CONFIG_TOKEN_KEY = "token"
 TOKEN_FILE_NAME = ".caravel_token"
 TOKEN_LEN = 15
+SET_ELSEWHERE = [["--sp"], ["--compute"], ["--env"], ["--help"], ["--version"], ['']]

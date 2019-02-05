@@ -1,6 +1,7 @@
 """ Interface with looper """
 
 import argparse
+from const import SET_ELSEWHERE
 
 __all__ = ["get_long_optnames", "get_options_html_types", "opts_by_prog"]
 
@@ -15,13 +16,11 @@ def get_long_optnames(p):
     """
 
     def use_act(a):
-        return _has_long_opt(a) and not isinstance(a, argparse._HelpAction)
+        return not _is_set_elsewhere(a.option_strings)
 
     def get_name(a):
-        for n in a.option_strings:
-            if _is_long_optname(n):
-                return n
-        raise ValueError("No long option names for action: {}".format(a))
+        if not _is_set_elsewhere(a.option_strings):
+                return _get_long_opt(a.option_strings)
 
     return opts_by_prog(p, get_name=get_name, use_act=use_act)
 
@@ -40,6 +39,17 @@ def opts_by_prog(p, get_name, use_act):
     """
     return {n: [get_name(a) for a in sub._actions if use_act(a)]
             for n, sub in _get_subparser(p).choices.items()}
+
+
+def _is_set_elsewhere(opt):
+    """
+    Check if the option is set elsewhere in caravel. Return True if yes.
+    For example the compute env is configured in a separate tab, at the project level.
+    Additionally, options like "--help" or "-version" are treated the same way
+    :param list opt: list with one element. Option to be checked.
+    :return:
+    """
+    return [_get_long_opt(opt)] in SET_ELSEWHERE
 
 
 def get_options_html_types(p, command=None):
@@ -65,7 +75,7 @@ def get_options_html_types(p, command=None):
     html_params = []
     html_dest = []
     for opt in opts:
-        if isinstance(opt, (argparse._HelpAction, argparse._VersionAction)) or not opt.option_strings or opt.option_strings == ["--sp"]:
+        if _is_set_elsewhere(opt.option_strings):
             continue
         elif isinstance(opt, argparse._StoreFalseAction) or isinstance(opt, argparse._StoreTrueAction):
             html_elements_types.append("checkbox")
@@ -90,6 +100,8 @@ def get_options_html_types(p, command=None):
             html_elements_types.append("text")
             html_params.append({"placeholder": "Unknown argument type"})
             html_dest.append(opt.dest)
+    ret_vals_lens = set(map(len, [html_elements_types, html_params, html_dest]))
+    assert len(ret_vals_lens) == 1, "The lengths of return lists are not equal, '{}'".format(ret_vals_lens)
     return html_elements_types, html_params, html_dest
 
 
@@ -107,16 +119,37 @@ def _get_subparser(p):
     return subs[0]
 
 
-def _has_long_opt(act):
-    """ Determine whether the given option defines a long option name. """
-    try:
-        opts = act.option_strings
-    except AttributeError:
-        opts = []
-    for n in opts:
+def _has_long_opt(opt):
+    """
+    Determine whether the given option defines a long option name
+
+    :param list opt: a list of option name(s)
+    :return: bool indicating whether the given option defines a long option name
+
+    """
+    # try:
+    #     opts = act.option_strings
+    # except AttributeError:
+    #     opts = []
+    if not isinstance(opt, list):
+        raise TypeError("The opt argument has to be a list of strings.")
+    for n in opt:
         if _is_long_optname(n):
             return True
     return False
+
+
+def _get_long_opt(opt):
+    """
+    Get only the long option name from the option strings
+
+    :param list opt: a list of option name(s)
+    :return: a long option name or empty string
+    """
+    if _has_long_opt(opt):
+        return opt[map(_is_long_optname, opt).index(True)]
+    else:
+        return ""
 
 
 def _is_long_optname(n):

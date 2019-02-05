@@ -2,14 +2,11 @@
 
 from functools import wraps
 import logging
-import shutil
-import tempfile
 import traceback
 import warnings
 import argparse
 
 from flask import Blueprint, Flask, render_template, request, jsonify, session
-import psutil
 import yaml
 
 from _version import __version__ as caravel_version
@@ -349,6 +346,9 @@ def background_options():
     opts_types_params_dest = get_options_html_types(parser_looper, act)
     dests = opts_types_params_dest[2]
     options_act = options[act]
+    geprint(options_act)
+    geprint("\n\n")
+    geprint(opts_types_params_dest)
     return jsonify(options=render_template('options.html', options_names=options_act, opts_types_params_dest=opts_types_params_dest))
 
 
