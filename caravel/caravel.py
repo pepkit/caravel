@@ -346,9 +346,6 @@ def background_options():
     opts_types_params_dest = get_options_html_types(parser_looper, act)
     dests = opts_types_params_dest[2]
     options_act = options[act]
-    geprint(options_act)
-    geprint("\n\n")
-    geprint(opts_types_params_dest)
     return jsonify(options=render_template('options.html', options_names=options_act, opts_types_params_dest=opts_types_params_dest))
 
 

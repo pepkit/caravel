@@ -127,10 +127,6 @@ def _has_long_opt(opt):
     :return: bool indicating whether the given option defines a long option name
 
     """
-    # try:
-    #     opts = act.option_strings
-    # except AttributeError:
-    #     opts = []
     if not isinstance(opt, list):
         raise TypeError("The opt argument has to be a list of strings.")
     for n in opt:
