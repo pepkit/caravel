@@ -3,7 +3,7 @@
 import argparse
 from const import SET_ELSEWHERE
 
-__all__ = ["get_long_optnames", "get_options_html_types", "opts_by_prog"]
+__all__ = ["get_long_optnames", "get_options_html_types", "get_html_elements_info", "opts_by_prog"]
 
 
 def get_long_optnames(p):
@@ -52,12 +52,65 @@ def _is_set_elsewhere(opt):
     return [_get_long_opt(opt)] in SET_ELSEWHERE
 
 
-def get_options_html_types(p, command=None):
+# def get_options_html_types(p, command=None):
+#     """
+#     Determine the type of the HTML form element from the looper parser/subparser.
+#     Addtionally, get a list of dictionaries with the HTML elements parameters and corresponding values
+#     needed to construct the objects and the dest values.
+#     _HelpAction objects (--help), _VersionAction objects and empty option_strings are omitted
+#
+#     :param argparse.ArgumentParser p: the parser to inspect
+#     :param str command: looper command name if no name provided the main parser is used
+#     :return: html_element_type: name of the html elements to use
+#     :return: html_params: parameters needed for HTML form elements construction
+#     :rtype: (list, list[dict])
+#     """
+#     if command is None:
+#         opts = p._actions
+#     else:
+#         subparser = _get_subparser(p)
+#         opts = subparser.choices[command]._actions
+#
+#     html_elements_types = []
+#     html_params = []
+#     html_dest = []
+#     for opt in opts:
+#         if _is_set_elsewhere(opt.option_strings):
+#             continue
+#         elif isinstance(opt, argparse._StoreFalseAction) or isinstance(opt, argparse._StoreTrueAction):
+#             html_elements_types.append("checkbox")
+#             html_params.append({"checked": "True"}) if opt.default else html_params.append({None: None})
+#             html_dest.append(opt.dest)
+#         elif isinstance(opt, argparse._StoreAction):
+#             if opt.choices is not None:
+#                 html_elements_types.append("select")
+#                 html_dest.append(opt.dest)
+#                 if opt.choices is not None:
+#                     html_params.append({"value": opt.choices})
+#             elif opt.type is not None and isinstance(opt.type(), (int, float)):
+#                 html_elements_types.append("range")
+#                 html_params.append({"step": "1"}) if isinstance(opt.type(), int) else html_params.append({"step": "0.1"})
+#                 html_dest.append(opt.dest)
+#             else:
+#                 # will use custom type info from looper here
+#                 html_elements_types.append("text")
+#                 html_params.append({"placeholder": "Unknown argument type"})
+#                 html_dest.append(opt.dest)
+#         else:
+#             html_elements_types.append("text")
+#             html_params.append({"placeholder": "Unknown argument type"})
+#             html_dest.append(opt.dest)
+#     ret_vals_lens = set(map(len, [html_elements_types, html_params, html_dest]))
+#     assert len(ret_vals_lens) == 1, "The lengths of return lists are not equal, '{}'".format(ret_vals_lens)
+#     return html_elements_types, html_params, html_dest
+
+
+def get_html_elements_info(p, command=None):
     """
     Determine the type of the HTML form element from the looper parser/subparser.
-    Addtionally, get a list of dictionaries with the HTML elements parameters and corresponding values
+    Additionally, get a list of dictionaries with the HTML elements parameters and corresponding values
     needed to construct the objects and the dest values.
-    _HelpAction objects (--help), _VersionAction objects and empty option_strings are omitted
+    See _is_set_elsewhere documentation for the options that are omitted.
 
     :param argparse.ArgumentParser p: the parser to inspect
     :param str command: looper command name if no name provided the main parser is used
@@ -77,28 +130,12 @@ def get_options_html_types(p, command=None):
     for opt in opts:
         if _is_set_elsewhere(opt.option_strings):
             continue
-        elif isinstance(opt, argparse._StoreFalseAction) or isinstance(opt, argparse._StoreTrueAction):
-            html_elements_types.append("checkbox")
-            html_params.append({"checked": "True"}) if opt.default else html_params.append({None: None})
-            html_dest.append(opt.dest)
-        elif isinstance(opt, argparse._StoreAction):
-            if opt.choices is not None:
-                html_elements_types.append("select")
-                html_dest.append(opt.dest)
-                if opt.choices is not None:
-                    html_params.append({"value": opt.choices})
-            elif opt.type is not None and isinstance(opt.type(), (int, float)):
-                html_elements_types.append("range")
-                html_params.append({"step": "1"}) if isinstance(opt.type(), int) else html_params.append({"step": "0.1"})
-                html_dest.append(opt.dest)
-            else:
-                # will use custom type info from looper here
-                html_elements_types.append("text")
-                html_params.append({"placeholder": "Unknown argument type"})
-                html_dest.append(opt.dest)
         else:
-            html_elements_types.append("text")
-            html_params.append({"placeholder": "Unknown argument type"})
+            type_data = opt.type("1", caravel=True)
+            type = type_data.element_type
+            params = type_data.element_args
+            html_elements_types.append(type)
+            html_params.append(params)
             html_dest.append(opt.dest)
     ret_vals_lens = set(map(len, [html_elements_types, html_params, html_dest]))
     assert len(ret_vals_lens) == 1, "The lengths of return lists are not equal, '{}'".format(ret_vals_lens)

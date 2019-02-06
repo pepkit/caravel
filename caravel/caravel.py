@@ -343,10 +343,11 @@ def background_options():
     act = request.args.get('act', type=str) or "run"
     parser_looper = blp()
     options = get_long_optnames(parser_looper)
-    opts_types_params_dest = get_options_html_types(parser_looper, act)
-    dests = opts_types_params_dest[2]
     options_act = options[act]
-    return jsonify(options=render_template('options.html', options_names=options_act, opts_types_params_dest=opts_types_params_dest))
+    opts_types_params_dest = get_html_elements_info(parser_looper, act)
+    dests = opts_types_params_dest[2]
+    return jsonify(options=render_template('options.html', options_names=options_act,
+                                           opts_types_params_dest=opts_types_params_dest))
 
 
 @app.route('/_background_summary')
