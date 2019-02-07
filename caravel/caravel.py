@@ -377,6 +377,7 @@ def action():
     global p
     global selected_subproject
     global dests
+    global user_selected_package
     # To be changed in future version. Looper will be imported and run within caravel
     # opt = list(set(request.form.getlist('opt')))
     # opt = request.form.getlist('opt')
@@ -391,6 +392,12 @@ def action():
     geprint(p.config_file)
     args_dict["config_file"] = p.config_file
     args_dict["subproject"] = selected_subproject
+
+    try:
+        args_dict["compute"] = user_selected_package
+    except NameError:
+        app.logger.info("The compute package was not selected, using 'default'.")
+        args_dict["compute"] = "default"
     geprint(args)
 
     prj = looper.project.Project(
@@ -398,46 +405,18 @@ def action():
         file_checks=args.file_checks,
         compute_env_file=getattr(args, 'env', None))
 
-    with peppy.ProjectContext(prj, include_protocols=args.include_protocols,
-                              exclude_protocols=args.exclude_protocols) as prj:
 
+    # with peppy.ProjectContext(prj, include_samples=args.include_samples,
+    #                           exclude_samples=args.exclude_samples) as prj:
+    with peppy.ProjectContext(prj) as prj:
         if act == "run":
-            if args.compute:
-                prj.set_compute(args.compute)
-
-            if not hasattr(prj.metadata, "pipelines_dir") or len(prj.metadata.pipelines_dir) == 0:
-                raise AttributeError(
-                    "Looper requires at least one pipeline(s) location; set "
-                    "with 'pipeline_interfaces' in the metadata section of a "
-                    "project config file.")
-
-            if not prj.interfaces_by_protocol:
-                raise Exception(
-                    "The Project knows no protocols. Does it point "
-                    "to at least one pipelines location that exists?")
-
             run = looper.looper.Runner(prj)
             try:
-                run(args)
+                run(args, None)
             except IOError:
                 raise Exception("{} pipelines_dir: '{}'".format(
                     prj.__class__.__name__, prj.metadata.pipelines_dir))
-    # run = looper.looper.Runner(prj)
-    # run(args, "test")
     return render_template("execute.html", output=None)
-    # eprint("\nSelected flags:\n " + '\n'.join(opt))
-    # eprint("\nSelected action: " + act)
-    # cmd = "looper " + act + " " + ' '.join(opt) + " " + config_file
-    # eprint("\nCreated Command: " + cmd)
-    # tmpdirname = tempfile.mkdtemp("tmpdir")
-    # eprint("\nCreated temporary directory: " + tmpdirname)
-    # file_run = open(tmpdirname + "/output.txt", "w")
-    # proc_run = psutil.Popen(cmd, shell=True, stdout=file_run)
-    # proc_run.wait()
-    # with open(tmpdirname + "/output.txt", "r") as myfile:
-    #     output_run = myfile.readlines()
-    # shutil.rmtree(tmpdirname)
-    # return render_template("execute.html", output=None)
 
 
 def main():
