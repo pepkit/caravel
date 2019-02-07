@@ -3,7 +3,7 @@
 import argparse
 from const import SET_ELSEWHERE
 
-__all__ = ["get_long_optnames", "get_options_html_types", "get_html_elements_info", "opts_by_prog"]
+__all__ = ["get_long_optnames", "get_html_elements_info", "opts_by_prog"]
 
 
 def get_long_optnames(p):
