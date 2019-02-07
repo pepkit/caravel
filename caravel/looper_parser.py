@@ -127,19 +127,21 @@ def get_html_elements_info(p, command=None):
     html_elements_types = []
     html_params = []
     html_dest = []
+    opt_names = []
     for opt in opts:
         if _is_set_elsewhere(opt.option_strings):
             continue
         else:
+            opt_names.append(_get_long_opt(opt.option_strings))
             type_data = opt.type("1", caravel=True)
             type = type_data.element_type
             params = type_data.element_args
             html_elements_types.append(type)
             html_params.append(params)
             html_dest.append(opt.dest)
-    ret_vals_lens = set(map(len, [html_elements_types, html_params, html_dest]))
+    ret_vals_lens = set(map(len, [html_elements_types, html_params, html_dest, opt_names]))
     assert len(ret_vals_lens) == 1, "The lengths of return lists are not equal, '{}'".format(ret_vals_lens)
-    return html_elements_types, html_params, html_dest
+    return html_elements_types, html_params, html_dest, opt_names
 
 
 def _get_subparser(p):

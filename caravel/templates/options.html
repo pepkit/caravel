@@ -3,14 +3,16 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
 </head>
 <h3>Select options</h3>
-{% set options_types = opts_types_params_dest[0] %}
-{% set options_params = opts_types_params_dest[1] %}
-{% set options_dest = opts_types_params_dest[2] %}
+{% set options_types = html_elements_info[0] %}
+{% set options_params = html_elements_info[1] %}
+{% set options_dest = html_elements_info[2] %}
+{% set options_names = html_elements_info[3]%}
 <form method="POST" action="{{ url_for('action') }}">
 <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">     
 {% for dict_item in options_params %}
     {% set i = loop.index - 1 %}    
     {% for key, value in dict_item.items() %}
+    <p>{{ options_types[i] }}</p>
         <div class="form-row">
             <div class="col-3">
                 <label class="col-form-label"><b><pre>{{ options_names[i] }}</pre></b></label>
