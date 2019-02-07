@@ -3,7 +3,7 @@
 import argparse
 from const import SET_ELSEWHERE
 
-__all__ = ["get_long_optnames", "get_html_elements_info", "opts_by_prog"]
+__all__ = ["get_long_optnames", "get_html_elements_info", "opts_by_prog", "html_param_builder"]
 
 
 def get_long_optnames(p):
@@ -52,58 +52,6 @@ def _is_set_elsewhere(opt):
     return [_get_long_opt(opt)] in SET_ELSEWHERE
 
 
-# def get_options_html_types(p, command=None):
-#     """
-#     Determine the type of the HTML form element from the looper parser/subparser.
-#     Addtionally, get a list of dictionaries with the HTML elements parameters and corresponding values
-#     needed to construct the objects and the dest values.
-#     _HelpAction objects (--help), _VersionAction objects and empty option_strings are omitted
-#
-#     :param argparse.ArgumentParser p: the parser to inspect
-#     :param str command: looper command name if no name provided the main parser is used
-#     :return: html_element_type: name of the html elements to use
-#     :return: html_params: parameters needed for HTML form elements construction
-#     :rtype: (list, list[dict])
-#     """
-#     if command is None:
-#         opts = p._actions
-#     else:
-#         subparser = _get_subparser(p)
-#         opts = subparser.choices[command]._actions
-#
-#     html_elements_types = []
-#     html_params = []
-#     html_dest = []
-#     for opt in opts:
-#         if _is_set_elsewhere(opt.option_strings):
-#             continue
-#         elif isinstance(opt, argparse._StoreFalseAction) or isinstance(opt, argparse._StoreTrueAction):
-#             html_elements_types.append("checkbox")
-#             html_params.append({"checked": "True"}) if opt.default else html_params.append({None: None})
-#             html_dest.append(opt.dest)
-#         elif isinstance(opt, argparse._StoreAction):
-#             if opt.choices is not None:
-#                 html_elements_types.append("select")
-#                 html_dest.append(opt.dest)
-#                 if opt.choices is not None:
-#                     html_params.append({"value": opt.choices})
-#             elif opt.type is not None and isinstance(opt.type(), (int, float)):
-#                 html_elements_types.append("range")
-#                 html_params.append({"step": "1"}) if isinstance(opt.type(), int) else html_params.append({"step": "0.1"})
-#                 html_dest.append(opt.dest)
-#             else:
-#                 # will use custom type info from looper here
-#                 html_elements_types.append("text")
-#                 html_params.append({"placeholder": "Unknown argument type"})
-#                 html_dest.append(opt.dest)
-#         else:
-#             html_elements_types.append("text")
-#             html_params.append({"placeholder": "Unknown argument type"})
-#             html_dest.append(opt.dest)
-#     ret_vals_lens = set(map(len, [html_elements_types, html_params, html_dest]))
-#     assert len(ret_vals_lens) == 1, "The lengths of return lists are not equal, '{}'".format(ret_vals_lens)
-#     return html_elements_types, html_params, html_dest
-
 
 def get_html_elements_info(p, command=None):
     """
@@ -137,11 +85,11 @@ def get_html_elements_info(p, command=None):
             type = type_data.element_type
             params = type_data.element_args
             html_elements_types.append(type)
-            html_params.append(params)
+            html_params.append(html_param_builder(params))
             html_dest.append(opt.dest)
     ret_vals_lens = set(map(len, [html_elements_types, html_params, html_dest, opt_names]))
     assert len(ret_vals_lens) == 1, "The lengths of return lists are not equal, '{}'".format(ret_vals_lens)
-    return html_elements_types, html_params, html_dest, opt_names
+    return [html_elements_types, html_params, html_dest, opt_names]
 
 
 def _get_subparser(p):
@@ -190,3 +138,20 @@ def _get_long_opt(opt):
 def _is_long_optname(n):
     """ Determine whether a given option name is "long" form. """
     return n.startswith("--")
+
+
+def html_param_builder(params):
+    """
+    Build a HTML params string out of a dictionary of the option names and their values. If a list is the value
+    (it is intended in a select case) the original list is returned instead of a string
+
+    :param dict params:
+    :return: the composed parameters string or list in case list is the class of the value in the dict
+    :rtype: str | list
+    """
+    string = ""
+    for key, value in params.items():
+        if isinstance(value, list):
+            return value
+        string = string + key + "=" + value + " "
+    return string.strip()
