@@ -3,7 +3,7 @@
 import argparse
 from const import SET_ELSEWHERE
 
-__all__ = ["get_long_optnames", "get_html_elements_info", "opts_by_prog", "html_param_builder"]
+__all__ = ["get_long_optnames", "get_html_elements_info", "opts_by_prog", "html_param_builder", "convert_value", "parse_namespace"]
 
 
 def get_long_optnames(p):
@@ -155,3 +155,52 @@ def html_param_builder(params):
             return value
         string = string + key + "=" + value + " "
     return string.strip()
+
+
+def parse_namespace(var_nspce):
+    """
+    Process the dictionary (e.g. produced by vars(argparse.Namespace)). Change None to False (produced by checkboxes)
+    and "on" to True
+
+    :param dict var_nspce:
+    :return: processed dict. Keep in ming that if the input was the output of vars(argparse.Namespace) the argparse.Namespace will update as well./
+    :rtype dict
+    """
+    for key, value in var_nspce.items():
+        if value is None and key is not "subproject":
+            var_nspce[key] = False
+        elif value == "on":
+            var_nspce[key] = True
+    return var_nspce
+
+
+def convert_value(val):
+    """
+    Convert string to the most appropriate type, one of: bool, str, int, None or float
+
+    :param str val: the string to convert
+    :return: converted string to the most appropriate type
+    :rtype bool | str | int | float | None
+    """
+    if not isinstance(val, str):
+        try:
+            val = str(val)
+        except:
+            raise ValueError("The input has to be of type convertible to 'str', got '{}'".format(type(val)))
+
+    if isinstance(val, bool):
+        return val
+    if isinstance(val, str):
+        if val == 'None':
+            return None
+        try:
+            float(val)
+        except ValueError:
+            return val
+        else:
+            try:
+                int(val)
+            except ValueError:
+                return float(val)
+            else:
+                return int(val)

@@ -378,27 +378,23 @@ def action():
     global selected_subproject
     global dests
     global user_selected_package
-    # To be changed in future version. Looper will be imported and run within caravel
-    # opt = list(set(request.form.getlist('opt')))
-    # opt = request.form.getlist('opt')
 
     # None if checkbox is unchecked, "on" if checked
     args = argparse.Namespace()
     args_dict = vars(args)
 
     for arg in dests:
-        value = request.form.get(arg)
+        value = convert_value(request.form.get(arg))
         args_dict[arg] = value
-    geprint(p.config_file)
     args_dict["config_file"] = p.config_file
     args_dict["subproject"] = selected_subproject
+    args_dict = parse_namespace(args_dict)
 
     try:
         args_dict["compute"] = user_selected_package
     except NameError:
         app.logger.info("The compute package was not selected, using 'default'.")
         args_dict["compute"] = "default"
-    geprint(args)
 
     prj = looper.project.Project(
         args.config_file, subproject=args.subproject,
@@ -412,7 +408,8 @@ def action():
         if act == "run":
             run = looper.looper.Runner(prj)
             try:
-                run(args, None)
+                # run(args, None)
+                app.logger.info("no run")
             except IOError:
                 raise Exception("{} pipelines_dir: '{}'".format(
                     prj.__class__.__name__, prj.metadata.pipelines_dir))
