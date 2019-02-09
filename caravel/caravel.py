@@ -404,7 +404,6 @@ def action():
 
     # with peppy.ProjectContext(prj, include_samples=args.include_samples,
     #                           exclude_samples=args.exclude_samples) as prj:
-    print(args)
     with peppy.ProjectContext(prj) as prj:
         if act == "run":
             run = looper.looper.Runner(prj)
