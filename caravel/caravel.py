@@ -386,7 +386,7 @@ def action():
     for arg in dests:
         value = convert_value(request.form.get(arg))
         args_dict[arg] = value
-    args_dict["config_file"] = p.config_file
+    args_dict["config_file"] = str(p.config_file)
     args_dict["subproject"] = selected_subproject
     args_dict = parse_namespace(args_dict)
 
@@ -404,6 +404,7 @@ def action():
 
     # with peppy.ProjectContext(prj, include_samples=args.include_samples,
     #                           exclude_samples=args.exclude_samples) as prj:
+    print(args)
     with peppy.ProjectContext(prj) as prj:
         if act == "run":
             run = looper.looper.Runner(prj)
