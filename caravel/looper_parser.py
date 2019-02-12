@@ -1,9 +1,24 @@
 """ Interface with looper """
 
 import argparse
-from const import SET_ELSEWHERE
+from distutils.version import LooseVersion
+from const import SET_ELSEWHERE, REQUIRED_LOOPER_VERSION, LOOPER_VERSION
 
-__all__ = ["get_long_optnames", "get_html_elements_info", "opts_by_prog", "html_param_builder", "convert_value", "parse_namespace"]
+__all__ = ["get_long_optnames", "get_html_elements_info", "opts_by_prog", "html_param_builder", "convert_value",
+           "parse_namespace", "ensure_looper_version"]
+
+
+def ensure_looper_version(required_looper=REQUIRED_LOOPER_VERSION, current_looper=LOOPER_VERSION):
+    """
+    Loose looper version assertion. The distutils.version.LooseVersion objects implement __cmp__ methods that allow for
+     comparisons of version strings with letters, like: "0.11.0dev".
+    :param required_looper: A version that is required for the software to function
+    :param current_looper: A version that the software uses
+    :return:
+    """
+    assert LooseVersion(current_looper) >= LooseVersion(required_looper), \
+        "The version of looper in use ({in_use}) does not meet the caravel requirement ({req})"\
+            .format(in_use=current_looper, req=required_looper)
 
 
 def get_long_optnames(p):

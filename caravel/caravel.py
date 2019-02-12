@@ -16,7 +16,6 @@ from looper_parser import *
 
 import looper
 import divvy
-from looper import __version__ as looper_version
 import peppy
 from peppy.utils import coll_like
 
@@ -29,7 +28,7 @@ app = Flask(__name__)
 
 @app.context_processor
 def inject_dict_for_all_templates():
-    return dict(caravel_version=caravel_version, looper_version=looper_version, referrer=request.referrer)
+    return dict(caravel_version=caravel_version, looper_version=LOOPER_VERSION, referrer=request.referrer)
 
 
 def clear_session_data(keys):
@@ -429,6 +428,7 @@ def action():
 
 
 def main():
+    ensure_looper_version()
     parser = CaravelParser()
     args = parser.parse_args()
     app.config["project_configs"] = args.config
