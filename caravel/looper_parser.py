@@ -12,8 +12,8 @@ def ensure_looper_version(required_looper=REQUIRED_LOOPER_VERSION, current_loope
     """
     Loose looper version assertion. The distutils.version.LooseVersion objects implement __cmp__ methods that allow for
      comparisons of version strings with letters, like: "0.11.0dev".
-    :param required_looper: A version that is required for the software to function
-    :param current_looper: A version that the software uses
+    :param str required_looper: A version that is required for the software to function
+    :param str current_looper: A version that the software uses
     :return:
     """
     assert LooseVersion(current_looper) >= LooseVersion(required_looper), \
