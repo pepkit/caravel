@@ -10,3 +10,4 @@ projects:
   - path/to/project2_config.yaml
 ```
 
+The paths in the file above should be either absolute or relative to the file location.
