@@ -10,8 +10,11 @@ __all__ = ["get_long_optnames", "get_html_elements_info", "opts_by_prog", "html_
 
 def ensure_looper_version(required_looper=REQUIRED_LOOPER_VERSION, current_looper=LOOPER_VERSION):
     """
-    Loose looper version assertion. The distutils.version.LooseVersion objects implement __cmp__ methods that allow for
+    Loose looper version assertion.
+
+    The distutils.version.LooseVersion objects implement __cmp__ methods that allow for
      comparisons of version strings with letters, like: "0.11.0dev".
+
     :param str required_looper: A version that is required for the software to function
     :param str current_looper: A version that the software uses
     :return:

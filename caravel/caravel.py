@@ -157,27 +157,27 @@ def parse_config_file():
     The CLI argument is given the priority.
     Path to the PEP projects and predefined token are extracted if file is read successfully.
 
-    :param list[str] sections: list of string names indicating the sections(s) of config file to retrieve.
-        Options: "projects", "token" or both
-    :return list[str], str: tuple of project list and string with the token.
-        If neither is requested, None is returned instead
+    :return list[str] project list
     """
 
     project_list_path = app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
+    print(project_list_path)
     if project_list_path is None:
         raise ValueError("Please set the environment variable {} or provide a YAML file listing paths to project "
                          "config files".format(CONFIG_ENV_VAR))
-    project_list_path = os.path.expanduser(project_list_path)
-
+    project_list_path = os.path.normpath(os.path.join(os.getcwd(), os.path.expanduser(project_list_path)))
     if not os.path.isfile(project_list_path):
         raise ValueError("Project configs list isn't a file: {}".format(project_list_path))
-
+    geprint(project_list_path)
     with open(project_list_path, 'r') as stream:
         pl = yaml.safe_load(stream)
         assert CONFIG_PRJ_KEY in pl, \
             "'{}' key not in the projects list file.".format(CONFIG_PRJ_KEY)
         projects = pl[CONFIG_PRJ_KEY]
-        projects = sorted(flatten([glob_if_exists(os.path.expanduser(os.path.expandvars(prj))) for prj in projects]))
+        # for each project use the dirname of the yaml file to establish the paths to the project itself,
+        # additionally expand the environment variables and the user
+        projects = sorted(flatten([glob_if_exists(os.path.join(
+            os.path.dirname(project_list_path), os.path.expanduser(os.path.expandvars(prj)))) for prj in projects]))
     return projects
 
 
@@ -397,16 +397,8 @@ def action():
 
         # Establish the project-root logger and attach one for this module.
     looper.setup_looper_logger(level=10,
-                        additional_locations=("caravel.log",))
-    global _LOGGER
+                        additional_locations=(LOG_FILENAME,))
     _LOGGER = logging.getLogger(__name__)
-
-    # Initialize project
-    _LOGGER.debug("compute_env_file: " + str(getattr(args, 'env', None)))
-    _LOGGER.info("Building Project")
-    if args.subproject is not None:
-        _LOGGER.info("Using subproject: %s", args.subproject)
-
     prj = looper.project.Project(
         args.config_file, subproject=args.subproject,
         file_checks=args.file_checks,
