@@ -396,6 +396,18 @@ def action():
         app.logger.info("The compute package was not selected, using 'default'.")
         args_dict["compute"] = "default"
 
+        # Establish the project-root logger and attach one for this module.
+    looper.setup_looper_logger(level=10,
+                        additional_locations=("caravel.log",))
+    global _LOGGER
+    _LOGGER = logging.getLogger(__name__)
+
+    # Initialize project
+    _LOGGER.debug("compute_env_file: " + str(getattr(args, 'env', None)))
+    _LOGGER.info("Building Project")
+    if args.subproject is not None:
+        _LOGGER.info("Using subproject: %s", args.subproject)
+
     prj = looper.project.Project(
         args.config_file, subproject=args.subproject,
         file_checks=args.file_checks,
@@ -408,8 +420,8 @@ def action():
         if act == "run":
             run = looper.looper.Runner(prj)
             try:
-                # run(args, None)
-                app.logger.info("no run")
+                run(args, None)
+                # app.logger.info("run")
             except IOError:
                 raise Exception("{} pipelines_dir: '{}'".format(
                     prj.__class__.__name__, prj.metadata.pipelines_dir))
