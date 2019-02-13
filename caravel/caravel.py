@@ -378,6 +378,7 @@ def action():
     global selected_subproject
     global dests
     global user_selected_package
+    global env_file_path
 
     # None if checkbox is unchecked, "on" if checked
     args = argparse.Namespace()
@@ -389,9 +390,9 @@ def action():
     args_dict["config_file"] = str(p.config_file)
     args_dict["subproject"] = selected_subproject
     args_dict = parse_namespace(args_dict)
-
     try:
         args_dict["compute"] = user_selected_package
+        args_dict["env"] = env_file_path
     except NameError:
         app.logger.info("The compute package was not selected, using 'default'.")
         args_dict["compute"] = "default"
@@ -418,7 +419,30 @@ def action():
             except IOError:
                 raise Exception("{} pipelines_dir: '{}'".format(
                     prj.__class__.__name__, prj.metadata.pipelines_dir))
-    return render_template("execute.html", output=None)
+
+        if act == "destroy":
+            looper.looper.Destroyer(prj)(args)
+
+        if act == "summarize":
+            looper.looper.Summarizer(prj)()
+
+        if act == "check":
+            # TODO: hook in fixed samples once protocol differentiation is
+            # TODO (continued) figured out (related to #175).
+            looper.looper.Checker(prj)(flags=args.flags)
+
+        if act == "clean":
+            looper.looper.Cleaner(prj)(args)
+    return render_template("execute.html")
+
+
+@app.route('/_background_result')
+def background_result():
+    import textile
+    with open(LOG_FILENAME, "r") as log:
+        log_content = log.read()
+    log.close()
+    return jsonify(result=textile.textile(log_content))
 
 
 def main():
