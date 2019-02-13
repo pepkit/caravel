@@ -120,3 +120,30 @@ def _version_text(sep):
     from looper import __version__ as looper_version
     return "caravel version: {}".format(caravel_version) + sep + \
            "looper version: {}\n".format(looper_version)
+
+
+def print_terminal_width(txt=None, char="-"):
+    """
+    Print a line composed of the chars and a text in the middle of the terminal
+
+    :param str txt: a string to display in the middle of the terminal
+    :param str char: a character that the box will be composed of
+    :return None
+    """
+    char = str(char)
+    assert len(char) == 1, "The length of the char parameter has to be equal 1, got '{}'".format(len(char))
+    spaced_txt = txt.center(len(txt)+2) if txt is not None else ""
+    print(char * ((terminal_width() / 2) - (len(spaced_txt) / 2)) + spaced_txt + char *
+          ((terminal_width() / 2) - (len(spaced_txt) / 2)))
+
+
+def terminal_width():
+    """
+    Get terminal width
+
+    :return: width of the terminal
+    :rtype int
+    """
+    import fcntl, termios, struct
+    _, tw = struct.unpack('HH', fcntl.ioctl(0, termios.TIOCGWINSZ, struct.pack('HH', 0, 0)))
+    return tw

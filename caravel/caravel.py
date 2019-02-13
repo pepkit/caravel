@@ -161,14 +161,14 @@ def parse_config_file():
     """
 
     project_list_path = app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
-    print(project_list_path)
     if project_list_path is None:
         raise ValueError("Please set the environment variable {} or provide a YAML file listing paths to project "
                          "config files".format(CONFIG_ENV_VAR))
+    print(os.getcwd())
+    print(os.path.expanduser(project_list_path))
     project_list_path = os.path.normpath(os.path.join(os.getcwd(), os.path.expanduser(project_list_path)))
     if not os.path.isfile(project_list_path):
         raise ValueError("Project configs list isn't a file: {}".format(project_list_path))
-    geprint(project_list_path)
     with open(project_list_path, 'r') as stream:
         pl = yaml.safe_load(stream)
         assert CONFIG_PRJ_KEY in pl, \
@@ -252,7 +252,8 @@ def set_comp_env():
         active_settings = compute_config.get_active_package()
         return jsonify(active_settings=render_template('compute_info.html', active_settings=active_settings))
     active_settings = compute_config.get_active_package()
-    return render_template('set_comp_env.html', env_conf_file=env_file_path, compute_packages=compute_packages, active_settings=active_settings, user_selected_package=user_selected_package)
+    return render_template('set_comp_env.html', env_conf_file=env_file_path, compute_packages=compute_packages,
+                           active_settings=active_settings, user_selected_package=user_selected_package)
 
 
 @app.route("/process", methods=['GET', 'POST'])
@@ -396,7 +397,7 @@ def action():
         args_dict["compute"] = "default"
 
         # Establish the project-root logger and attach one for this module.
-    looper.setup_looper_logger(level=10,
+    looper.setup_looper_logger(level=20,
                         additional_locations=(LOG_FILENAME,))
     _LOGGER = logging.getLogger(__name__)
     prj = looper.project.Project(
@@ -411,8 +412,9 @@ def action():
         if act == "run":
             run = looper.looper.Runner(prj)
             try:
+                print_terminal_width("looper log")
                 run(args, None)
-                # app.logger.info("run")
+                print_terminal_width()
             except IOError:
                 raise Exception("{} pipelines_dir: '{}'".format(
                     prj.__class__.__name__, prj.metadata.pipelines_dir))
