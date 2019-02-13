@@ -421,18 +421,25 @@ def action():
                     prj.__class__.__name__, prj.metadata.pipelines_dir))
 
         if act == "destroy":
+            print_terminal_width("looper log")
             looper.looper.Destroyer(prj)(args)
+            print_terminal_width()
 
         if act == "summarize":
+            print_terminal_width("looper log")
             looper.looper.Summarizer(prj)()
+            print_terminal_width()
 
         if act == "check":
-            # TODO: hook in fixed samples once protocol differentiation is
-            # TODO (continued) figured out (related to #175).
+            print_terminal_width("looper log")
             looper.looper.Checker(prj)(flags=args.flags)
+            print_terminal_width()
 
         if act == "clean":
+            print_terminal_width("looper log")
             looper.looper.Cleaner(prj)(args)
+            print_terminal_width()
+
     return render_template("execute.html")
 
 
