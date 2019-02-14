@@ -345,8 +345,8 @@ def background_options():
     return jsonify(options=render_template('options.html', html_elements_info=html_elements_info))
 
 
-@app.route('/_background_summary')
-def background_summary():
+@app.route('/_background_summary_notice')
+def background_summary_notice():
     global p_info
     global summary_string
     global summary_location
@@ -363,18 +363,14 @@ def background_summary():
             app.register_blueprint(psummary)
         except AssertionError:
             eprint("this blueprint was already registered")
-        present = "1"
-        summary = "1"
+        return jsonify(present="1")
     else:
-        summary = "0"
-        present = "0"
-    return jsonify(present=present, summary=render_template('summary.html', summary=summary, file_name=p_info["summary_html"]))
+        return jsonify(present="0", summary=render_template('summary_notice.html'))
 
 
-@app.route('/background_see_summary', methods=['GET', 'POST'])
-def background_see_summary():
+@app.route('/summary', methods=['GET', 'POST'])
+def summary():
     global summary_location
-    geprint(summary_location)
     return send_from_directory(os.path.dirname(summary_location), os.path.basename(summary_location))
 
 
