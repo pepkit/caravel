@@ -6,7 +6,7 @@ import traceback
 import warnings
 import argparse
 
-from flask import Blueprint, Flask, render_template, request, jsonify, session
+from flask import Blueprint, Flask, render_template, request, jsonify, session, send_from_directory
 import yaml
 
 from _version import __version__ as caravel_version
@@ -164,8 +164,6 @@ def parse_config_file():
     if project_list_path is None:
         raise ValueError("Please set the environment variable {} or provide a YAML file listing paths to project "
                          "config files".format(CONFIG_ENV_VAR))
-    print(os.getcwd())
-    print(os.path.expanduser(project_list_path))
     project_list_path = os.path.normpath(os.path.join(os.getcwd(), os.path.expanduser(project_list_path)))
     if not os.path.isfile(project_list_path):
         raise ValueError("Project configs list isn't a file: {}".format(project_list_path))
@@ -350,6 +348,8 @@ def background_options():
 @app.route('/_background_summary')
 def background_summary():
     global p_info
+    global summary_string
+    global summary_location
     summary_location = "{output_dir}/{summary_html}".format(output_dir=p_info["output_dir"],
                                                             summary_html=p_info["summary_html"])
     if os.path.isfile(summary_location):
@@ -363,11 +363,19 @@ def background_summary():
             app.register_blueprint(psummary)
         except AssertionError:
             eprint("this blueprint was already registered")
-        summary_string = "{name}/summary/{summary_html}".format(name=p_info["name"],
-                                                                summary_html=p_info["summary_html"])
+        present = "1"
+        summary = "1"
     else:
-        summary_string = "Summary not available"
-    return jsonify(summary=render_template('summary.html', summary=summary_string, file_name=p_info["summary_html"]))
+        summary = "0"
+        present = "0"
+    return jsonify(present=present, summary=render_template('summary.html', summary=summary, file_name=p_info["summary_html"]))
+
+
+@app.route('/background_see_summary', methods=['GET', 'POST'])
+def background_see_summary():
+    global summary_location
+    geprint(summary_location)
+    return send_from_directory(os.path.dirname(summary_location), os.path.basename(summary_location))
 
 
 @app.route("/action", methods=['GET', 'POST'])
@@ -380,7 +388,6 @@ def action():
     global user_selected_package
     global env_file_path
 
-    # None if checkbox is unchecked, "on" if checked
     args = argparse.Namespace()
     args_dict = vars(args)
 
@@ -406,9 +413,6 @@ def action():
         file_checks=args.file_checks,
         compute_env_file=getattr(args, 'env', None))
 
-
-    # with peppy.ProjectContext(prj, include_samples=args.include_samples,
-    #                           exclude_samples=args.exclude_samples) as prj:
     with peppy.ProjectContext(prj) as prj:
         if act == "run":
             run = looper.looper.Runner(prj)

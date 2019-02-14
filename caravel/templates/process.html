@@ -37,14 +37,18 @@
   function render_summary_link() {
       $.getJSON($SCRIPT_ROOT + '/_background_summary', {
       }, function(data) {
-        $("div#summary").html(data.active_settings);
+        if(data.present == "0"){
+          document.getElementById("summary_btn").disabled = true;
+        } else{
+          document.getElementById("summary_btn").disabled = false;
+        }
+        $("div#summary").html(data.summary);
       });
       return false;
     }
   $(function() {
     // The function is triggered on page load and with the "a#show_summary" button
     render_summary_link()
-    $('a#show_summary').bind('click', render_summary_link);
   });
 </script>
 <script>
@@ -83,8 +87,11 @@
       </select>
     <div id="options" class="divider-vertical"></div>
     <hr class="col-xs-12">
-    <div class="divider-vertical">
-      <a href='#' id=show_summary><button type="button" class="btn btn-outline-dark">Get summary</button></a>
-    </div>
+    <form method="POST" action="{{ url_for('background_see_summary') }}">
+      <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
+      <div class="divider-vertical">
+        <button type="submit" id="summary_btn" name="summary_btn" class="btn btn-outline-dark">See summary</button>
+      </div>
+    </form>
     <div id="summary"></div>
 {% endblock %}
