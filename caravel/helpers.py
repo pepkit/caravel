@@ -8,7 +8,12 @@ import os
 import random
 import string
 import sys
-from peppy.utils import coll_like
+import looper
+import peppy
+import fcntl
+import termios
+import struct
+from const import LOG_FILENAME
 
 
 def eprint(*args, **kwargs):
@@ -29,9 +34,11 @@ def expand_path(p, root=""):
     if root:
         if not os.path.isabs(root):
             raise ValueError("Non-absolute root path: {}".format(root))
+        
         def absolutize(x):
             return os.path.join(root, x)
     else:
+        
         def absolutize(x):
             return x
     exp = os.path.expanduser(os.path.expandvars(p))
@@ -64,7 +71,7 @@ def glob_if_exists(x):
     :param x: a string with path containing globs
     :return list[str]: a list of paths
     """
-    return [glob.glob(e) or e for e in x] if coll_like(x) else (glob.glob(x) or [x])
+    return [glob.glob(e) or e for e in x] if peppy.utils.coll_like(x) else (glob.glob(x) or [x])
 
 
 def random_string(n):
@@ -144,6 +151,56 @@ def terminal_width():
     :return: width of the terminal
     :rtype int
     """
-    import fcntl, termios, struct
     _, tw = struct.unpack('HH', fcntl.ioctl(0, termios.TIOCGWINSZ, struct.pack('HH', 0, 0)))
     return tw
+
+
+def run_looper(args, act):
+    """
+    Prepare and run looper action using the provided arguments
+
+    :param argparse.Namespace args: set of looper arguments
+    :param str act: action to run
+    :return: None
+    """
+    # Establish looper logger
+    looper.setup_looper_logger(level=20,
+                               additional_locations=(LOG_FILENAME,))
+    # compose Project object
+    prj = looper.project.Project(
+        args.config_file,
+        subproject=args.subproject,
+        file_checks=args.file_checks,
+        compute_env_file=getattr(args, 'env', None)
+    )
+    # run selected looper action
+    with peppy.ProjectContext(prj) as prj:
+        if act == "run":
+            run = looper.looper.Runner(prj)
+            try:
+                print_terminal_width("looper log")
+                run(args, None)
+                print_terminal_width()
+            except IOError:
+                raise Exception("{} pipelines_dir: '{}'".format(
+                    prj.__class__.__name__, prj.metadata.pipelines_dir))
+
+        if act == "destroy":
+            print_terminal_width("looper log")
+            looper.looper.Destroyer(prj)(args)
+            print_terminal_width()
+
+        if act == "summarize":
+            print_terminal_width("looper log")
+            looper.looper.Summarizer(prj)()
+            print_terminal_width()
+
+        if act == "check":
+            print_terminal_width("looper log")
+            looper.looper.Checker(prj)(flags=args.flags)
+            print_terminal_width()
+
+        if act == "clean":
+            print_terminal_width("looper log")
+            looper.looper.Cleaner(prj)(args)
+            print_terminal_width()

@@ -70,7 +70,6 @@ def _is_set_elsewhere(opt):
     return [_get_long_opt(opt)] in SET_ELSEWHERE
 
 
-
 def get_html_elements_info(p, command=None):
     """
     Determine the type of the HTML form element from the looper parser/subparser.

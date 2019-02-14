@@ -4,17 +4,12 @@ from functools import wraps
 import logging
 import traceback
 import warnings
-import argparse
-
 from flask import Blueprint, Flask, render_template, request, jsonify, session, redirect
 import yaml
-
 from _version import __version__ as caravel_version
 from const import *
 from helpers import *
 from looper_parser import *
-
-import looper
 import divvy
 import peppy
 from peppy.utils import coll_like
@@ -387,60 +382,23 @@ def action():
 
     args = argparse.Namespace()
     args_dict = vars(args)
-
+    # Set the arguments from the forms
     for arg in dests:
         value = convert_value(request.form.get(arg))
         args_dict[arg] = value
+    # Set the previously selected arguments: config_file, subproject, computing environment
     args_dict["config_file"] = str(p.config_file)
     args_dict["subproject"] = selected_subproject
-    args_dict = parse_namespace(args_dict)
     try:
         args_dict["compute"] = user_selected_package
         args_dict["env"] = env_file_path
     except NameError:
         app.logger.info("The compute package was not selected, using 'default'.")
         args_dict["compute"] = "default"
-
-        # Establish the project-root logger and attach one for this module.
-    looper.setup_looper_logger(level=20,
-                        additional_locations=(LOG_FILENAME,))
-    _LOGGER = logging.getLogger(__name__)
-    prj = looper.project.Project(
-        args.config_file, subproject=args.subproject,
-        file_checks=args.file_checks,
-        compute_env_file=getattr(args, 'env', None))
-
-    with peppy.ProjectContext(prj) as prj:
-        if act == "run":
-            run = looper.looper.Runner(prj)
-            try:
-                print_terminal_width("looper log")
-                run(args, None)
-                print_terminal_width()
-            except IOError:
-                raise Exception("{} pipelines_dir: '{}'".format(
-                    prj.__class__.__name__, prj.metadata.pipelines_dir))
-
-        if act == "destroy":
-            print_terminal_width("looper log")
-            looper.looper.Destroyer(prj)(args)
-            print_terminal_width()
-
-        if act == "summarize":
-            print_terminal_width("looper log")
-            looper.looper.Summarizer(prj)()
-            print_terminal_width()
-
-        if act == "check":
-            print_terminal_width("looper log")
-            looper.looper.Checker(prj)(flags=args.flags)
-            print_terminal_width()
-
-        if act == "clean":
-            print_terminal_width("looper log")
-            looper.looper.Cleaner(prj)(args)
-            print_terminal_width()
-
+    # perform necessary changes so the looper understands the Namespace
+    args_dict = parse_namespace(args_dict)
+    # run looper
+    run_looper(args, act)
     return render_template("execute.html")
 
 
