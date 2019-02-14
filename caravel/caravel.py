@@ -6,7 +6,7 @@ import traceback
 import warnings
 import argparse
 
-from flask import Blueprint, Flask, render_template, request, jsonify, session, send_from_directory
+from flask import Blueprint, Flask, render_template, request, jsonify, session, redirect
 import yaml
 
 from _version import __version__ as caravel_version
@@ -358,11 +358,12 @@ def background_summary_notice():
         @psummary.route("/{pname}/summary/<path:page_name>".format(pname=p_info["name"]), methods=['GET'])
         def render_static(page_name):
             return render_template('%s' % page_name)
-
         try:
             app.register_blueprint(psummary)
         except AssertionError:
-            eprint("this blueprint was already registered")
+            app.logger.info("this blueprint was already registered")
+        summary_string = "{name}/summary/{summary_html}".format(name=p_info["name"],
+                                                                summary_html=p_info["summary_html"])
         return jsonify(present="1")
     else:
         return jsonify(present="0", summary=render_template('summary_notice.html'))
@@ -370,8 +371,8 @@ def background_summary_notice():
 
 @app.route('/summary', methods=['GET', 'POST'])
 def summary():
-    global summary_location
-    return send_from_directory(os.path.dirname(summary_location), os.path.basename(summary_location))
+    global summary_string
+    return redirect(summary_string)
 
 
 @app.route("/action", methods=['GET', 'POST'])
