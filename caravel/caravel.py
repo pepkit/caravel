@@ -14,13 +14,13 @@ import divvy
 import peppy
 import textile
 from peppy.utils import coll_like
+from platform import python_version
 
 
 logging.getLogger().setLevel(logging.INFO)
 
-
 app = Flask(__name__)
-
+app.logger.info("Using python {}".format(python_version()))
 
 @app.context_processor
 def inject_dict_for_all_templates():
