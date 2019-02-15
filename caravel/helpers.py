@@ -13,8 +13,6 @@ import peppy
 import fcntl
 import termios
 import struct
-from const import LOG_FILENAME
-
 
 def eprint(*args, **kwargs):
     """
@@ -155,17 +153,17 @@ def terminal_width():
     return tw
 
 
-def run_looper(args, act):
+def run_looper(args, act, log_path):
     """
     Prepare and run looper action using the provided arguments
 
     :param argparse.Namespace args: set of looper arguments
     :param str act: action to run
+    :param str log_path: absolute path to the log file location
     :return: None
     """
     # Establish looper logger
-    looper.setup_looper_logger(level=20,
-                               additional_locations=(LOG_FILENAME,))
+    looper.setup_looper_logger(level=20, additional_locations=log_path)
     # compose Project object
     prj = looper.project.Project(
         args.config_file,

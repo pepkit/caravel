@@ -4,7 +4,7 @@ from functools import wraps
 import logging
 import traceback
 import warnings
-from flask import Blueprint, Flask, render_template, request, jsonify, session, redirect
+from flask import Blueprint, Flask, render_template, request, jsonify, session, redirect, send_from_directory
 import yaml
 from _version import __version__ as caravel_version
 from const import *
@@ -12,6 +12,7 @@ from helpers import *
 from looper_parser import *
 import divvy
 import peppy
+import textile
 from peppy.utils import coll_like
 
 
@@ -364,7 +365,7 @@ def background_summary_notice():
         return jsonify(present="0", summary=render_template('summary_notice.html'))
 
 
-@app.route('/summary', methods=['GET', 'POST'])
+@app.route('/summary', methods=['POST'])
 def summary():
     global summary_string
     return redirect(summary_string)
@@ -379,7 +380,7 @@ def action():
     global dests
     global user_selected_package
     global env_file_path
-
+    global log_path
     args = argparse.Namespace()
     args_dict = vars(args)
     # Set the arguments from the forms
@@ -397,18 +398,26 @@ def action():
         args_dict["compute"] = "default"
     # perform necessary changes so the looper understands the Namespace
     args_dict = parse_namespace(args_dict)
+    # establish the looper log path
+    log_path = os.path.join(p_info["output_dir"], LOG_FILENAME)
     # run looper
-    run_looper(args, act)
+    run_looper(args=args, act=act, log_path=log_path)
     return render_template("execute.html")
 
 
 @app.route('/_background_result')
 def background_result():
-    import textile
-    with open(LOG_FILENAME, "r") as log:
+    global p_info
+    global log_path
+    with open(log_path, "r") as log:
         log_content = log.read()
-    log.close()
     return jsonify(result=textile.textile(log_content))
+
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'caravel.ico', mimetype='image/vnd.microsoft.icon')
 
 
 def main():
