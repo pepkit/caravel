@@ -1,0 +1,8 @@
+include requirements/*
+include README.md
+include logo_looper.svg
+include caravel/static/logo_looper.svg
+include caravel/static/python.svg
+include caravel/static/logo_caravel.svg
+include caravel/static/caravel_icon.svg
+include caravel/static/caravel.svg
