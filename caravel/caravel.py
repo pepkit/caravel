@@ -6,7 +6,7 @@ import traceback
 import warnings
 from flask import Blueprint, Flask, render_template, request, jsonify, session, redirect, send_from_directory
 import yaml
-from _version import __version__ as caravel_version
+from _version import __version__ as CARAVEL_VERSION
 from const import *
 from helpers import *
 from looper_parser import *
@@ -22,9 +22,10 @@ logging.getLogger().setLevel(logging.INFO)
 app = Flask(__name__)
 app.logger.info("Using python {}".format(python_version()))
 
+
 @app.context_processor
 def inject_dict_for_all_templates():
-    return dict(caravel_version=caravel_version, looper_version=LOOPER_VERSION, referrer=request.referrer)
+    return dict(caravel_version=CARAVEL_VERSION, looper_version=LOOPER_VERSION, python_version=python_version(),referrer=request.referrer)
 
 
 def clear_session_data(keys):

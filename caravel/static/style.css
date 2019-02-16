@@ -28,7 +28,8 @@ body {
   margin-top: -40px;
   /* negative value of footer height */
   height: 40px;
-  padding-left: 40px;
+  padding-top: 5px;
+  padding-left: 10px;
 }
 
 .divider-15 {
@@ -44,4 +45,39 @@ body {
 .divider-vertical {
   margin-top:15px;
   margin-bottom:15px;
+}
+
+th {
+  font-size:12px;
+  padding: 3px;
+  font-weight: bold;
+  text-align: center;
+  background-color: #464c56;
+  color: white
+
+
+}
+
+td {
+  font-size:12px;
+  padding: 3px;
+  text-align: center;
+  color: #464c56;
+  font-weight: bold;
+  font-family: Courier New
+}
+
+code.footer {
+  color:#464c56
+}
+
+.left {
+  float:left;
+  padding-left: 10px;
+  padding-bottom: 10px;
+}
+.right {
+  float:right;
+  padding-top: 15px;
+  padding-right: 10px;
 }
