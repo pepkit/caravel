@@ -43,11 +43,10 @@
 	        <p><b>{{ item }}: </b><code id="{{ item }}">{{ active_settings[item] }}</code></p>
 	    	{% endfor %}
 		</div>
-			<a href="{{ referrer }}"><button type="submit" class="btn btn-outline-dark ml-2">Go back <i class="fas fa-arrow-left"></i></button></a>
 	{% else %}
 		<h2>Environment variable pointing to the <code>DIVCFG</code> file not found</h2>
 		<p>The <code>{{ env_var_name }}</code> environment variable is not set. Set it with: <code>export {{ env_var_name }}=path/to/file</code> and run <code>caravel</code> again.</p>
 		<p>Learn more about <a href="http://code.databio.org/divvy/configuration/" target="_blank"><code>DIVCFG</code></a> files concept <a href="http://code.databio.org/divvy/" target="_blank">here</a>.</p>
-		<a href="{{ referrer }}"><button type="submit" class="btn btn-outline-dark ml-2">Go back <i class="fas fa-arrow-left"></i></button></a>
 	{% endif %}
+	{% include 'back_referrer.html' %}
 {% endblock %}
