@@ -98,7 +98,7 @@ def get_html_elements_info(p, command=None):
             continue
         else:
             opt_names.append(_get_long_opt(opt.option_strings))
-            type_data = opt.type("1", caravel=True)
+            type_data = opt.type(caravel=True)
             type = type_data.element_type
             params = type_data.element_args
             html_elements_types.append(type)
