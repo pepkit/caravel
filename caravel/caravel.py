@@ -216,22 +216,13 @@ def set_comp_env():
     global active_settings
     global user_selected_package
     global env_file_path
+    COMPUTE_SETTINGS_VARNAME = divvy.const.COMPUTE_SETTINGS_VARNAME
 
     try:
         compute_config
     except NameError:
-        env_file_path = os.getenv(COMPUTE_SETTINGS_VARNAME)
-        if env_file_path is not None:
-            app.logger.info("Found the `{}` environment variable".format(COMPUTE_SETTINGS_VARNAME))
-            if not os.path.isfile(env_file_path):
-                raise ValueError("'{var_name}' environment variable points to '{file}', which does not exist"
-                                 .format(var_name=COMPUTE_SETTINGS_VARNAME, file=env_file_path))
-            app.logger.info("File `{}` exists".format(env_file_path))
-            compute_config = divvy.ComputingConfiguration(env_file_path)
-            compute_packages = compute_config.list_compute_packages()
-        else:
-            app.logger.info("Didn't find the '{}' environment variable".format(COMPUTE_SETTINGS_VARNAME))
-            return render_template('set_comp_env.html', compute_packages=None, env_var_name=COMPUTE_SETTINGS_VARNAME)
+        compute_config = divvy.ComputingConfiguration()
+        compute_packages = compute_config.list_compute_packages()
     selected_package = request.args.get('compute', type=str)
     try:
         user_selected_package
@@ -247,8 +238,11 @@ def set_comp_env():
         active_settings = compute_config.get_active_package()
         return jsonify(active_settings=render_template('compute_info.html', active_settings=active_settings))
     active_settings = compute_config.get_active_package()
-    return render_template('set_comp_env.html', env_conf_file=env_file_path, compute_packages=compute_packages,
-                           active_settings=active_settings, user_selected_package=user_selected_package)
+    notify_not_set = COMPUTE_SETTINGS_VARNAME[0] if compute_config.default_config_file == compute_config.config_file\
+        else None
+    return render_template('set_comp_env.html', env_conf_file=compute_config.config_file,
+                           compute_packages=compute_packages, active_settings=active_settings,
+                           user_selected_package=user_selected_package, notify_not_set=notify_not_set)
 
 
 @app.route("/process", methods=['GET', 'POST'])
@@ -275,27 +269,13 @@ def process():
         if new_selected_project is not None and selected_project != new_selected_project:
             selected_project = new_selected_project
 
-    config_file = os.path.expandvars(os.path.expanduser(selected_project))
+    config_file = str(os.path.expandvars(os.path.expanduser(selected_project)))
     p = peppy.Project(config_file)
 
     try:
         subprojects = list(p.subprojects.keys())
     except AttributeError:
         subprojects = None
-
-    try:
-        selected_subproject = request.form['subprojects']
-        if selected_project is None:
-            p = peppy.Project(config_file)
-        else:
-            try:
-                p.activate_subproject(selected_subproject)
-            except AttributeError:
-                return render_error_msg("Your peppy version does not implement the subproject activation "
-                                        "functionality. Consider upgrading it to version >= 0.19. "
-                                        "See: https://github.com/pepkit/peppy/releases")
-    except KeyError:
-        selected_subproject = None
 
     p_info = {
         "name": p.name,
@@ -313,14 +293,17 @@ def process():
 def background_subproject():
     global p
     global config_file
+    global selected_subproject
     sp = request.args.get('sp', type=str)
     if sp == "reset":
+        selected_subproject = None
         output = "No subproject activated"
         p = peppy.Project(config_file)
     else:
         try:
             p.activate_subproject(sp)
             output = "Activated suproject: " + sp
+            selected_subproject = sp
         except AttributeError:
             output = "Upgrade peppy, see terminal for details"
             app.logger.warning("Your peppy version does not implement the subproject activation functionality. "
@@ -331,7 +314,6 @@ def background_subproject():
 @app.route('/_background_options')
 def background_options():
     global p_info
-    global selected_subproject
     global act
     global dests
     from looper.looper import build_parser as blp
@@ -390,7 +372,10 @@ def action():
         args_dict[arg] = value
     # Set the previously selected arguments: config_file, subproject, computing environment
     args_dict["config_file"] = str(p.config_file)
-    args_dict["subproject"] = selected_subproject
+    try:
+        args_dict["subproject"] = selected_subproject
+    except NameError:
+        args_dict["subproject"] = None
     try:
         args_dict["compute"] = user_selected_package
         args_dict["env"] = env_file_path
@@ -401,9 +386,9 @@ def action():
     args_dict = parse_namespace(args_dict)
     # establish the looper log path
     log_path = os.path.join(p_info["output_dir"], LOG_FILENAME)
-    # run looper
     run_looper(args=args, act=act, log_path=log_path)
-    return render_template("execute.html")
+    return render_template("/execute.html")
+
 
 
 @app.route('/_background_result')

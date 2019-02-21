@@ -24,8 +24,7 @@
 </script>
 {% endblock %}
 {% block content %}
-	{% if compute_packages is not none %}
-			<h2>Configure computing environment</h2>
+			<h1>Configure computing environment</h1>
 			<p>Compute packages read from: <code>{{ env_conf_file }}</code></p>
 				<select name="select_compute" class="custom-select" style="width:auto;">
 					{% for item in compute_packages %}
@@ -43,10 +42,12 @@
 	        <p><b>{{ item }}: </b><code id="{{ item }}">{{ active_settings[item] }}</code></p>
 	    	{% endfor %}
 		</div>
-	{% else %}
-		<h2>Environment variable pointing to the <code>DIVCFG</code> file not found</h2>
-		<p>The <code>{{ env_var_name }}</code> environment variable is not set. Set it with: <code>export {{ env_var_name }}=path/to/file</code> and run <code>caravel</code> again.</p>
-		<p>Learn more about <a href="http://code.databio.org/divvy/configuration/" target="_blank"><code>DIVCFG</code></a> files concept <a href="http://code.databio.org/divvy/" target="_blank">here</a>.</p>
-	{% endif %}
+		{% if notify_not_set is not none %}
+			<hr class="col-xs-12">
+			<h3>Environment variable(s) pointing to the <code>DIVCFG</code> file not found</h3>
+			<p>The <code>{{ notify_not_set }}</code> environment variable is not set. Set it with: 
+				<code>export {{ notify_not_set }}=path/to/file</code> and run <code>caravel</code> again.</p>
+			<p>Learn more about <a href="http://code.databio.org/divvy/configuration/" target="_blank"><code>DIVCFG</code></a> files concept <a href="http://code.databio.org/divvy/" target="_blank">here</a>.</p>
+		{% endif %}
 	{% include 'back_referrer.html' %}
 {% endblock %}
