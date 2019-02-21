@@ -216,7 +216,6 @@ def set_comp_env():
     global active_settings
     global user_selected_package
     global env_file_path
-    COMPUTE_SETTINGS_VARNAME = divvy.const.COMPUTE_SETTINGS_VARNAME
 
     try:
         compute_config

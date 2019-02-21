@@ -1,6 +1,7 @@
 """ Package constants """
 
 from looper import __version__ as looper_version
+from divvy.const import COMPUTE_SETTINGS_VARNAME
 LOOPER_VERSION = looper_version
 REQUIRED_LOOPER_VERSION = "0.11.0"
 CONFIG_ENV_VAR = "CARAVEL"
