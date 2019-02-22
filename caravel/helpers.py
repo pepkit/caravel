@@ -116,11 +116,6 @@ class CaravelParser(argparse.ArgumentParser):
             dest="debug",
             help="Use this option if you want to enter the debug mode. Unsecured.")
 
-        self.add_argument(
-            "-t",
-            dest="test",
-            help="TEST (default: %(new_default)s)")
-
     def format_help(self):
         """ Add version information to help text. """
         return _version_text(sep="\n") + super(CaravelParser, self).format_help()
