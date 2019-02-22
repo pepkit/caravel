@@ -13,6 +13,7 @@ import peppy
 import fcntl
 import termios
 import struct
+from const import *
 
 def eprint(*args, **kwargs):
     """
@@ -115,6 +116,11 @@ class CaravelParser(argparse.ArgumentParser):
             dest="debug",
             help="Use this option if you want to enter the debug mode. Unsecured.")
 
+        self.add_argument(
+            "-t",
+            dest="test",
+            help="TEST (default: %(new_default)s)")
+
     def format_help(self):
         """ Add version information to help text. """
         return _version_text(sep="\n") + super(CaravelParser, self).format_help()
@@ -153,24 +159,19 @@ def terminal_width():
     return tw
 
 
-def run_looper(args, act, log_path):
+def run_looper(prj, args, act, log_path, logging_lvl):
     """
     Prepare and run looper action using the provided arguments
 
+    :param looper.project.Project prj: project to execute looper action on
     :param argparse.Namespace args: set of looper arguments
     :param str act: action to run
     :param str log_path: absolute path to the log file location
+    :param int logging_lvl: logging level code
     :return: None
     """
     # Establish looper logger
-    looper.setup_looper_logger(level=20, additional_locations=log_path)
-    # compose Project object
-    prj = looper.project.Project(
-        args.config_file,
-        subproject=args.subproject,
-        file_checks=args.file_checks,
-        compute_env_file=getattr(args, 'env', None)
-    )
+    looper.setup_looper_logger(level=logging_lvl, additional_locations=log_path)
     # run selected looper action
     with peppy.ProjectContext(prj) as prj:
         if act == "run":

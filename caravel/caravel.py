@@ -96,7 +96,6 @@ def token_required(func):
         return func(*args, **kwargs)
     return decorated
 
-
 @token_required
 def shutdown_server():
     shut_func = request.environ.get('werkzeug.server.shutdown')
@@ -211,37 +210,33 @@ def index():
 @token_required
 def set_comp_env():
     global compute_config
-    global selected_package
-    global compute_packages
     global active_settings
-    global user_selected_package
-    global env_file_path
+    global currently_selected_package
 
     try:
         compute_config
     except NameError:
         compute_config = divvy.ComputingConfiguration()
-        compute_packages = compute_config.list_compute_packages()
     selected_package = request.args.get('compute', type=str)
     try:
-        user_selected_package
+        currently_selected_package
     except NameError:
-        user_selected_package = "default"
+        currently_selected_package = "default"
     if selected_package is not None:
         success = compute_config.clean_start(selected_package)
         if not success:
             msg = "Compute package '{}' cannot be activated".format(selected_package)
             app.logger.warning(msg)
             return jsonify(active_settings=render_template('compute_info.html', active_settings=None, msg=msg))
-        user_selected_package = selected_package
+        currently_selected_package = selected_package
         active_settings = compute_config.get_active_package()
         return jsonify(active_settings=render_template('compute_info.html', active_settings=active_settings))
     active_settings = compute_config.get_active_package()
     notify_not_set = COMPUTE_SETTINGS_VARNAME[0] if compute_config.default_config_file == compute_config.config_file\
         else None
     return render_template('set_comp_env.html', env_conf_file=compute_config.config_file,
-                           compute_packages=compute_packages, active_settings=active_settings,
-                           user_selected_package=user_selected_package, notify_not_set=notify_not_set)
+                           compute_packages=compute_config.list_compute_packages(), active_settings=active_settings,
+                           currently_selected_package=currently_selected_package, notify_not_set=notify_not_set)
 
 
 @app.route("/process", methods=['GET', 'POST'])
@@ -357,12 +352,12 @@ def summary():
 @token_required
 def action():
     global act
-    global p
+    global config_file
     global selected_subproject
     global dests
-    global user_selected_package
-    global env_file_path
+    global currently_selected_package
     global log_path
+    global logging_lvl
     args = argparse.Namespace()
     args_dict = vars(args)
     # Set the arguments from the forms
@@ -370,22 +365,30 @@ def action():
         value = convert_value(request.form.get(arg))
         args_dict[arg] = value
     # Set the previously selected arguments: config_file, subproject, computing environment
-    args_dict["config_file"] = str(p.config_file)
+    args_dict["config_file"] = config_file
     try:
         args_dict["subproject"] = selected_subproject
     except NameError:
         args_dict["subproject"] = None
-    try:
-        args_dict["compute"] = user_selected_package
-        args_dict["env"] = env_file_path
-    except NameError:
-        app.logger.info("The compute package was not selected, using 'default'.")
-        args_dict["compute"] = "default"
+
     # perform necessary changes so the looper understands the Namespace
     args_dict = parse_namespace(args_dict)
     # establish the looper log path
     log_path = os.path.join(p_info["output_dir"], LOG_FILENAME)
-    run_looper(args=args, act=act, log_path=log_path)
+
+    prj = looper.project.Project(
+        args.config_file,
+        subproject=args.subproject,
+        file_checks=args.file_checks,
+    )
+
+    try:
+        prj.dcc.activate_package(currently_selected_package)
+    except NameError:
+        app.logger.info("The compute package was not selected, using 'default'.")
+        prj.dcc.activate_package("default")
+
+    run_looper(prj=prj, args=args, act=act, log_path=log_path, logging_lvl=logging_lvl)
     return render_template("/execute.html")
 
 
@@ -406,6 +409,7 @@ def favicon():
 
 
 def main():
+    global logging_lvl
     ensure_looper_version()
     parser = CaravelParser()
     args = parser.parse_args()
@@ -414,7 +418,9 @@ def main():
     app.config['SECRET_KEY'] = 'thisisthesecretkey'
     if app.config["DEBUG"]:
         warnings.warn("You have entered the debug mode. The server-client connection is not secure!")
+        logging_lvl = 10
     else:
+        logging_lvl = 30
         generate_token(token=parse_token_file())
     app.run()
 
