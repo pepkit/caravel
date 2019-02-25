@@ -17,8 +17,6 @@ from peppy.utils import coll_like
 from platform import python_version
 
 
-logging.getLogger().setLevel(logging.INFO)
-
 app = Flask(__name__)
 app.logger.info("Using python {}".format(python_version()))
 
@@ -189,9 +187,13 @@ def parse_token_file(path=TOKEN_FILE_NAME):
             "'{token}' key not in the {file} file.".format(token=CONFIG_TOKEN_KEY, file=TOKEN_FILE_NAME)
         token = out[CONFIG_TOKEN_KEY]
         token_unique_len = len(''.join(set(token)))
-        assert token_unique_len >= 5, "The predefined authentication token in the config file has to be composed " \
-            "of at least 5 unique characters, got {len} in '{token}'.".format(len=token_unique_len, token=token)
-        app.logger.info("{} file found, using the predefined token".format(TOKEN_FILE_NAME))
+        if token_unique_len < 5:
+            app.logger.warning("The predefined authentication token in the config file has to be composed of at least 5"
+                               " unique characters, got {len} in '{token}'.".format(len=token_unique_len, token=token))
+            app.logger.info("Using randomly generated token.")
+            token = None
+        else:
+            app.logger.info("{} file found, using the predefined token".format(TOKEN_FILE_NAME))
     except IOError:
         token = None
     return token
@@ -411,6 +413,7 @@ def favicon():
 def main():
     global logging_lvl
     ensure_looper_version()
+    logging.getLogger().setLevel(logging.INFO)
     parser = CaravelParser()
     args = parser.parse_args()
     app.config["project_configs"] = args.config
