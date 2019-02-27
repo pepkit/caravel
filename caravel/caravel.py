@@ -282,7 +282,12 @@ def process():
         "subprojects": subprojects
     }
 
-    return render_template('process.html', p_info=p_info, change=None)
+    try:
+        selected_subproject
+    except NameError:
+        selected_subproject = None
+
+    return render_template('process.html', p_info=p_info, change=None, selected_subproject=selected_subproject)
 
 
 @app.route('/_background_subproject')
@@ -291,14 +296,13 @@ def background_subproject():
     global config_file
     global selected_subproject
     sp = request.args.get('sp', type=str)
-    if sp == "reset":
+    output = "Activated suproject: " + sp
+    if sp == "None":
         selected_subproject = None
-        output = "No subproject activated"
-        p = p.deactivate_subproject()
+        p.deactivate_subproject()
     else:
         try:
             p.activate_subproject(sp)
-            output = "Activated suproject: " + sp
             selected_subproject = sp
         except AttributeError:
             output = "Upgrade peppy, see terminal for details"

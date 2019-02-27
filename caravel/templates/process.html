@@ -6,14 +6,31 @@
     $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 </script>
 <script type=text/javascript>
+  // subproject activation
   $(function() {
-    $('a#show_subproject').bind('click', function() {
+    $('a#activate_subproject').bind('click', function() {
       $.getJSON($SCRIPT_ROOT + '/_background_subproject', {
         sp: $('select[name="subprojects"]').val(),
       }, function(data) {
         $("#subproj_txt").text(data.subproj_txt);
         $("#sample_count").text(data.sample_count);
       });
+      document.getElementById("deactivate_btn").disabled = false;
+      return false;
+    });
+  });
+</script>
+<script type=text/javascript>
+  // subproject deactivation
+  $(function() {
+    $('a#deactivate_subproject').bind('click', function() {
+      $.getJSON($SCRIPT_ROOT + '/_background_subproject', {
+        sp: "None",
+      }, function(data) {
+        $("#subproj_txt").text(data.subproj_txt);
+        $("#sample_count").text(data.sample_count);
+      });
+      document.getElementById("deactivate_btn").disabled = true;
       return false;
     });
   });
@@ -70,11 +87,11 @@
             {% for i in p_info["subprojects"] %}
                 <option value="{{ i }}">{{ i }}</option>
             {% endfor %}
-            <option value=reset>None</option>
         </select>
-        <a href='#' id=show_subproject><button type="submit" class="btn btn-outline-dark ml-2">ACTIVATE</button></a>
+        <a href='#' id=activate_subproject><button id="activate_btn" type="submit" class="btn btn-outline-dark ml-2">ACTIVATE</button></a>
+        <a href='#' id=deactivate_subproject><button id="deactivate_btn" disabled=true type="submit" class="btn btn-outline-dark ml-2">DEACTIVATE</button></a>
         <div class="divider-vertical">
-          <p id=subproj_txt class="badge badge-primary">No subproject activated</p>
+          <p id=subproj_txt class="badge badge-primary" placeholder="First name">Activated subproject: {{ selected_subproject }}</p>
         </div>
     {% endif %}
     <hr class="col-xs-12">
