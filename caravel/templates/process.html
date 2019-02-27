@@ -83,6 +83,7 @@
         <p><b>{{ item }}: </b><code id="{{ item }}">{{ p_info[item] }}</code></p>
     {% endfor %}
     {% if p_info["subprojects"] is not none %}
+        <h3>Subprojects:</h3>    
         <select name="subprojects" class="custom-select" style="width:auto;">
             {% for i in p_info["subprojects"] %}
                 <option value="{{ i }}">{{ i }}</option>
