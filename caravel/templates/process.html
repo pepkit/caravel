@@ -89,9 +89,13 @@
             {% endfor %}
         </select>
         <a href='#' id=activate_subproject><button id="activate_btn" type="submit" class="btn btn-outline-dark ml-2">ACTIVATE</button></a>
-        <a href='#' id=deactivate_subproject><button id="deactivate_btn" disabled=true type="submit" class="btn btn-outline-dark ml-2">DEACTIVATE</button></a>
+        {% if selected_subproject is none %}
+          <a href='#' id=deactivate_subproject><button id="deactivate_btn" disabled type="submit" class="btn btn-outline-dark ml-2">DEACTIVATE</button></a>
+        {% else %}
+          <a href='#' id=deactivate_subproject><button id="deactivate_btn" type="submit" class="btn btn-outline-dark ml-2">DEACTIVATE</button></a>
+        {% endif %}
         <div class="divider-vertical">
-          <p id=subproj_txt class="badge badge-primary" placeholder="First name">Activated subproject: {{ selected_subproject }}</p>
+          <p id=subproj_txt class="badge badge-primary">Activated subproject: {{ selected_subproject }}</p>
         </div>
     {% endif %}
     <hr class="col-xs-12">

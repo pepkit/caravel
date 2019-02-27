@@ -15,6 +15,7 @@ import termios
 import struct
 from const import *
 
+
 def eprint(*args, **kwargs):
     """
     Print the provided text to stderr.
