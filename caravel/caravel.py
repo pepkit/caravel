@@ -264,15 +264,19 @@ def process():
         new_selected_project = request.form.get('select_project')
         if new_selected_project is not None and selected_project != new_selected_project:
             selected_project = new_selected_project
-
     config_file = str(os.path.expandvars(os.path.expanduser(selected_project)))
-    p = Project(config_file)
-
+    try:
+        p
+    except NameError:
+        p = Project(config_file)
     try:
         subprojects = list(p.subprojects.keys())
     except AttributeError:
         subprojects = None
-
+    try:
+        selected_subproject
+    except NameError:
+        selected_subproject = None
     p_info = {
         "name": p.name,
         "config_file": p.config_file,
@@ -281,12 +285,6 @@ def process():
         "output_dir": p.metadata.output_dir,
         "subprojects": subprojects
     }
-
-    try:
-        selected_subproject
-    except NameError:
-        selected_subproject = None
-
     return render_template('process.html', p_info=p_info, change=None, selected_subproject=selected_subproject)
 
 
@@ -296,7 +294,7 @@ def background_subproject():
     global config_file
     global selected_subproject
     sp = request.args.get('sp', type=str)
-    output = "Activated suproject: " + sp
+    output = "Activated subproject: " + sp
     if sp == "None":
         selected_subproject = None
         p.deactivate_subproject()
@@ -371,27 +369,19 @@ def action():
     for arg in dests:
         value = convert_value(request.form.get(arg))
         args_dict[arg] = value
-    # Set the previously selected arguments: config_file, subproject, computing environment
-    args_dict["config_file"] = config_file
-    try:
-        args_dict["subproject"] = selected_subproject
-    except NameError:
-        args_dict["subproject"] = None
-
     # perform necessary changes so the looper understands the Namespace
     args_dict = parse_namespace(args_dict)
     # establish the looper log path
     log_path = os.path.join(p_info["output_dir"], LOG_FILENAME)
-
+    # set the selected computing environment in the Project object
     try:
         p.dcc.activate_package(currently_selected_package)
     except NameError:
         app.logger.info("The compute package was not selected, using 'default'.")
         p.dcc.activate_package("default")
-
+    # run looper action
     run_looper(prj=p, args=args, act=act, log_path=log_path, logging_lvl=logging_lvl)
     return render_template("/execute.html")
-
 
 
 @app.route('/_background_result')
