@@ -11,10 +11,10 @@ from const import *
 from helpers import *
 from looper_parser import *
 import divvy
-import peppy
 import textile
 from peppy.utils import coll_like
 from platform import python_version
+from looper.project import Project
 
 
 app = Flask(__name__)
@@ -266,7 +266,7 @@ def process():
             selected_project = new_selected_project
 
     config_file = str(os.path.expandvars(os.path.expanduser(selected_project)))
-    p = peppy.Project(config_file)
+    p = Project(config_file)
 
     try:
         subprojects = list(p.subprojects.keys())
@@ -294,7 +294,7 @@ def background_subproject():
     if sp == "reset":
         selected_subproject = None
         output = "No subproject activated"
-        p = peppy.Project(config_file)
+        p = p.deactivate_subproject()
     else:
         try:
             p.activate_subproject(sp)
@@ -360,6 +360,7 @@ def action():
     global currently_selected_package
     global log_path
     global logging_lvl
+    global p
     args = argparse.Namespace()
     args_dict = vars(args)
     # Set the arguments from the forms
@@ -378,19 +379,13 @@ def action():
     # establish the looper log path
     log_path = os.path.join(p_info["output_dir"], LOG_FILENAME)
 
-    prj = looper.project.Project(
-        args.config_file,
-        subproject=args.subproject,
-        file_checks=args.file_checks,
-    )
-
     try:
-        prj.dcc.activate_package(currently_selected_package)
+        p.dcc.activate_package(currently_selected_package)
     except NameError:
         app.logger.info("The compute package was not selected, using 'default'.")
-        prj.dcc.activate_package("default")
+        p.dcc.activate_package("default")
 
-    run_looper(prj=prj, args=args, act=act, log_path=log_path, logging_lvl=logging_lvl)
+    run_looper(prj=p, args=args, act=act, log_path=log_path, logging_lvl=logging_lvl)
     return render_template("/execute.html")
 
 
