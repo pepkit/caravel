@@ -140,8 +140,8 @@ def print_terminal_width(txt=None, char="-"):
     char = str(char)
     assert len(char) == 1, "The length of the char parameter has to be equal 1, got '{}'".format(len(char))
     spaced_txt = txt.center(len(txt)+2) if txt is not None else ""
-    print(char * ((terminal_width() / 2) - (len(spaced_txt) / 2)) + spaced_txt + char *
-          ((terminal_width() / 2) - (len(spaced_txt) / 2)))
+    print(char * int((terminal_width() / 2) - (len(spaced_txt) / 2)) + spaced_txt + char *
+          int((terminal_width() / 2) - (len(spaced_txt) / 2)))
 
 
 def terminal_width():
