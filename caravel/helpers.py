@@ -112,7 +112,7 @@ class CaravelParser(argparse.ArgumentParser):
                  "CARAVEL will be used instead.")
 
         self.add_argument(
-            "-d", "--debug-mode",
+            "-d", "--dbg",
             action="store_true",
             dest="debug",
             help="Use this option if you want to enter the debug mode. Unsecured.")
