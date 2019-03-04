@@ -49,7 +49,6 @@ def generate_token(token=None, n=TOKEN_LEN):
 
     :param token: the token to use
     :param n: length of the token to generate
-    :return: flask.render_template
     """
     global login_token
     login_token = token or random_string(n)
@@ -108,7 +107,7 @@ def generate_csrf_token(n=100):
     """
     Generate a CSRF token
     :param n: length of a token
-    :return: flask.session with "_csrf_token_key"
+    :return flask.session: a session object with "_csrf_token_key"
     """
     if '_csrf_token' not in session:
         session['_csrf_token'] = random_string(n)
@@ -125,7 +124,7 @@ app.jinja_env.globals['csrf_token'] = generate_csrf_token
 def unhandled_exception(e):
     app.logger.error('Unhandled Exception: %s', (e))
     eprint(traceback.format_exc())
-    return render_template('error.html', e=e, types=[e.__class__.__name__]), 500
+    return render_template('error.html', e=[e], types=[e.__class__.__name__]), 500
 
 
 @app.route('/shutdown', methods=['GET'])
@@ -350,7 +349,6 @@ def background_summary_notice():
 def summary():
     global summary_string
     return redirect(summary_string)
-
 
 @app.route("/action", methods=['GET', 'POST'])
 @token_required

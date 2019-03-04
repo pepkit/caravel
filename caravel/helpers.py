@@ -135,13 +135,13 @@ def print_terminal_width(txt=None, char="-"):
 
     :param str txt: a string to display in the middle of the terminal
     :param str char: a character that the box will be composed of
-    :return None
     """
     char = str(char)
     assert len(char) == 1, "The length of the char parameter has to be equal 1, got '{}'".format(len(char))
     spaced_txt = txt.center(len(txt)+2) if txt is not None else ""
-    print(char * int((terminal_width() / 2) - (len(spaced_txt) / 2)) + spaced_txt + char *
-          int((terminal_width() / 2) - (len(spaced_txt) / 2)))
+    fill_width = int(0.5 * (terminal_width() - len(spaced_txt)))
+    filler = char * fill_width
+    print(filler + spaced_txt + filler)
 
 
 def terminal_width():
@@ -164,7 +164,6 @@ def run_looper(prj, args, act, log_path, logging_lvl):
     :param str act: action to run
     :param str log_path: absolute path to the log file location
     :param int logging_lvl: logging level code
-    :return: None
     """
     # Establish looper logger
     looper.setup_looper_logger(level=logging_lvl, additional_locations=log_path)
