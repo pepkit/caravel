@@ -1,6 +1,6 @@
 flask
 divvy
-looper>=0.11.0
+looper>=0.10
 peppy>0.19
 psutil
 watchdog
