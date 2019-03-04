@@ -15,7 +15,7 @@ def _get_looper_req():
             except ValueError:
                 continue
             if "looper" in p:
-                return v.lstrip("=")
+                return v.lstrip("=").rstrip("\n")
         else:
             raise Exception("Looper requirement parse failed: {}".
                             format(reqs_file))
