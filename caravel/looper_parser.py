@@ -10,8 +10,11 @@ __all__ = ["get_long_optnames", "get_html_elements_info", "opts_by_prog", "html_
 
 def ensure_looper_version(required_looper=REQUIRED_LOOPER_VERSION, current_looper=LOOPER_VERSION):
     """
-    Loose looper version assertion. The distutils.version.LooseVersion objects implement __cmp__ methods that allow for
+    Loose looper version assertion.
+
+    The distutils.version.LooseVersion objects implement __cmp__ methods that allow for
      comparisons of version strings with letters, like: "0.11.0dev".
+
     :param str required_looper: A version that is required for the software to function
     :param str current_looper: A version that the software uses
     :return:
@@ -67,7 +70,6 @@ def _is_set_elsewhere(opt):
     return [_get_long_opt(opt)] in SET_ELSEWHERE
 
 
-
 def get_html_elements_info(p, command=None):
     """
     Determine the type of the HTML form element from the looper parser/subparser.
@@ -96,7 +98,7 @@ def get_html_elements_info(p, command=None):
             continue
         else:
             opt_names.append(_get_long_opt(opt.option_strings))
-            type_data = opt.type("1", caravel=True)
+            type_data = opt.type(caravel=True)
             type = type_data.element_type
             params = type_data.element_args
             html_elements_types.append(type)

@@ -4,31 +4,26 @@ from functools import wraps
 import logging
 import traceback
 import warnings
-import argparse
-
-from flask import Blueprint, Flask, render_template, request, jsonify, session
+from flask import Blueprint, Flask, render_template, request, jsonify, session, redirect, send_from_directory
 import yaml
-
-from _version import __version__ as caravel_version
+from _version import __version__ as CARAVEL_VERSION
 from const import *
 from helpers import *
 from looper_parser import *
-
-import looper
 import divvy
-import peppy
+import textile
 from peppy.utils import coll_like
-
-
-logging.getLogger().setLevel(logging.INFO)
+from platform import python_version
+from looper.project import Project
 
 
 app = Flask(__name__)
+app.logger.info("Using python {}".format(python_version()))
 
 
 @app.context_processor
 def inject_dict_for_all_templates():
-    return dict(caravel_version=caravel_version, looper_version=LOOPER_VERSION, referrer=request.referrer)
+    return dict(caravel_version=CARAVEL_VERSION, looper_version=LOOPER_VERSION, python_version=python_version(),referrer=request.referrer)
 
 
 def clear_session_data(keys):
@@ -54,7 +49,6 @@ def generate_token(token=None, n=TOKEN_LEN):
 
     :param token: the token to use
     :param n: length of the token to generate
-    :return: flask.render_template
     """
     global login_token
     login_token = token or random_string(n)
@@ -99,7 +93,6 @@ def token_required(func):
         return func(*args, **kwargs)
     return decorated
 
-
 @token_required
 def shutdown_server():
     shut_func = request.environ.get('werkzeug.server.shutdown')
@@ -114,7 +107,7 @@ def generate_csrf_token(n=100):
     """
     Generate a CSRF token
     :param n: length of a token
-    :return: flask.session with "_csrf_token_key"
+    :return flask.session: a session object with "_csrf_token_key"
     """
     if '_csrf_token' not in session:
         session['_csrf_token'] = random_string(n)
@@ -131,7 +124,7 @@ app.jinja_env.globals['csrf_token'] = generate_csrf_token
 def unhandled_exception(e):
     app.logger.error('Unhandled Exception: %s', (e))
     eprint(traceback.format_exc())
-    return render_template('error.html', e=e, types=[e.__class__.__name__]), 500
+    return render_template('error.html', e=[e], types=[e.__class__.__name__]), 500
 
 
 @app.route('/shutdown', methods=['GET'])
@@ -157,27 +150,25 @@ def parse_config_file():
     The CLI argument is given the priority.
     Path to the PEP projects and predefined token are extracted if file is read successfully.
 
-    :param list[str] sections: list of string names indicating the sections(s) of config file to retrieve.
-        Options: "projects", "token" or both
-    :return list[str], str: tuple of project list and string with the token.
-        If neither is requested, None is returned instead
+    :return list[str] project list
     """
 
     project_list_path = app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
     if project_list_path is None:
         raise ValueError("Please set the environment variable {} or provide a YAML file listing paths to project "
                          "config files".format(CONFIG_ENV_VAR))
-    project_list_path = os.path.expanduser(project_list_path)
-
+    project_list_path = os.path.normpath(os.path.join(os.getcwd(), os.path.expanduser(project_list_path)))
     if not os.path.isfile(project_list_path):
         raise ValueError("Project configs list isn't a file: {}".format(project_list_path))
-
     with open(project_list_path, 'r') as stream:
         pl = yaml.safe_load(stream)
         assert CONFIG_PRJ_KEY in pl, \
             "'{}' key not in the projects list file.".format(CONFIG_PRJ_KEY)
         projects = pl[CONFIG_PRJ_KEY]
-        projects = sorted(flatten([glob_if_exists(os.path.expanduser(os.path.expandvars(prj))) for prj in projects]))
+        # for each project use the dirname of the yaml file to establish the paths to the project itself,
+        # additionally expand the environment variables and the user
+        projects = sorted(flatten([glob_if_exists(os.path.join(
+            os.path.dirname(project_list_path), os.path.expanduser(os.path.expandvars(prj)))) for prj in projects]))
     return projects
 
 
@@ -195,9 +186,13 @@ def parse_token_file(path=TOKEN_FILE_NAME):
             "'{token}' key not in the {file} file.".format(token=CONFIG_TOKEN_KEY, file=TOKEN_FILE_NAME)
         token = out[CONFIG_TOKEN_KEY]
         token_unique_len = len(''.join(set(token)))
-        assert token_unique_len >= 5, "The predefined authentication token in the config file has to be composed " \
-            "of at least 5 unique characters, got {len} in '{token}'.".format(len=token_unique_len, token=token)
-        app.logger.info("{} file found, using the predefined token".format(TOKEN_FILE_NAME))
+        if token_unique_len < 5:
+            app.logger.warning("The predefined authentication token in the config file has to be composed of at least 5"
+                               " unique characters, got {len} in '{token}'.".format(len=token_unique_len, token=token))
+            app.logger.info("Using randomly generated token.")
+            token = None
+        else:
+            app.logger.info("{} file found, using the predefined token".format(TOKEN_FILE_NAME))
     except IOError:
         token = None
     return token
@@ -216,43 +211,33 @@ def index():
 @token_required
 def set_comp_env():
     global compute_config
-    global selected_package
-    global compute_packages
     global active_settings
-    global user_selected_package
-    global env_file_path
+    global currently_selected_package
 
     try:
         compute_config
     except NameError:
-        env_file_path = os.getenv(COMPUTE_SETTINGS_VARNAME)
-        if env_file_path is not None:
-            app.logger.info("Found the `{}` environment variable".format(COMPUTE_SETTINGS_VARNAME))
-            if not os.path.isfile(env_file_path):
-                raise ValueError("'{var_name}' environment variable points to '{file}', which does not exist"
-                                 .format(var_name=COMPUTE_SETTINGS_VARNAME, file=env_file_path))
-            app.logger.info("File `{}` exists".format(env_file_path))
-            compute_config = divvy.ComputingConfiguration(env_file_path)
-            compute_packages = compute_config.list_compute_packages()
-        else:
-            app.logger.info("Didn't find the '{}' environment variable".format(COMPUTE_SETTINGS_VARNAME))
-            return render_template('set_comp_env.html', compute_packages=None, env_var_name=COMPUTE_SETTINGS_VARNAME)
+        compute_config = divvy.ComputingConfiguration()
     selected_package = request.args.get('compute', type=str)
     try:
-        user_selected_package
+        currently_selected_package
     except NameError:
-        user_selected_package = "default"
+        currently_selected_package = "default"
     if selected_package is not None:
         success = compute_config.clean_start(selected_package)
         if not success:
             msg = "Compute package '{}' cannot be activated".format(selected_package)
             app.logger.warning(msg)
             return jsonify(active_settings=render_template('compute_info.html', active_settings=None, msg=msg))
-        user_selected_package = selected_package
+        currently_selected_package = selected_package
         active_settings = compute_config.get_active_package()
         return jsonify(active_settings=render_template('compute_info.html', active_settings=active_settings))
     active_settings = compute_config.get_active_package()
-    return render_template('set_comp_env.html', env_conf_file=env_file_path, compute_packages=compute_packages, active_settings=active_settings, user_selected_package=user_selected_package)
+    notify_not_set = COMPUTE_SETTINGS_VARNAME[0] if compute_config.default_config_file == compute_config.config_file\
+        else None
+    return render_template('set_comp_env.html', env_conf_file=compute_config.config_file,
+                           compute_packages=compute_config.list_compute_packages(), active_settings=active_settings,
+                           currently_selected_package=currently_selected_package, notify_not_set=notify_not_set)
 
 
 @app.route("/process", methods=['GET', 'POST'])
@@ -278,29 +263,19 @@ def process():
         new_selected_project = request.form.get('select_project')
         if new_selected_project is not None and selected_project != new_selected_project:
             selected_project = new_selected_project
-
-    config_file = os.path.expandvars(os.path.expanduser(selected_project))
-    p = peppy.Project(config_file)
-
+    config_file = str(os.path.expandvars(os.path.expanduser(selected_project)))
+    try:
+        p
+    except NameError:
+        p = Project(config_file)
     try:
         subprojects = list(p.subprojects.keys())
     except AttributeError:
         subprojects = None
-
     try:
-        selected_subproject = request.form['subprojects']
-        if selected_project is None:
-            p = peppy.Project(config_file)
-        else:
-            try:
-                p.activate_subproject(selected_subproject)
-            except AttributeError:
-                return render_error_msg("Your peppy version does not implement the subproject activation "
-                                        "functionality. Consider upgrading it to version >= 0.19. "
-                                        "See: https://github.com/pepkit/peppy/releases")
-    except KeyError:
+        selected_subproject
+    except NameError:
         selected_subproject = None
-
     p_info = {
         "name": p.name,
         "config_file": p.config_file,
@@ -309,22 +284,23 @@ def process():
         "output_dir": p.metadata.output_dir,
         "subprojects": subprojects
     }
-
-    return render_template('process.html', p_info=p_info, change=None)
+    return render_template('process.html', p_info=p_info, change=None, selected_subproject=selected_subproject)
 
 
 @app.route('/_background_subproject')
 def background_subproject():
     global p
     global config_file
+    global selected_subproject
     sp = request.args.get('sp', type=str)
-    if sp == "reset":
-        output = "No subproject activated"
-        p = peppy.Project(config_file)
+    output = "Activated subproject: " + sp
+    if sp == "None":
+        selected_subproject = None
+        p.deactivate_subproject()
     else:
         try:
             p.activate_subproject(sp)
-            output = "Activated suproject: " + sp
+            selected_subproject = sp
         except AttributeError:
             output = "Upgrade peppy, see terminal for details"
             app.logger.warning("Your peppy version does not implement the subproject activation functionality. "
@@ -335,7 +311,6 @@ def background_subproject():
 @app.route('/_background_options')
 def background_options():
     global p_info
-    global selected_subproject
     global act
     global dests
     from looper.looper import build_parser as blp
@@ -346,9 +321,11 @@ def background_options():
     return jsonify(options=render_template('options.html', html_elements_info=html_elements_info))
 
 
-@app.route('/_background_summary')
-def background_summary():
+@app.route('/_background_summary_notice')
+def background_summary_notice():
     global p_info
+    global summary_string
+    global summary_location
     summary_location = "{output_dir}/{summary_html}".format(output_dir=p_info["output_dir"],
                                                             summary_html=p_info["summary_html"])
     if os.path.isfile(summary_location):
@@ -357,78 +334,73 @@ def background_summary():
         @psummary.route("/{pname}/summary/<path:page_name>".format(pname=p_info["name"]), methods=['GET'])
         def render_static(page_name):
             return render_template('%s' % page_name)
-
         try:
             app.register_blueprint(psummary)
         except AssertionError:
-            eprint("this blueprint was already registered")
+            app.logger.info("this blueprint was already registered")
         summary_string = "{name}/summary/{summary_html}".format(name=p_info["name"],
                                                                 summary_html=p_info["summary_html"])
+        return jsonify(present="1")
     else:
-        summary_string = "Summary not available"
-    return jsonify(summary=render_template('summary.html', summary=summary_string, file_name=p_info["summary_html"]))
+        return jsonify(present="0", summary=render_template('summary_notice.html'))
 
+
+@app.route('/summary', methods=['POST'])
+def summary():
+    global summary_string
+    return redirect(summary_string)
 
 @app.route("/action", methods=['GET', 'POST'])
 @token_required
 def action():
     global act
-    global p
+    global config_file
     global selected_subproject
     global dests
-    global user_selected_package
-
-    # None if checkbox is unchecked, "on" if checked
+    global currently_selected_package
+    global log_path
+    global logging_lvl
+    global p
     args = argparse.Namespace()
     args_dict = vars(args)
-
+    # Set the arguments from the forms
     for arg in dests:
         value = convert_value(request.form.get(arg))
         args_dict[arg] = value
-    args_dict["config_file"] = str(p.config_file)
-    args_dict["subproject"] = selected_subproject
+    # perform necessary changes so the looper understands the Namespace
     args_dict = parse_namespace(args_dict)
-
+    # establish the looper log path
+    log_path = os.path.join(p_info["output_dir"], LOG_FILENAME)
+    # set the selected computing environment in the Project object
     try:
-        args_dict["compute"] = user_selected_package
+        p.dcc.activate_package(currently_selected_package)
     except NameError:
         app.logger.info("The compute package was not selected, using 'default'.")
-        args_dict["compute"] = "default"
-
-        # Establish the project-root logger and attach one for this module.
-    looper.setup_looper_logger(level=10,
-                        additional_locations=("caravel.log",))
-    global _LOGGER
-    _LOGGER = logging.getLogger(__name__)
-
-    # Initialize project
-    _LOGGER.debug("compute_env_file: " + str(getattr(args, 'env', None)))
-    _LOGGER.info("Building Project")
-    if args.subproject is not None:
-        _LOGGER.info("Using subproject: %s", args.subproject)
-
-    prj = looper.project.Project(
-        args.config_file, subproject=args.subproject,
-        file_checks=args.file_checks,
-        compute_env_file=getattr(args, 'env', None))
+        p.dcc.activate_package("default")
+    # run looper action
+    run_looper(prj=p, args=args, act=act, log_path=log_path, logging_lvl=logging_lvl)
+    return render_template("/execute.html")
 
 
-    # with peppy.ProjectContext(prj, include_samples=args.include_samples,
-    #                           exclude_samples=args.exclude_samples) as prj:
-    with peppy.ProjectContext(prj) as prj:
-        if act == "run":
-            run = looper.looper.Runner(prj)
-            try:
-                run(args, None)
-                # app.logger.info("run")
-            except IOError:
-                raise Exception("{} pipelines_dir: '{}'".format(
-                    prj.__class__.__name__, prj.metadata.pipelines_dir))
-    return render_template("execute.html", output=None)
+@app.route('/_background_result')
+def background_result():
+    global p_info
+    global log_path
+    with open(log_path, "r") as log:
+        log_content = log.read()
+    return jsonify(result=textile.textile(log_content))
+
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'caravel.ico', mimetype='image/vnd.microsoft.icon')
 
 
 def main():
+    global logging_lvl
     ensure_looper_version()
+    logging.getLogger().setLevel(logging.INFO)
     parser = CaravelParser()
     args = parser.parse_args()
     app.config["project_configs"] = args.config
@@ -436,7 +408,9 @@ def main():
     app.config['SECRET_KEY'] = 'thisisthesecretkey'
     if app.config["DEBUG"]:
         warnings.warn("You have entered the debug mode. The server-client connection is not secure!")
+        logging_lvl = 10
     else:
+        logging_lvl = 30
         generate_token(token=parse_token_file())
     app.run()
 

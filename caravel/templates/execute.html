@@ -1,13 +1,28 @@
 {% extends "template.html" %}
 {% block title %}Looper results{% endblock %}
+{% block head %}
+{{ super() }}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type=text/javascript>
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+<script type=text/javascript>
+  function render_result() {
+          $.getJSON($SCRIPT_ROOT + '/_background_result', {
+        act: $('select[name="actions"]').val(),
+      }, function(data) {
+        $("div#result").html(data.result);
+      });
+      return false;
+  }
+  $(function() {
+    // The function is triggered on page load
+    render_result()
+  });
+</script>
+{% endblock %}
 {% block content %}
 <h2>Looper results:</h2>
-{% if output is not none %}
-	{% for line in output %}
-	<code>{{ line }}</code>
-	{% endfor %}
-{% else %}
-	<p>Nothing to be displayed</p>
-{% endif %}
-<a href="{{ referrer }}"><button type="submit" class="btn btn-outline-dark ml-2">Go back <i class="fas fa-arrow-left"></i></button></a>
+<div id="result" class="divider-vertical"><code>No result yet</code></div>
+{% include 'back_referrer.html' %}
 {% endblock %}
