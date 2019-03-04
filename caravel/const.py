@@ -1,9 +1,28 @@
 """ Package constants """
 
+import os
 from peppy import COMPUTE_SETTINGS_VARNAME
 from looper import __version__ as looper_version
+
+
+def _get_looper_req():
+    reqs_file = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                             "requirements", "requirements-all.txt")
+    with open(reqs_file) as rf:
+        for l in rf:
+            try:
+                p, v = l.split("=")
+            except ValueError:
+                continue
+            if "looper" in p:
+                return v.lstrip("=")
+        else:
+            raise Exception("Looper requirement parse failed: {}".
+                            format(reqs_file))
+
+
 LOOPER_VERSION = looper_version
-REQUIRED_LOOPER_VERSION = "0.11.0"
+REQUIRED_LOOPER_VERSION = _get_looper_req()
 CONFIG_ENV_VAR = "CARAVEL"
 CONFIG_PRJ_KEY = "projects"
 CONFIG_TOKEN_KEY = "token"
