@@ -18,16 +18,6 @@ with open("requirements.txt", 'r') as reqs_file:
         #DEPENDENCIES.append(line.split("=")[0].rstrip("<>"))
         DEPENDENCIES.append(line)
 
-# numexpr for pandas
-try:
-    import numexpr
-except ImportError:
-    # No numexpr is OK for pandas.
-    pass
-else:
-    # pandas 0.20.2 needs updated numexpr; the claim is 2.4.6, but that failed.
-    DEPENDENCIES.append("numexpr>=2.6.2")
-
 # 2to3
 if sys.version_info >= (3, ):
     extra["use_2to3"] = True
@@ -68,7 +58,6 @@ setup(
         "Development Status :: 4 - Beta",
         "License :: OSI Approved :: BSD License",
         "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Topic :: Scientific/Engineering :: Bio-Informatics"
