@@ -112,6 +112,11 @@ class CaravelParser(argparse.ArgumentParser):
                  "CARAVEL will be used instead.")
 
         self.add_argument(
+            "-p", "--port",
+            dest="port",
+            help="The port the webserver should be run on.", default=DEFAULT_PORT)
+
+        self.add_argument(
             "-d", "--dbg",
             action="store_true",
             dest="debug",

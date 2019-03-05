@@ -53,7 +53,7 @@ def generate_token(token=None, n=TOKEN_LEN):
     global login_token
     login_token = token or random_string(n)
     eprint("\nCaravel is protected with a token.\nCopy this link to your browser to authenticate:\n")
-    geprint("http://localhost:5000/?token=" + login_token + "\n")
+    geprint("http://localhost:{port}/?token={token}".format(port=app.config.get("port"), token=login_token) + "\n")
 
 
 def token_required(func):
@@ -409,16 +409,18 @@ def main():
     logging.getLogger().setLevel(logging.INFO)
     parser = CaravelParser()
     args = parser.parse_args()
+    app.config["port"] = args.port
     app.config["project_configs"] = args.config
     app.config["DEBUG"] = args.debug
     app.config['SECRET_KEY'] = 'thisisthesecretkey'
+    print("PORT: {}".format(args.port))
     if app.config["DEBUG"]:
         warnings.warn("You have entered the debug mode. The server-client connection is not secure!")
         logging_lvl = 10
     else:
         logging_lvl = 30
         generate_token(token=parse_token_file())
-    app.run()
+    app.run(port=args.port)
 
 
 if __name__ == "__main__":

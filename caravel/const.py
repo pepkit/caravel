@@ -34,3 +34,4 @@ TOKEN_LEN = 15
 SET_ELSEWHERE = [["--sp"], ["--compute"], ["--env"], ["--help"], ["--version"], ["--selector-attribute"],
                  ["--selector-exclude"], ["--selector-include"], ['']]
 LOG_FILENAME = "caravel.log"
+DEFAULT_PORT = 5000
