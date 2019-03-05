@@ -8,17 +8,20 @@ from looper import __version__ as looper_version
 def _get_looper_req():
     reqs_file = os.path.join(os.path.dirname(__file__),
                              "requirements", "requirements-all.txt")
-    with open(reqs_file) as rf:
-        for l in rf:
-            try:
-                p, v = l.split("=")
-            except ValueError:
-                continue
-            if "looper" in p:
-                return v.lstrip("=").rstrip("\n")
-        else:
-            raise Exception("Looper requirement parse failed: {}".
-                            format(reqs_file))
+    if os.path.isfile(reqs_file):
+        with open(reqs_file) as rf:
+            for l in rf:
+                try:
+                    p, v = l.split("=")
+                except ValueError:
+                    continue
+                if "looper" in p:
+                    return v.lstrip("=").rstrip("\n")
+            else:
+                raise Exception("Looper requirement parse failed: {}".
+                                format(reqs_file))
+    else:
+        return None
 
 
 LOOPER_VERSION = looper_version

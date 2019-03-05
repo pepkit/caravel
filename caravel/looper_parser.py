@@ -19,9 +19,10 @@ def ensure_looper_version(required_looper=REQUIRED_LOOPER_VERSION, current_loope
     :param str current_looper: A version that the software uses
     :return:
     """
-    assert LooseVersion(current_looper) >= LooseVersion(required_looper), \
-        "The version of looper in use ({in_use}) does not meet the caravel requirement ({req})"\
-            .format(in_use=current_looper, req=required_looper)
+    if REQUIRED_LOOPER_VERSION is not None:
+        assert LooseVersion(current_looper) >= LooseVersion(required_looper), \
+            "The version of looper in use ({in_use}) does not meet the caravel requirement ({req})"\
+                .format(in_use=current_looper, req=required_looper)
 
 
 def get_long_optnames(p):
