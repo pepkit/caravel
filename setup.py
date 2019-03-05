@@ -11,7 +11,7 @@ extra = {}
 
 # Ordinary dependencies
 DEPENDENCIES = []
-with open("requirements/requirements-all.txt", 'r') as reqs_file:
+with open("caravel/requirements/requirements-all.txt", 'r') as reqs_file:
     for line in reqs_file:
         if not line.strip():
             continue
@@ -23,20 +23,6 @@ if sys.version_info >= (3, ):
     extra["use_2to3"] = True
 extra["install_requires"] = DEPENDENCIES
 
-
-# Additional files to include with package
-def get_static(name, condition=None):
-    static = [os.path.join(name, f) for f in os.listdir(
-            os.path.join(os.path.dirname(os.path.realpath(__file__)), name))]
-    if condition is None:
-        return static
-    else:
-        return [i for i in filter(lambda x: eval(condition), static)]
-
-
-# scripts to be added to the $PATH
-# scripts = get_static("scripts", condition="'.' in x")
-scripts = None
 
 with open("{}/_version.py".format(PACKAGE), 'r') as versionfile:
     version = versionfile.readline().split()[-1].strip("\"'\n")
@@ -71,8 +57,7 @@ setup(
             "{p} = {p}.{p}:main".format(p=PACKAGE)
         ],
     },
-    package_data={PACKAGE: ['templates/*']},
-    scripts=scripts,
+    package_data={PACKAGE: ['templates/*', 'requirements/*']},
     include_package_data=True,
     **extra
 )

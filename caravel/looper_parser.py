@@ -1,10 +1,9 @@
 """ Interface with looper """
 
+import warnings
 import argparse
 from distutils.version import LooseVersion
 from const import SET_ELSEWHERE, REQUIRED_LOOPER_VERSION, LOOPER_VERSION
-import warnings
-
 __all__ = ["get_long_optnames", "get_html_elements_info", "opts_by_prog", "html_param_builder", "convert_value",
            "parse_namespace", "ensure_looper_version"]
 
@@ -25,7 +24,7 @@ def ensure_looper_version(required_looper=REQUIRED_LOOPER_VERSION, current_loope
             "The version of looper in use ({in_use}) does not meet the caravel requirement ({req})"\
                 .format(in_use=current_looper, req=required_looper)
     else:
-        warnings.warn("The looper version could not be assured, the requirements file not found.")
+        warnings.warn("The looper version could not be assured since the requirements file was not found.")
 
 
 def get_long_optnames(p):
