@@ -6,7 +6,7 @@ from looper import __version__ as looper_version
 
 
 def _get_looper_req():
-    reqs_file = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+    reqs_file = os.path.join(os.path.dirname(__file__),
                              "requirements", "requirements-all.txt")
     with open(reqs_file) as rf:
         for l in rf:
