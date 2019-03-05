@@ -413,7 +413,6 @@ def main():
     app.config["project_configs"] = args.config
     app.config["DEBUG"] = args.debug
     app.config['SECRET_KEY'] = 'thisisthesecretkey'
-    print("PORT: {}".format(args.port))
     if app.config["DEBUG"]:
         warnings.warn("You have entered the debug mode. The server-client connection is not secure!")
         logging_lvl = 10
