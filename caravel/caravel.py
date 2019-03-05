@@ -203,6 +203,12 @@ def parse_token_file(path=TOKEN_FILE_NAME):
 @token_required
 def index():
     global projects
+    global p
+    try:
+        del p
+        app.logger.info("Project data removed.")
+    except NameError:
+        app.logger.info("No project defined yet.")
     projects = parse_config_file()
     return render_template('index.html', projects=projects)
 
