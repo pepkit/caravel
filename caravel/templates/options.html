@@ -6,41 +6,41 @@
 {% set options_types = html_elements_info[0] %}
 {% set options_params = html_elements_info[1] %}
 {% set options_dest = html_elements_info[2] %}
-{% set options_names = html_elements_info[3]%}
+{% set options_names = html_elements_info[3] %}
 <form method="POST" action="{{ url_for('action') }}">
-<input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
-{% for element in options_names %}
-    {% set i = loop.index - 1 %}   
-    <div class="form-row" style="height: 30px;">
-        <div class="col-3">
-            <label class="col-form-label"><b><pre>{{ options_names[i] }}</pre></b></label>
+    <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
+    {% for element in options_names %}
+        {% set i = loop.index - 1 %}   
+        <div class="form-row" style="height: 30px;">
+            <div class="col-3">
+                <label class="col-form-label"><b><pre>{{ options_names[i] }}</pre></b></label>
+            </div>
+            {% if options_types[i] == "select" %}
+            <div class="col-3">
+                <select multiple name="{{ options_dest[i] }}" class="form-control">
+                    {% for e in options_params[i] %}
+                        <option value="{{ e }}">{{ e }}</option>   
+                    {% endfor %}
+                </select>
+                <p><small>Hold ctrl/command to select multiple</small></p>
+            </div>
+            {% elif options_types[i] == "range" %}
+            <div class="col-2">
+                <input class="form-control" type="{{ options_types[i] }}" {{ options_params[i] }} name="{{ options_dest[i] }}" oninput="show_value(this.name,this.value)">
+            </div>
+            <div class="col">
+                <p id="{{ options_dest[i] }}" class="badge badge-primary"></p>
+            </div>
+            {% else %}
+            <div class="col-2">
+                <input class="form-control" type="{{ options_types[i] }}" {{ options_params[i] }} name="{{ options_dest[i] }}">
+            </div>
+            {% endif %}
         </div>
-        {% if options_types[i] == "select" %}
-        <div class="col-3">
-            <select multiple name="{{ options_dest[i] }}" class="form-control">
-                {% for e in options_params[i] %}
-                <option value="{{ e }}">{{ e }}</option>   
-                {% endfor %}
-            </select>
-            <p><small>Hold ctrl/command to select multiple</small></p>
-        </div>
-        {% elif options_types[i] == "range" %}
-        <div class="col-2">
-            <input class="form-control" type="{{ options_types[i] }}" {{ options_params[i] }} name="{{ options_dest[i] }}" oninput="show_value(this.name,this.value)">
-        </div>
-        <div class="col">
-            <p id="{{ options_dest[i] }}" class="badge badge-primary"></p>
-        </div>
-        {% else %}
-        <div class="col-2">
-            <input class="form-control" type="{{ options_types[i] }}" {{ options_params[i] }} name="{{ options_dest[i] }}">
-        </div>
-        {% endif %}
+    {% endfor %}
+    <div class="divider-vertical">
+        <button type="submit" class="btn btn-outline-dark ml-2">GO</button>
     </div>
-{% endfor %}
-<div class="divider-vertical">
-    <button type="submit" class="btn btn-outline-dark ml-2">GO</button>
-</div>
 </form>
 <div>
 	<p>See <a href="https://looper.readthedocs.io/en/latest/usage.html" target="_new">looper documentation</a> for the options explanation.</p>

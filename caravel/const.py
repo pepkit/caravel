@@ -5,6 +5,7 @@ from looper import __version__ as LOOPER_VERSION
 from _version import __version__ as CARAVEL_VERSION
 import os
 
+
 def get_req_version(module=None):
     """
     Read the required version of the specified module from the requirements file
