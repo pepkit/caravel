@@ -11,7 +11,7 @@
 <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
 {% for element in options_names %}
     {% set i = loop.index - 1 %}   
-    <div class="form-row">
+    <div class="form-row" style="height: 30px;">
         <div class="col-3">
             <label class="col-form-label"><b><pre>{{ options_names[i] }}</pre></b></label>
         </div>
@@ -25,14 +25,14 @@
             <p><small>Hold ctrl/command to select multiple</small></p>
         </div>
         {% elif options_types[i] == "range" %}
-        <div class="col-3">
+        <div class="col-2">
             <input class="form-control" type="{{ options_types[i] }}" {{ options_params[i] }} name="{{ options_dest[i] }}" oninput="show_value(this.name,this.value)">
         </div>
         <div class="col">
             <p id="{{ options_dest[i] }}" class="badge badge-primary"></p>
         </div>
         {% else %}
-        <div class="col-3">
+        <div class="col-2">
             <input class="form-control" type="{{ options_types[i] }}" {{ options_params[i] }} name="{{ options_dest[i] }}">
         </div>
         {% endif %}
