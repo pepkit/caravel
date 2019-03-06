@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 import argparse
+from const import *
 import glob
 from itertools import chain
 import random
@@ -13,7 +14,32 @@ import fcntl
 import termios
 import struct
 from flask import render_template
-from const import *
+import os
+
+
+def get_req_version(module=None):
+    """
+    Read the required version of the specified module from the requirements file
+
+    :param str module: the module to be checked
+    :return str | None: the required version of the requested module
+    """
+    reqs_file = os.path.join(os.path.dirname(__file__),
+                             "requirements", "requirements-all.txt")
+    if module is not None and os.path.isfile(reqs_file):
+        with open(reqs_file) as rf:
+            for l in rf:
+                try:
+                    p, v = l.split("=")
+                except ValueError:
+                    continue
+                if module in p:
+                    return v.lstrip("=").rstrip("\n")
+            else:
+                raise Exception("Looper requirement parse failed: {}".
+                                format(reqs_file))
+    else:
+        return None
 
 
 def eprint(*args, **kwargs):
