@@ -23,7 +23,8 @@ app.logger.info("Using python {}".format(python_version()))
 
 @app.context_processor
 def inject_dict_for_all_templates():
-    return dict(caravel_version=CARAVEL_VERSION, looper_version=LOOPER_VERSION, python_version=python_version(),referrer=request.referrer)
+    return dict(caravel_version=CARAVEL_VERSION, looper_version=LOOPER_VERSION, python_version=python_version(),
+                referrer=request.referrer)
 
 
 def clear_session_data(keys):
@@ -58,8 +59,7 @@ def generate_token(token=None, n=TOKEN_LEN):
 
 def token_required(func):
     """
-    This decorator checks for a token, verifies if it is valid
-    and redirects to the login page if needed
+    This decorator checks for a token, verifies if it is valid and redirects to the login page if needed
     :param callable func: function to be decorated
     :return callable: decorated function
     """
@@ -150,7 +150,7 @@ def parse_config_file():
     The CLI argument is given the priority.
     Path to the PEP projects and predefined token are extracted if file is read successfully.
 
-    :return list[str] project list
+    :return list[str]: project list
     """
 
     project_list_path = app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
@@ -206,9 +206,9 @@ def index():
     global p
     try:
         del p
-        app.logger.info("Project data removed.")
+        app.logger.info("Project data removed")
     except NameError:
-        app.logger.info("No project defined yet.")
+        app.logger.info("No project defined yet")
     projects = parse_config_file()
     return render_template('index.html', projects=projects)
 
@@ -355,6 +355,7 @@ def background_summary_notice():
 def summary():
     global summary_string
     return redirect(summary_string)
+
 
 @app.route("/action", methods=['GET', 'POST'])
 @token_required

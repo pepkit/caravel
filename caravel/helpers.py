@@ -4,7 +4,6 @@ from __future__ import print_function
 import argparse
 import glob
 from itertools import chain
-import os
 import random
 import string
 import sys
@@ -13,6 +12,7 @@ import peppy
 import fcntl
 import termios
 import struct
+from flask import render_template
 from const import *
 
 
@@ -79,14 +79,17 @@ def random_string(n):
     Generates a random string of length N (token), prints a message
 
     :param int n: length of the string to be generated
-    :return str: random string
+    :return str: a random string
     """
     return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(n))
 
 
 def render_error_msg(msg):
-    """ Renders an error template with a message and prints to the terminal. """
-    from flask import render_template
+    """
+    Renders an error template with a message and prints to the terminal
+
+    :param str msg: the message to be printed and displayed on the web
+    """
     eprint(msg)
     return render_template('error.html', e=[msg], types=None)
 
@@ -103,7 +106,7 @@ class CaravelParser(argparse.ArgumentParser):
         self.add_argument(
             "-V", "--version",
             action="version",
-            version=_version_text(sep="; "))
+            version=_version_text())
 
         self.add_argument(
             "-c", "--config",
@@ -124,14 +127,16 @@ class CaravelParser(argparse.ArgumentParser):
 
     def format_help(self):
         """ Add version information to help text. """
-        return _version_text(sep="\n") + super(CaravelParser, self).format_help()
+        return _version_text() + super(CaravelParser, self).format_help()
 
 
-def _version_text(sep):
-    from _version import __version__ as caravel_version
-    from looper import __version__ as looper_version
-    return "caravel version: {}".format(caravel_version) + sep + \
-           "looper version: {}\n".format(looper_version)
+def _version_text():
+    """
+    Compile a string for the argparser help with caravel and looper versions
+
+    :return str: a compiled string
+    """
+    return "caravel version: {cv}\nlooper version: {lv}\n".format(cv=CARAVEL_VERSION, lv=LOOPER_VERSION)
 
 
 def print_terminal_width(txt=None, char="-"):
@@ -153,8 +158,7 @@ def terminal_width():
     """
     Get terminal width
 
-    :return: width of the terminal
-    :rtype int
+    :return int: width of the terminal
     """
     _, tw = struct.unpack('HH', fcntl.ioctl(0, termios.TIOCGWINSZ, struct.pack('HH', 0, 0)))
     return tw

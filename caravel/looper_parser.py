@@ -17,7 +17,6 @@ def ensure_looper_version(required_looper=REQUIRED_LOOPER_VERSION, current_loope
 
     :param str required_looper: A version that is required for the software to function
     :param str current_looper: A version that the software uses
-    :return:
     """
     if REQUIRED_LOOPER_VERSION is not None:
         assert LooseVersion(current_looper) >= LooseVersion(required_looper), \
@@ -66,9 +65,9 @@ def _is_set_elsewhere(opt):
     """
     Check if the option is set elsewhere in caravel. Return True if yes.
     For example the compute env is configured in a separate tab, at the project level.
-    Additionally, options like "--help" or "-version" are treated the same way
+    Additionally, options like "--help" or "--version" are treated the same way
     :param list opt: list with one element. Option to be checked.
-    :return:
+    :return bool: a boolean indicating if an option is set elsewhere
     """
     return [_get_long_opt(opt)] in SET_ELSEWHERE
 
@@ -131,7 +130,7 @@ def _has_long_opt(opt):
     Determine whether the given option defines a long option name
 
     :param list opt: a list of option name(s)
-    :return: bool indicating whether the given option defines a long option name
+    :return bool: bool indicating whether the given option defines a long option name
 
     """
     if not isinstance(opt, list):
@@ -147,7 +146,7 @@ def _get_long_opt(opt):
     Get only the long option name from the option strings
 
     :param list opt: a list of option name(s)
-    :return: a long option name or empty string
+    :return str: a long option name or empty string
     """
     if _has_long_opt(opt):
         return opt[map(_is_long_optname, opt).index(True)]
@@ -166,8 +165,7 @@ def html_param_builder(params):
     (it is intended in a select case) the original list is returned instead of a string
 
     :param dict params:
-    :return: the composed parameters string or list in case list is the class of the value in the dict
-    :rtype: str | list
+    :return str | list: the composed parameters string or list in case list is the class of the value in the dict
     """
     string = ""
     for key, value in params.items():
@@ -182,9 +180,9 @@ def parse_namespace(var_nspce):
     Process the dictionary (e.g. produced by vars(argparse.Namespace)). Change None to False (produced by checkboxes)
     and "on" to True
 
-    :param dict var_nspce:
-    :return: processed dict. Keep in ming that if the input was the output of vars(argparse.Namespace) the argparse.Namespace will update as well./
-    :rtype dict
+    :param dict var_nspce: the dictionary representation of argparse.Namespace to be parsed
+    :return dict: processed dict. Keep in mind that if the input was the output of vars(argparse.Namespace)
+     the argparse.Namespace will update as well.
     """
     for key, value in var_nspce.items():
         if value is None and key is not "subproject":
@@ -199,8 +197,7 @@ def convert_value(val):
     Convert string to the most appropriate type, one of: bool, str, int, None or float
 
     :param str val: the string to convert
-    :return: converted string to the most appropriate type
-    :rtype bool | str | int | float | None
+    :return bool | str | int | float | None: converted string to the most appropriate type
     """
     if not isinstance(val, str):
         try:
