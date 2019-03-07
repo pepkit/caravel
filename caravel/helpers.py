@@ -15,6 +15,7 @@ import termios
 import struct
 from flask import render_template
 import os
+from functools import partial
 
 
 def get_req_version(module=None):
@@ -190,6 +191,25 @@ def terminal_width():
     return tw
 
 
+def _wrap_func_in_box(func, title):
+    """
+    This decorator wraps the function output in a titled box
+
+    :param callable func: function to be decorated
+    :param str title: the title to be displayed in the center of the box
+    :return callable: decorated function
+    """
+    def decorated(*args, **kwargs):
+        print_terminal_width(title)
+        func(*args, **kwargs)
+        print_terminal_width()
+    return decorated
+
+
+wrap_func_in_box = partial(_wrap_func_in_box, title="looper log")
+
+
+@wrap_func_in_box
 def run_looper(prj, args, act, log_path, logging_lvl):
     """
     Prepare and run looper action using the provided arguments
@@ -202,34 +222,25 @@ def run_looper(prj, args, act, log_path, logging_lvl):
     """
     # Establish looper logger
     looper.setup_looper_logger(level=logging_lvl, additional_locations=log_path)
+    eprint("\nAction: {}\n".format(act))
     # run selected looper action
     with peppy.ProjectContext(prj) as prj:
         if act == "run":
             run = looper.looper.Runner(prj)
             try:
-                print_terminal_width("looper log")
                 run(args, None)
-                print_terminal_width()
             except IOError:
                 raise Exception("{} pipelines_dir: '{}'".format(
                     prj.__class__.__name__, prj.metadata.pipelines_dir))
 
         if act == "destroy":
-            print_terminal_width("looper log")
             looper.looper.Destroyer(prj)(args)
-            print_terminal_width()
 
         if act == "summarize":
-            print_terminal_width("looper log")
             looper.looper.Summarizer(prj)()
-            print_terminal_width()
 
         if act == "check":
-            print_terminal_width("looper log")
             looper.looper.Checker(prj)(flags=args.flags)
-            print_terminal_width()
 
         if act == "clean":
-            print_terminal_width("looper log")
             looper.looper.Cleaner(prj)(args)
-            print_terminal_width()

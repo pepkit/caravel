@@ -59,6 +59,7 @@ def generate_token(token=None, n=TOKEN_LEN):
 def token_required(func):
     """
     This decorator checks for a token, verifies if it is valid and redirects to the login page if needed
+
     :param callable func: function to be decorated
     :return callable: decorated function
     """
