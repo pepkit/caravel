@@ -278,11 +278,11 @@ def process():
         subprojects = list(p.subprojects.keys())
     except AttributeError:
         subprojects = None
+    # TODO: p_info will be removed altogether in the future version
     p_info = {
         "name": p.name,
         "config_file": p.config_file,
         "sample_count": p.num_samples,
-        "summary_html": "{project_name}_summary.html".format(project_name=p.name),
         "output_dir": p.metadata.output_dir,
         "subprojects": subprojects
     }
@@ -322,23 +322,23 @@ def background_options():
 
 @app.route('/_background_summary_notice')
 def background_summary_notice():
-    global p_info
+    global p
     global summary_string
     global summary_location
-    summary_location = "{output_dir}/{summary_html}".format(output_dir=p_info["output_dir"],
-                                                            summary_html=p_info["summary_html"])
+    summary_html_name = get_summary_html_name(p)
+    summary_location = os.path.join(p.metadata.output_dir, summary_html_name)
     if os.path.isfile(summary_location):
-        psummary = Blueprint(p.name, __name__, template_folder=p_info["output_dir"])
+        psummary = Blueprint(p.name, __name__, template_folder=p.metadata.output_dir)
 
-        @psummary.route("/{pname}/summary/<path:page_name>".format(pname=p_info["name"]), methods=['GET'])
+        @psummary.route("/{pname}/summary/<path:page_name>".format(pname=p.name), methods=['GET'])
         def render_static(page_name):
             return render_template('%s' % page_name)
         try:
             app.register_blueprint(psummary)
         except AssertionError:
             app.logger.info("this blueprint was already registered")
-        summary_string = "{name}/summary/{summary_html}".format(name=p_info["name"],
-                                                                summary_html=p_info["summary_html"])
+        summary_string = "{name}/summary/{summary_html}".format(name=p.name,
+                                                                summary_html=summary_html_name)
         return jsonify(present="1")
     else:
         return jsonify(present="0", summary=render_template('summary_notice.html'))

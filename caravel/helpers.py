@@ -19,6 +19,19 @@ import os
 from functools import partial
 
 
+def get_summary_html_name(prj):
+    """
+    Get the name of the provided project object
+
+    :param peppy.Project prj: a project object to compose a summary HTML file name for
+    :return str: name of the summary HTML file
+    """
+    fname = prj.name
+    if prj.subproject is not None:
+        fname += "_" + prj.subproject
+    return fname + "_summary.html"
+
+
 def ensure_version(current=V_BY_NAME, required=REQUIRED_V_BY_NAME):
     """
     Loose version assertion.
