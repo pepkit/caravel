@@ -21,7 +21,7 @@ from functools import partial
 
 def get_summary_html_name(prj):
     """
-    Get the name of the provided project object
+    Get the name of the summary HTML file for provided project object
 
     :param peppy.Project prj: a project object to compose a summary HTML file name for
     :return str: name of the summary HTML file
