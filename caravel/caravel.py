@@ -255,6 +255,9 @@ def process():
     global p_info
     global selected_project
     global projects
+    from looper import build_parser as blp
+
+    actions = get_positional_args(blp(), sort=True)
 
     # this try-except block is used to determine whether the user should be redirected to the index page
     # to select the project when they land on the process subpage from the set_comp_env subpage
@@ -286,7 +289,7 @@ def process():
         "output_dir": p.metadata.output_dir,
         "subprojects": subprojects
     }
-    return render_template('process.html', p_info=p_info, change=None, selected_subproject=p.subproject)
+    return render_template('process.html', p_info=p_info, change=None, selected_subproject=p.subproject, actions=actions)
 
 
 @app.route('/_background_subproject')
@@ -298,12 +301,7 @@ def background_subproject():
     if sp == "None":
         p.deactivate_subproject()
     else:
-        try:
-            p.activate_subproject(sp)
-        except AttributeError:
-            output = "Upgrade peppy, see terminal for details"
-            app.logger.warning("Your peppy version does not implement the subproject activation functionality. "
-                             "Consider upgrading it to version >= 0.19. See: https://github.com/pepkit/peppy/releases")
+        p.activate_subproject(sp)
     return jsonify(subproj_txt=output, sample_count=p.num_samples)
 
 

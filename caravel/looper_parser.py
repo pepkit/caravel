@@ -3,7 +3,27 @@
 import argparse
 from const import SET_ELSEWHERE
 __all__ = ["get_long_optnames", "get_html_elements_info", "opts_by_prog", "html_param_builder", "convert_value",
-           "parse_namespace"]
+           "parse_namespace", "get_positional_args"]
+
+
+def get_positional_args(p, sort=False):
+    """
+    Get the looper positional arguments (actions). Additionally, the arguments can be ordered in a practical way
+
+    :param argparse.ArgumentParser p: the parser to inspect
+    :param bool sort: if the positional arguemnts should be ordered in a practical way
+    :return list: a list of looper positional arguments
+    """
+    def _sort_looper_actions(act_list):
+        order = ["run", "summarize"]
+        order.reverse()
+        for a in order:
+            act_list.remove(a)
+            act_list.insert(0, a)
+        return act_list
+
+    pos_args = list(_get_subparser(p).choices.viewkeys())
+    return _sort_looper_actions(pos_args) if sort else pos_args
 
 
 def get_long_optnames(p):
