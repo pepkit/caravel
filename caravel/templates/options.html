@@ -16,25 +16,25 @@
                 <label class="col-form-label"><b><pre>{{ options_names[i] }}</pre></b></label>
             </div>
             {% if options_types[i] == "select" %}
-            <div class="col-3">
-                <select multiple name="{{ options_dest[i] }}" class="form-control">
-                    {% for e in options_params[i] %}
-                        <option value="{{ e }}">{{ e }}</option>   
-                    {% endfor %}
-                </select>
-                <p><small>Hold ctrl/command to select multiple</small></p>
-            </div>
+                <div class="col-3">
+                    <select multiple name="{{ options_dest[i] }}" class="form-control">
+                        {% for e in options_params[i] %}
+                            <option value="{{ e }}">{{ e }}</option>   
+                        {% endfor %}
+                    </select>
+                    <p><small>Hold ctrl/command to select multiple</small></p>
+                </div>
             {% elif options_types[i] == "range" %}
-            <div class="col-2">
-                <input class="form-control" type="{{ options_types[i] }}" {{ options_params[i] }} name="{{ options_dest[i] }}" oninput="show_value(this.name,this.value)">
-            </div>
-            <div class="col">
-                <p id="{{ options_dest[i] }}" class="badge badge-primary"></p>
-            </div>
+                <div class="col-2">
+                    <input class="form-control" type="{{ options_types[i] }}" {{ options_params[i] }} name="{{ options_dest[i] }}" oninput="show_value(this.name,this.value)">
+                </div>
+                <div class="col">
+                    <p id="{{ options_dest[i] }}" class="badge badge-primary"></p>
+                </div>
             {% else %}
-            <div class="col-2">
-                <input class="form-control" type="{{ options_types[i] }}" {{ options_params[i] }} name="{{ options_dest[i] }}">
-            </div>
+                <div class="col-2">
+                    <input class="form-control" type="{{ options_types[i] }}" {{ options_params[i] }} name="{{ options_dest[i] }}">
+                </div>
             {% endif %}
         </div>
     {% endfor %}

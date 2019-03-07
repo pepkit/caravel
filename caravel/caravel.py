@@ -6,7 +6,6 @@ import traceback
 import warnings
 from flask import Blueprint, Flask, render_template, request, jsonify, session, redirect, send_from_directory
 import yaml
-from _version import __version__ as CARAVEL_VERSION
 from const import *
 from helpers import *
 from looper_parser import *
@@ -92,6 +91,7 @@ def token_required(func):
 
         return func(*args, **kwargs)
     return decorated
+
 
 @token_required
 def shutdown_server():
@@ -252,7 +252,6 @@ def process():
     global p
     global config_file
     global p_info
-    global selected_subproject
     global selected_project
     global projects
 
@@ -278,10 +277,6 @@ def process():
         subprojects = list(p.subprojects.keys())
     except AttributeError:
         subprojects = None
-    try:
-        selected_subproject
-    except NameError:
-        selected_subproject = None
     p_info = {
         "name": p.name,
         "config_file": p.config_file,
@@ -290,23 +285,20 @@ def process():
         "output_dir": p.metadata.output_dir,
         "subprojects": subprojects
     }
-    return render_template('process.html', p_info=p_info, change=None, selected_subproject=selected_subproject)
+    return render_template('process.html', p_info=p_info, change=None, selected_subproject=p.subproject)
 
 
 @app.route('/_background_subproject')
 def background_subproject():
     global p
     global config_file
-    global selected_subproject
     sp = request.args.get('sp', type=str)
     output = "Activated subproject: " + sp
     if sp == "None":
-        selected_subproject = None
         p.deactivate_subproject()
     else:
         try:
             p.activate_subproject(sp)
-            selected_subproject = sp
         except AttributeError:
             output = "Upgrade peppy, see terminal for details"
             app.logger.warning("Your peppy version does not implement the subproject activation functionality. "
@@ -362,7 +354,6 @@ def summary():
 def action():
     global act
     global config_file
-    global selected_subproject
     global dests
     global currently_selected_package
     global log_path
