@@ -5,6 +5,11 @@
 <script type=text/javascript>
     $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 </script>
+<script type="text/javascript">
+  const sleep = (milliseconds) => {
+  return new Promise(resolve => setTimeout(resolve, milliseconds))
+}
+</script>
 <script type=text/javascript>
   // subproject activation
   $(function() {
@@ -16,7 +21,9 @@
         $("#sample_count").text(data.sample_count);
       });
       document.getElementById("deactivate_btn").disabled = false;
-      return false;
+      sleep(100).then(() => {
+        render_summary_notice()
+      })
     });
   });
 </script>
@@ -31,9 +38,12 @@
         $("#sample_count").text(data.sample_count);
       });
       document.getElementById("deactivate_btn").disabled = true;
-      return false;
+      sleep(100).then(() => {
+        render_summary_notice()
+      })
     });
   });
+
 </script>
 <script type=text/javascript>
   function render_options() {
@@ -59,6 +69,7 @@
           $("div#summary_notice").html(data.summary);
         } else{
           document.getElementById("summary_btn").disabled = false;
+          $("div#summary_notice").html("");
         }
       });
       return false;
@@ -102,10 +113,9 @@
     <hr class="col-xs-12">
       <h2>Perform action on the PEP</h2>
       <select id="show_options" name="actions" class="custom-select" style="width:auto;">
-        <option value="run">Run</option>
-        <option value="check">Check</option>
-        <option value="destroy">Destroy</option>
-        <option value="summarize">Summarize</option>
+        {% for i in actions %}
+          <option value="{{ i }}">{{ i|title }}</option>
+        {% endfor %}
       </select>
     <div id="options" class="divider-vertical"></div>
     <hr class="col-xs-12">
