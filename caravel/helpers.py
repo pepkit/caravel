@@ -2,8 +2,9 @@
 
 from __future__ import print_function
 import argparse
-from const import *
+from const import V_BY_NAME, REQUIRED_V_BY_NAME, DEFAULT_PORT
 import glob
+from distutils.version import LooseVersion
 from itertools import chain
 import random
 import string
@@ -18,29 +19,23 @@ import os
 from functools import partial
 
 
-def get_req_version(module=None):
+def ensure_version(current=V_BY_NAME, required=REQUIRED_V_BY_NAME):
     """
-    Read the required version of the specified module from the requirements file
+    Loose version assertion.
 
-    :param str module: the module to be checked
-    :return str | None: the required version of the requested module
+    The distutils.version.LooseVersion objects implement __cmp__ methods that allow for
+     comparisons of version strings with letters, like: "0.11.0dev".
+
+    :raise ImportError: if at least one of the versions in use does not meet the requirements
+    :return bool: True if all the requested versions match
     """
-    reqs_file = os.path.join(os.path.dirname(__file__),
-                             "requirements", "requirements-all.txt")
-    if module is not None and os.path.isfile(reqs_file):
-        with open(reqs_file) as rf:
-            for l in rf:
-                try:
-                    p, v = l.split("=")
-                except ValueError:
-                    continue
-                if module in p:
-                    return v.lstrip("=").rstrip("\n")
-            else:
-                raise Exception("Looper requirement parse failed: {}".
-                                format(reqs_file))
-    else:
-        return None
+    assert all(x in current.keys() for x in required.keys()), \
+        "the package names to be checked do not match the required versions dictionary."
+    for package in required:
+        if LooseVersion(current[package]) < LooseVersion(required[package]):
+            raise ImportError("The version of {name} in use ({in_use}) does not meet the caravel requirement ({req})"
+                            .format(name=package, in_use=current[package], req=required[package]))
+    return True
 
 
 def eprint(*args, **kwargs):
@@ -163,7 +158,7 @@ def _version_text():
 
     :return str: a compiled string
     """
-    return "caravel version: {cv}\nlooper version: {lv}\n".format(cv=CARAVEL_VERSION, lv=LOOPER_VERSION)
+    return "caravel version: {cv}\nlooper version: {lv}\n".format(cv=V_BY_NAME["caravel"], lv=V_BY_NAME["looper"])
 
 
 def print_terminal_width(txt=None, char="-"):
@@ -230,8 +225,7 @@ def run_looper(prj, args, act, log_path, logging_lvl):
             try:
                 run(args, None)
             except IOError:
-                raise Exception("{} pipelines_dir: '{}'".format(
-                    prj.__class__.__name__, prj.metadata.pipelines_dir))
+                raise Exception("{} pipelines_dir: '{}'".format(prj.__class__.__name__, prj.metadata.pipelines_dir))
 
         if act == "destroy":
             looper.looper.Destroyer(prj)(args)

@@ -398,7 +398,7 @@ def favicon():
 
 def main():
     global logging_lvl
-    ensure_looper_version()
+    ensure_version()
     logging.getLogger().setLevel(logging.INFO)
     parser = CaravelParser()
     args = parser.parse_args()
