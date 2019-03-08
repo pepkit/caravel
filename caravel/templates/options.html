@@ -11,9 +11,9 @@
         {% set labels = data[2] %}
         {% for name in names %}
             {% set i = loop.index - 1 %}
-            <div class="row justify-content-left">
+            <div class="form-row justify-content-left">
                 {% if type == "select" %}
-                    <div class="col-2">
+                    <div class="col-auto">
                         <select class="form-control" multiple name="{{ names[i] }}">
                             {% for e in opts[i] %}
                                 <option value="{{ e }}">{{ e }}</option>   
@@ -26,15 +26,16 @@
                         {% set list = opts[i].split(' ') %}
                         {% set value = list[2].split('=') %}
                         {% set default = value|last %}
-                        <p id="badge"><span id="{{ names[i] }}" class="badge badge-primary">{{ default }}</span></p>
+                        <!-- <p id="badge"><span id="{{ names[i] }}" class="badge badge-primary">{{ default }}</span></p> -->
+                        <button id="{{ names[i] }}" class="disp-value" disabled>{{ default }}</button>
                     </div>
                 {% else %}
-                    <div class="col-auto">
+                    <div class="col-auto align-items-center">
                         <input class="{{ type }}" type="{{ type }}" {{ opts[i] }} name="{{ names[i] }}">
                     </div>
                 {% endif %}
-                <div class="col-auto" id="label">
-                    <label class="col-form-label"><b><pre>{{ labels[i] }}</pre></b></label>
+                <div class="col-auto align-items-center" id="label">
+                    <label class="col-form-label align-items-center"><b><pre>{{ labels[i] }}</pre></b></label>
                 </div>
             </div>
         {% endfor %}

@@ -96,3 +96,15 @@ span {
   padding-left: 0px;
 }
 
+button.disp-value {
+  font-weight: bold; 
+  font-size: 12px; 
+  border-radius: 5px; 
+  margin-left: 10px; 
+  color: white; 
+  padding: 1px; 
+  background-color: #007bff; 
+  width: 50px; 
+  opacity: 1;
+  border: none;
+}
