@@ -3,40 +3,41 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
 </head>
 <h3>Select options</h3>
-{% set options_types = html_elements_info[0] %}
-{% set options_params = html_elements_info[1] %}
-{% set options_dest = html_elements_info[2] %}
-{% set options_names = html_elements_info[3] %}
 <form method="POST" action="{{ url_for('action') }}">
     <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
-    {% for element in options_names %}
-        {% set i = loop.index - 1 %}   
-        <div class="form-row" style="height: 30px;">
-            <div class="col-3">
-                <label class="col-form-label"><b><pre>{{ options_names[i] }}</pre></b></label>
+    {% for type, data in grouped_form_data.items() %}
+        {% set opts = data[0] %}
+        {% set names = data[1] %}
+        {% set labels = data[2] %}
+        {% for name in names %}
+            {% set i = loop.index - 1 %}
+            <div class="row justify-content-left">
+                {% if type == "select" %}
+                    <div class="col-2">
+                        <select class="form-control" multiple name="{{ names[i] }}">
+                            {% for e in opts[i] %}
+                                <option value="{{ e }}">{{ e }}</option>   
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% elif type == "range" %}
+                    <div class="col-3">
+                        <input type="{{ type }}" {{ opts[i] }} name="{{ names[i] }}" oninput="show_value(this.name,this.value)">
+                        {% set list = opts[i].split(' ') %}
+                        {% set value = list[2].split('=') %}
+                        {% set default = value|last %}
+                        <span id="{{ names[i] }}" class="badge badge-primary">{{ default }}</span>
+                    </div>
+                {% else %}
+                    <div class="col-auto">
+                        <input class="{{ type }}" type="{{ type }}" {{ opts[i] }} name="{{ names[i] }}">
+                    </div>
+                {% endif %}
+                <div class="col-auto">
+                    <label class="col-form-label"><b><pre>{{ labels[i] }}</pre></b></label>
+                </div>
             </div>
-            {% if options_types[i] == "select" %}
-                <div class="col-3">
-                    <select multiple name="{{ options_dest[i] }}" class="form-control">
-                        {% for e in options_params[i] %}
-                            <option value="{{ e }}">{{ e }}</option>   
-                        {% endfor %}
-                    </select>
-                    <p><small>Hold ctrl/command to select multiple</small></p>
-                </div>
-            {% elif options_types[i] == "range" %}
-                <div class="col-2">
-                    <input class="form-control" type="{{ options_types[i] }}" {{ options_params[i] }} name="{{ options_dest[i] }}" oninput="show_value(this.name,this.value)">
-                </div>
-                <div class="col">
-                    <p id="{{ options_dest[i] }}" class="badge badge-primary"></p>
-                </div>
-            {% else %}
-                <div class="col-2">
-                    <input class="form-control" type="{{ options_types[i] }}" {{ options_params[i] }} name="{{ options_dest[i] }}">
-                </div>
-            {% endif %}
-        </div>
+        {% endfor %}
     {% endfor %}
     <div class="divider-vertical">
         <button type="submit" class="btn btn-outline-dark ml-2">GO</button>

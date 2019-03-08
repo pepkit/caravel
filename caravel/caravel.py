@@ -318,9 +318,10 @@ def background_options():
     from looper.looper import build_parser as blp
     act = request.args.get('act', type=str) or "run"
     parser_looper = blp()
-    html_elements_info = get_html_elements_info(parser_looper, act)
-    dests = html_elements_info[2]
-    return jsonify(options=render_template('options.html', html_elements_info=html_elements_info))
+    form_elements_data = get_form_elements_data(parser_looper, act)
+    grouped_data = form_elements_data_by_type(form_elements_data)
+    geprint(grouped_data)
+    return jsonify(options=render_template('options.html', html_elements_info=form_elements_data, grouped_form_data=grouped_data))
 
 
 @app.route('/_background_summary_notice')
