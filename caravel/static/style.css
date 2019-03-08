@@ -83,8 +83,16 @@ code.footer {
   padding-right: 10px;
 }
 
-input.checkbox { 
+input[type="range"] { 
   float: left;
+  width: 70%;
 }
 
+span {
+  margin-left: 5px;
+}
+
+.col-auto#label {
+  padding-left: 0px;
+}
 

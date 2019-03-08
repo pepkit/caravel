@@ -320,8 +320,7 @@ def background_options():
     parser_looper = blp()
     form_elements_data = get_form_elements_data(parser_looper, act)
     grouped_data = form_elements_data_by_type(form_elements_data)
-    geprint(grouped_data)
-    return jsonify(options=render_template('options.html', html_elements_info=form_elements_data, grouped_form_data=grouped_data))
+    return jsonify(options=render_template('options.html', grouped_form_data=grouped_data))
 
 
 @app.route('/_background_summary_notice')
