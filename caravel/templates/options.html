@@ -26,7 +26,6 @@
                         {% set list = opts[i].split(' ') %}
                         {% set value = list[2].split('=') %}
                         {% set default = value|last %}
-                        <!-- <p id="badge"><span id="{{ names[i] }}" class="badge badge-primary">{{ default }}</span></p> -->
                         <button id="{{ names[i] }}" class="disp-value" disabled>{{ default }}</button>
                     </div>
                 {% else %}

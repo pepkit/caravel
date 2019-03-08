@@ -114,9 +114,10 @@ def get_form_elements_data(p, command=None):
 
 def form_elements_data_by_type(data):
     """
+    Group the form elements data into a dictionary by the element type.
 
-    :param data:
-    :return:
+    :param list[list] data: output of the get_form_elements_data function, nested list
+    :return dict: the data grouped in a way digestible by the HTML templates
     """
     types = data[0]
     opts = data[1]
