@@ -4,7 +4,7 @@ from functools import wraps
 import logging
 import traceback
 import warnings
-from flask import Blueprint, Flask, render_template, request, jsonify, session, redirect, send_from_directory
+from flask import Blueprint, Flask, render_template, request, jsonify, session, redirect, send_from_directory, url_for
 import yaml
 from const import *
 from helpers import *
@@ -205,6 +205,11 @@ def parse_token_file(path=TOKEN_FILE_NAME):
 def index():
     global projects
     global p
+    global selected_project
+    try:
+        del selected_project
+    except NameError:
+        app.logger.info("No project selected yet")
     try:
         del p
         app.logger.info("Project data removed")
@@ -267,7 +272,7 @@ def process():
         selected_project = request.form.get('select_project')
         if selected_project is None:
             app.logger.info("The project is not selected, redirecting to the index page.")
-            return render_template('index.html', projects=projects)
+            return redirect(url_for('index'))
     else:
         new_selected_project = request.form.get('select_project')
         if new_selected_project is not None and selected_project != new_selected_project:
