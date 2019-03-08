@@ -4,7 +4,8 @@ from functools import wraps
 import logging
 import traceback
 import warnings
-from flask import Blueprint, Flask, render_template, request, jsonify, session, redirect, send_from_directory, url_for
+from flask import Blueprint, Flask, render_template, request, jsonify, session, redirect, send_from_directory, url_for,\
+    flash
 import yaml
 from const import *
 from helpers import *
@@ -272,6 +273,7 @@ def process():
         selected_project = request.form.get('select_project')
         if selected_project is None:
             app.logger.info("The project is not selected, redirecting to the index page.")
+            flash("No project was not selected, choose one from the list below.")
             return redirect(url_for('index'))
     else:
         new_selected_project = request.form.get('select_project')
