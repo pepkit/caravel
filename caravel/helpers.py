@@ -19,6 +19,29 @@ import os
 from functools import partial
 
 
+def get_items(i, l):
+    """
+    Get a sublist of list elements by their indices
+
+    :param list[int] i: a list of elements indices
+    :param list l: list
+    :return list: a list of the desired elements
+    """
+    return map(l.__getitem__, i)
+
+
+def find_in_list(x, l):
+    """
+    Get indices of the element x in list l
+
+    :param x: element to find
+    :param list l: list to be inspected
+    :return list: indices of the element
+    """
+    assert isinstance(l, list), "The argument l has to be a list, got '{}'.".format(type(l))
+    return [index for index, value in enumerate(l) if value == x]
+
+
 def get_summary_html_name(prj):
     """
     Get the name of the summary HTML file for provided project object

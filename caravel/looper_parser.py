@@ -2,8 +2,9 @@
 
 import argparse
 from const import SET_ELSEWHERE
-__all__ = ["get_long_optnames", "get_html_elements_info", "opts_by_prog", "html_param_builder", "convert_value",
-           "parse_namespace", "get_positional_args"]
+from helpers import *
+__all__ = ["get_long_optnames", "get_form_elements_data", "opts_by_prog", "html_param_builder", "convert_value",
+           "parse_namespace", "get_positional_args", "form_elements_data_by_type"]
 
 
 def get_positional_args(p, sort=False):
@@ -72,7 +73,7 @@ def _is_set_elsewhere(opt):
     return [_get_long_opt(opt)] in SET_ELSEWHERE
 
 
-def get_html_elements_info(p, command=None):
+def get_form_elements_data(p, command=None):
     """
     Determine the type of the HTML form element from the looper parser/subparser.
     Additionally, get a list of dictionaries with the HTML elements parameters and corresponding values
@@ -109,6 +110,27 @@ def get_html_elements_info(p, command=None):
     ret_vals_lens = set(map(len, [html_elements_types, html_params, html_dest, opt_names]))
     assert len(ret_vals_lens) == 1, "The lengths of return lists are not equal, '{}'".format(ret_vals_lens)
     return [html_elements_types, html_params, html_dest, opt_names]
+
+
+def form_elements_data_by_type(data):
+    """
+
+    :param data:
+    :return:
+    """
+    types = data[0]
+    opts = data[1]
+    dests = data[2]
+    optstrings = data[3]
+    unique_types = list(set(types))
+    ret_dict = dict()
+    for i in unique_types:
+        indices = find_in_list(i, types)
+        sel_opts = get_items(indices, opts)
+        sel_dests = get_items(indices, dests)
+        sel_optstrings = get_items(indices, optstrings)
+        ret_dict.update({i: [sel_opts, sel_dests, sel_optstrings]})
+    return ret_dict
 
 
 def _get_subparser(p):
