@@ -23,9 +23,16 @@
                 {% elif type == "range" %}
                     <div class="col-2">
                         <input type="{{ type }}" {{ opts[i] }} name="{{ names[i] }}" oninput="show_value(this.name,this.value)">
+                        {% set default = "None" %}
                         {% set list = opts[i].split(' ') %}
-                        {% set value = list[2].split('=') %}
-                        {% set default = value|last %}
+                        {% if list|length > 1 %}
+                            {% if list[2].startswith("val") %}
+                                {% set value = list[2].split('=') %}
+                                {% if value|length > 1 %}
+                                    {% set default = value|last %}
+                                {% endif %}   
+                            {% endif %}     
+                        {% endif %}
                         <button id="{{ names[i] }}" class="disp-value" disabled>{{ default }}</button>
                     </div>
                 {% else %}
