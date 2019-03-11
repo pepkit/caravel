@@ -11,7 +11,7 @@ from const import *
 from helpers import *
 from looper_parser import *
 import divvy
-import textile
+from textile import textile
 from peppy.utils import coll_like
 from platform import python_version
 from looper.project import Project
@@ -391,9 +391,9 @@ def action():
 def background_result():
     global p_info
     global log_path
-    with open(log_path, "r") as log:
-        log_content = log.read()
-    return jsonify(result=textile.textile(log_content))
+    global act
+    page = compile_results_content(log_path, act)
+    return jsonify(result=textile(page))
 
 
 @app.route('/favicon.ico')

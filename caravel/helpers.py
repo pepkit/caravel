@@ -16,6 +16,7 @@ import termios
 import struct
 from flask import render_template
 import os
+from re import sub
 from functools import partial
 
 
@@ -28,6 +29,36 @@ def get_items(i, l):
     :return list: a list of the desired elements
     """
     return map(l.__getitem__, i)
+
+
+def compile_results_content(log_path, act):
+    """
+    Compile the content of the looper results page. Apart from reading the contents of the log file
+    (that stores the looper log) a header and a footer are pre/appended.
+
+    :param str log_path: a path to the caravel log file to be shown
+    :param str act: the name of the action to be shown in the header of the page
+    :return str: the page
+    """
+    try:
+        with open(log_path, "r") as log:
+            log_content = log.read()
+            compiled_text = "<h2><code>looper {act} </code>results:</br></h2><hr>".format(act=act) +\
+                            log_content +\
+                            "<hr>log read from <code>{log_path}</code></br>".format(log_path=log_path)
+    except IOError:
+        compiled_text = "<b>Cannot find the log file: '{}'</b>".format(log_path)
+    return color_to_bold(compiled_text)
+
+
+def color_to_bold(txt):
+    """
+    Replace the color markers (from colorama.Fore) with the HTML bold tags
+
+    :param txt: the string to be edited
+    :return str: the uncolored and bolded string
+    """
+    return sub(pattern=r"\[\d{1}\w{1}", repl="</b>", string=sub(pattern=r"\[\d{2}\w{1}", repl="<b>", string=txt))
 
 
 def find_in_list(x, l):
