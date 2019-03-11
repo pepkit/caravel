@@ -32,6 +32,7 @@ def get_req_version(module=None):
 
 
 DEFAULT_PORT = 5000
+DEFAULT_LOGGING_LVL = 20
 CONFIG_ENV_VAR = "CARAVEL"
 CONFIG_PRJ_KEY = "projects"
 CONFIG_TOKEN_KEY = "token"

@@ -405,7 +405,6 @@ def favicon():
 def main():
     global logging_lvl
     ensure_version()
-    logging.getLogger().setLevel(logging.INFO)
     parser = CaravelParser()
     args = parser.parse_args()
     app.config["port"] = args.port
@@ -416,8 +415,9 @@ def main():
         warnings.warn("You have entered the debug mode. The server-client connection is not secure!")
         logging_lvl = 10
     else:
-        logging_lvl = 30
+        logging_lvl = DEFAULT_LOGGING_LVL
         generate_token(token=parse_token_file())
+    logging.getLogger().setLevel(logging_lvl)
     app.run(port=args.port)
 
 

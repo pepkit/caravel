@@ -48,10 +48,10 @@ def compile_results_content(log_path, act):
                             "<hr>log read from <code>{log_path}</code></br>".format(log_path=log_path)
     except IOError:
         compiled_text = "<b>Cannot find the log file: '{}'</b>".format(log_path)
-    return color_to_bold(compiled_text)
+    return _color_to_bold(compiled_text)
 
 
-def color_to_bold(txt):
+def _color_to_bold(txt):
     """
     Replace the color markers (from colorama.Fore) with the HTML bold tags
 
@@ -228,7 +228,7 @@ def _version_text():
     return "caravel version: {cv}\nlooper version: {lv}\n".format(cv=V_BY_NAME["caravel"], lv=V_BY_NAME["looper"])
 
 
-def print_terminal_width(txt=None, char="-"):
+def _print_terminal_width(txt=None, char="-"):
     """
     Print a line composed of the chars and a text in the middle of the terminal
 
@@ -238,12 +238,12 @@ def print_terminal_width(txt=None, char="-"):
     char = str(char)
     assert len(char) == 1, "The length of the char parameter has to be equal 1, got '{}'".format(len(char))
     spaced_txt = txt.center(len(txt)+2) if txt is not None else ""
-    fill_width = int(0.5 * (terminal_width() - len(spaced_txt)))
+    fill_width = int(0.5 * (_terminal_width() - len(spaced_txt)))
     filler = char * fill_width
     print(filler + spaced_txt + filler)
 
 
-def terminal_width():
+def _terminal_width():
     """
     Get terminal width
 
@@ -262,9 +262,9 @@ def _wrap_func_in_box(func, title):
     :return callable: decorated function
     """
     def decorated(*args, **kwargs):
-        print_terminal_width(title)
+        _print_terminal_width(title)
         func(*args, **kwargs)
-        print_terminal_width()
+        _print_terminal_width()
     return decorated
 
 

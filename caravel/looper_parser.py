@@ -3,8 +3,6 @@
 import argparse
 from const import SET_ELSEWHERE
 from helpers import *
-__all__ = ["get_long_optnames", "get_form_elements_data", "opts_by_prog", "html_param_builder", "convert_value",
-           "parse_namespace", "get_positional_args", "form_elements_data_by_type"]
 
 
 def get_positional_args(p, sort=False):
@@ -25,25 +23,6 @@ def get_positional_args(p, sort=False):
 
     pos_args = list(_get_subparser(p).choices.viewkeys())
     return _sort_looper_actions(pos_args) if sort else pos_args
-
-
-def get_long_optnames(p):
-    """
-    Map each program/subcommand name to collection of long option names.
-
-    :param argparse.ArgumentParser p: the CLI parser to inspect
-    :return dict[str, Iterable[str]]: binding between program/subcommand name
-        and collection of option names for it
-    """
-
-    def use_act(a):
-        return not _is_set_elsewhere(a.option_strings)
-
-    def get_name(a):
-        if not _is_set_elsewhere(a.option_strings):
-                return _get_long_opt(a.option_strings)
-
-    return opts_by_prog(p, get_name=get_name, use_act=use_act)
 
 
 def opts_by_prog(p, get_name, use_act):
@@ -105,7 +84,7 @@ def get_form_elements_data(p, command=None):
             type = type_data.element_type
             params = type_data.element_args
             html_elements_types.append(type)
-            html_params.append(html_param_builder(params))
+            html_params.append(_html_param_builder(params))
             html_dest.append(opt.dest)
     ret_vals_lens = set(map(len, [html_elements_types, html_params, html_dest, opt_names]))
     assert len(ret_vals_lens) == 1, "The lengths of return lists are not equal, '{}'".format(ret_vals_lens)
@@ -182,7 +161,7 @@ def _is_long_optname(n):
     return n.startswith("--")
 
 
-def html_param_builder(params):
+def _html_param_builder(params):
     """
     Build a HTML params string out of a dictionary of the option names and their values. If a list is the value
     (it is intended in a select case) the original list is returned instead of a string
