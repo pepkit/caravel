@@ -6,8 +6,8 @@ Here you can see the command-line usage instructions for the main caravel comman
 
 `python caravel/caravel.py --help`
 ```
-caravel version: 0.2-dev
-looper version: 0.11.0dev
+caravel version: 0.2
+looper version: 0.11.0
 usage: caravel.py [-h] [-V] [-c CONFIG] [-p PORT] [-d]
 
 caravel.py - Run a web interface for looper.
