@@ -207,15 +207,16 @@ def index():
     global projects
     global p
     global selected_project
-    try:
-        del selected_project
-    except NameError:
-        app.logger.info("No project selected yet")
-    try:
-        del p
-        app.logger.info("Project data removed")
-    except NameError:
-        app.logger.info("No project defined yet")
+    if request.args.get('start_over'):
+        try:
+            del selected_project
+        except NameError:
+            app.logger.info("No project selected yet")
+        try:
+            del p
+            app.logger.info("Project data removed")
+        except NameError:
+            app.logger.info("No project defined yet")
     projects = parse_config_file()
     return render_template('index.html', projects=projects)
 
