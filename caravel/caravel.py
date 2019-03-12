@@ -329,31 +329,24 @@ def background_options():
 @app.route('/_background_summary_notice')
 def background_summary_notice():
     global p
-    global summary_string
-    global summary_location
+    global summary_html_name
     summary_html_name = get_summary_html_name(p)
     summary_location = os.path.join(p.metadata.output_dir, summary_html_name)
-    if os.path.isfile(summary_location):
-        psummary = Blueprint(p.name, __name__, template_folder=p.metadata.output_dir)
-
-        @psummary.route("/{pname}/summary/<path:page_name>".format(pname=p.name), methods=['GET'])
-        def render_static(page_name):
-            return render_template('%s' % page_name)
-        try:
-            app.register_blueprint(psummary)
-        except AssertionError:
-            app.logger.info("this blueprint was already registered")
-        summary_string = "{name}/summary/{summary_html}".format(name=p.name,
-                                                                summary_html=summary_html_name)
-        return jsonify(present="1")
-    else:
-        return jsonify(present="0", summary=render_template('summary_notice.html'))
+    presence_code = ("1" if os.path.isfile(summary_location) else "0")
+    return jsonify(present=presence_code, summary=render_template('summary_notice.html'))
 
 
 @app.route('/summary', methods=['POST'])
 def summary():
-    global summary_string
+    global summary_html_name
+    summary_string = "summary/{}".format(summary_html_name)
     return redirect(summary_string)
+
+
+@app.route("/summary/<path:filename>", methods=['GET'])
+def serve_static(filename):
+    global p
+    return send_from_directory(p.output_dir, filename)
 
 
 @app.route("/action", methods=['GET', 'POST'])
