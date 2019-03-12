@@ -7,7 +7,7 @@ Changed:
   - Use logger instead of printing to the error for logging
   - Instead of having the optional `token` section in the config file 
   allow to use hidden `.caravel_token` to predefine the token
-  - Change logging  levels are 10 (debug) and 20 (info) in debug and normal modes, respectively
+  - Change logging levels to 10 (debug) and 20 (info) in debug and normal modes, respectively
 
 Added:
 
