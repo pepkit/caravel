@@ -11,7 +11,7 @@
         {% set labels = data[2] %}
         {% for name in names %}
             {% set i = loop.index - 1 %}
-            <div class="form-row justify-content-left">
+            <div class="row justify-content-left">
                 {% if type == "select" %}
                     <div class="col-auto">
                         <select class="form-control" multiple name="{{ names[i] }}">
@@ -21,7 +21,7 @@
                         </select>
                     </div>
                 {% elif type == "range" %}
-                    <div class="col-3">
+                    <div class="col-2 col-slider">
                         <input type="{{ type }}" {{ opts[i] }} name="{{ names[i] }}" oninput="show_value(this.name,this.value)">
                         {% set default = "None" %}
                         {% set list = opts[i].split(' ') %}
@@ -36,11 +36,11 @@
                         <button id="{{ names[i] }}" class="disp-value" disabled>{{ default }}</button>
                     </div>
                 {% else %}
-                    <div class="col-auto align-items-center">
+                    <div class="col-auto">
                         <input class="{{ type }}" type="{{ type }}" {{ opts[i] }} name="{{ names[i] }}">
                     </div>
                 {% endif %}
-                <div class="col-auto align-items-center" id="label">
+                <div class="col-auto" id="label">
                     <label class="col-form-label"><b><pre class="form">{{ labels[i] }}</pre></b></label>
                 </div>
             </div>

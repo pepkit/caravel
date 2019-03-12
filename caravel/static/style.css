@@ -85,15 +85,17 @@ code.footer {
 
 input[type="range"] { 
   float: left;
-  width: 70%;
+  width: 75%;
+  min-width: 50px;
 }
 
 span {
   margin-left: 5px;
 }
 
-.col-auto#label {
-  padding-left: 0px;
+div.col-auto {
+  padding-left: 10px;
+  padding-right: 0px;
 }
 
 label.col-form-label {
@@ -110,11 +112,18 @@ button.disp-value {
   font-weight: bold; 
   font-size: 12px; 
   border-radius: 5px; 
-  margin-left: 10px; 
+  margin-left: 5px; 
   color: white; 
   padding: 1px; 
   background-color: #007bff; 
   width: 50px; 
   opacity: 1;
   border: none;
+}
+
+div.col-slider {
+  display: inline-block;
+  width: 100%;
+  min-width: 240px;
+  padding-right: 0px;
 }
