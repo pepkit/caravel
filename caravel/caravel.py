@@ -274,7 +274,7 @@ def process():
         selected_project = request.form.get('select_project')
         if selected_project is None:
             app.logger.info("The project is not selected, redirecting to the index page.")
-            flash("No project was not selected, choose one from the list below.")
+            flash("No project was selected, choose one from the list below.")
             return redirect(url_for('index'))
     else:
         new_selected_project = request.form.get('select_project')
