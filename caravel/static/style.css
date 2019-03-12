@@ -96,6 +96,16 @@ span {
   padding-left: 0px;
 }
 
+label.col-form-label {
+  padding-bottom: 0px;
+  padding-top: 0px;
+}
+
+pre.form {
+  margin-bottom: 0px;
+  margin-top: 0px;
+}
+
 button.disp-value {
   font-weight: bold; 
   font-size: 12px; 

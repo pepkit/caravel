@@ -21,7 +21,7 @@
                         </select>
                     </div>
                 {% elif type == "range" %}
-                    <div class="col-2">
+                    <div class="col-3">
                         <input type="{{ type }}" {{ opts[i] }} name="{{ names[i] }}" oninput="show_value(this.name,this.value)">
                         {% set default = "None" %}
                         {% set list = opts[i].split(' ') %}
@@ -41,7 +41,7 @@
                     </div>
                 {% endif %}
                 <div class="col-auto align-items-center" id="label">
-                    <label class="col-form-label align-items-center"><b><pre>{{ labels[i] }}</pre></b></label>
+                    <label class="col-form-label"><b><pre class="form">{{ labels[i] }}</pre></b></label>
                 </div>
             </div>
         {% endfor %}
