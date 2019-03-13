@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 import argparse
-from const import V_BY_NAME, REQUIRED_V_BY_NAME, DEFAULT_PORT
+from const import V_BY_NAME, REQUIRED_V_BY_NAME, DEFAULT_PORT, DEFAULT_TERMIAL_WIDTH
 import glob
 from distutils.version import LooseVersion
 from itertools import chain
@@ -249,7 +249,10 @@ def _terminal_width():
 
     :return int: width of the terminal
     """
-    _, tw = struct.unpack('HH', fcntl.ioctl(0, termios.TIOCGWINSZ, struct.pack('HH', 0, 0)))
+    try:
+        _, tw = struct.unpack('HH', fcntl.ioctl(0, termios.TIOCGWINSZ, struct.pack('HH', 0, 0)))
+    except IOError:
+        tw = DEFAULT_TERMINAL_WIDTH
     return tw
 
 

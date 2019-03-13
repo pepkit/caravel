@@ -45,3 +45,4 @@ REQUIRED_LOOPER_VERSION = get_req_version("looper")["looper"]
 REQUIRED_PEPPY_VERSION = get_req_version("peppy")["peppy"]
 REQUIRED_V_BY_NAME = {"looper": REQUIRED_LOOPER_VERSION, "peppy": REQUIRED_PEPPY_VERSION}
 V_BY_NAME = {"looper": LOOPER_VERSION, "peppy": PEPPY_VERSION, "caravel": CARAVEL_VERSION}
+DEFAULT_TERMIAL_WIDTH = 40
