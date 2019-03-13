@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 import argparse
-from const import V_BY_NAME, REQUIRED_V_BY_NAME, DEFAULT_PORT, DEFAULT_TERMIAL_WIDTH
+from const import V_BY_NAME, REQUIRED_V_BY_NAME, DEFAULT_PORT, DEFAULT_TERMINAL_WIDTH
 import glob
 from distutils.version import LooseVersion
 from itertools import chain
