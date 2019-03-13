@@ -52,23 +52,24 @@ def _is_set_elsewhere(opt):
     return [_get_long_opt(opt)] in SET_ELSEWHERE
 
 
-def get_form_elements_data(p, command=None):
+def get_form_elements_data(parser, project, command=None):
     """
     Determine the type of the HTML form element from the looper parser/subparser.
     Additionally, get a list of dictionaries with the HTML elements parameters and corresponding values
     needed to construct the objects and the dest values.
     See _is_set_elsewhere documentation for the options that are omitted.
 
-    :param argparse.ArgumentParser p: the parser to inspect
+    :param argparse.ArgumentParser parser: the parser to inspect
+    :param peppy.Project project: the Project in the context of which the data should be processed
     :param str command: looper command name if no name provided the main parser is used
     :return: html_element_type: name of the html elements to use
     :return: html_params: parameters needed for HTML form elements construction
     :rtype: (list, list[dict])
     """
     if command is None:
-        opts = p._actions
+        opts = parser._actions
     else:
-        subparser = _get_subparser(p)
+        subparser = _get_subparser(parser)
         opts = subparser.choices[command]._actions
 
     html_elements_types = []
@@ -82,13 +83,30 @@ def get_form_elements_data(p, command=None):
             opt_names.append(_get_long_opt(opt.option_strings))
             type_data = opt.type(caravel=True)
             type = type_data.element_type
-            params = type_data.element_args
+            params = process_type_args(type_data.element_args, project)
             html_elements_types.append(type)
             html_params.append(_html_param_builder(params))
             html_dest.append(opt.dest)
     ret_vals_lens = set(map(len, [html_elements_types, html_params, html_dest, opt_names]))
     assert len(ret_vals_lens) == 1, "The lengths of return lists are not equal, '{}'".format(ret_vals_lens)
     return [html_elements_types, html_params, html_dest, opt_names]
+
+
+def process_type_args(type_args, project):
+    """
+    Process the HTML form arguments from the custom type object
+
+    The processing is strictly dependant on the class of the particular parameter. For instance,
+    if the argument is a str the processed one will be the value of the Project's attribute named this way.
+
+    :param dict type_args: the HTML form arguments from the type object
+    :param peppy.Project project: the Project in the context of which the data should be processed
+    :return dict: the dict with processed values
+    """
+    for k, v in type_args.iteritems():
+        if isinstance(v, str):
+            type_args[k] = getattr(project, v)
+    return type_args
 
 
 def form_elements_data_by_type(data):
@@ -173,7 +191,7 @@ def _html_param_builder(params):
     for key, value in params.items():
         if isinstance(value, list):
             return value
-        string = string + key + "=" + value + " "
+        string = string + key + "=" + str(value) + " "
     return string.strip()
 
 

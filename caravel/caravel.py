@@ -318,10 +318,11 @@ def background_options():
     global p_info
     global act
     global dests
+    global p
     from looper.looper import build_parser as blp
     act = request.args.get('act', type=str) or "run"
     parser_looper = blp()
-    form_elements_data = get_form_elements_data(parser_looper, act)
+    form_elements_data = get_form_elements_data(parser_looper, p, act)
     dests = form_elements_data[2]
     grouped_data = form_elements_data_by_type(form_elements_data)
     return jsonify(options=render_template('options.html', grouped_form_data=grouped_data))
