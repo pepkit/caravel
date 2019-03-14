@@ -367,6 +367,7 @@ def action():
     for arg in dests:
         value = convert_value(request.form.get(arg))
         args_dict[arg] = value
+    args_dict["force_yes"] = True
     # perform necessary changes so the looper understands the Namespace
     args_dict = parse_namespace(args_dict)
     # establish the looper log path
