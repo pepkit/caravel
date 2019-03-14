@@ -189,7 +189,8 @@ class CaravelParser(argparse.ArgumentParser):
     def __init__(self):
 
         super(CaravelParser, self).__init__(
-            description="%(prog)s - Run a web interface for looper.",
+            description="%(prog)s - run a web interface for looper",
+            epilog="See docs at: http://code.databio.org/caravel/",
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
         self.add_argument(

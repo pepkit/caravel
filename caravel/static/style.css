@@ -127,3 +127,11 @@ div.col-slider {
   min-width: 240px;
   padding-right: 0px;
 }
+
+.nav-link {
+  color: white;
+  }
+
+.nav-link:hover {
+  color: white;
+  }
