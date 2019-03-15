@@ -5,11 +5,6 @@
 <script type=text/javascript>
     $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 </script>
-<script type="text/javascript">
-  const sleep = (milliseconds) => {
-  return new Promise(resolve => setTimeout(resolve, milliseconds))
-}
-</script>
 <script type=text/javascript>
   // subproject activation
   $(function() {
@@ -37,7 +32,6 @@
       document.getElementById("deactivate_btn").disabled = true;
     });
   });
-
 </script>
 <script type=text/javascript>
   function render_options() {
@@ -54,31 +48,19 @@
     $('select#show_options').bind('change', render_options);
   });
 </script>
-<!-- <script type=text/javascript>
-  function render_summary_notice() {
-      $.getJSON($SCRIPT_ROOT + '/_background_summary_notice', {
-      }, function(data) {
-        if(data.present == "0"){
-          document.getElementById("summary_btn").disabled = true;
-          $("div#summary_notice").html(data.summary);
-        } else{
-          document.getElementById("summary_btn").disabled = false;
-          $("div#summary_notice").html("");
-        }
-      });
-      return false;
-    }
-  $(function() {
-    // The function is triggered on page load
-    render_summary_notice()
-  });
-</script> -->
 <script>
   function show_value(name, value) {
     // This function is used in the form in the options.html file
     // get the name of the element to control and the value that should be displayed
    document.getElementById(name).innerHTML=value;
   };
+</script>
+<script type="text/javascript">
+jQuery( document ).ready(function( $ ) {
+   $(window).on('popstate', function() {
+      location.reload(true);
+   });
+});
 </script>
 {% endblock %}
 {% block title %}Process{% endblock %}
@@ -117,8 +99,4 @@
         {% endfor %}
       </select>
     <div id="options" class="divider-vertical"></div>
-    <hr class="col-xs-12">
-    <form method="POST" action="{{ url_for('summary') }}">
-      <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
-    </form>
 {% endblock %}
