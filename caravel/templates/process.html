@@ -21,9 +21,6 @@
         $("#sample_count").text(data.sample_count);
       });
       document.getElementById("deactivate_btn").disabled = false;
-      sleep(100).then(() => {
-        render_summary_notice()
-      })
     });
   });
 </script>
@@ -38,9 +35,6 @@
         $("#sample_count").text(data.sample_count);
       });
       document.getElementById("deactivate_btn").disabled = true;
-      sleep(100).then(() => {
-        render_summary_notice()
-      })
     });
   });
 
@@ -60,7 +54,7 @@
     $('select#show_options').bind('change', render_options);
   });
 </script>
-<script type=text/javascript>
+<!-- <script type=text/javascript>
   function render_summary_notice() {
       $.getJSON($SCRIPT_ROOT + '/_background_summary_notice', {
       }, function(data) {
@@ -78,7 +72,7 @@
     // The function is triggered on page load
     render_summary_notice()
   });
-</script>
+</script> -->
 <script>
   function show_value(name, value) {
     // This function is used in the form in the options.html file
@@ -88,6 +82,11 @@
 </script>
 {% endblock %}
 {% block title %}Process{% endblock %}
+{% block navbar %}
+  <li class="nav-item active">
+    <a class="nav-link" href="{{ url_for('summary') }}">Summary <i class="fa fa-bar-chart"></i></a>
+  </li>
+{% endblock %}
 {% block content %}
     <h2>Selected PEP info:</h2>
     {% for item in p_info %} 
@@ -121,9 +120,5 @@
     <hr class="col-xs-12">
     <form method="POST" action="{{ url_for('summary') }}">
       <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
-      <div class="divider-vertical">
-        <button type="submit" id="summary_btn" name="summary_btn" class="btn btn-outline-dark">See summary</button>
-      </div>
     </form>
-    <div id="summary_notice"></div>
 {% endblock %}

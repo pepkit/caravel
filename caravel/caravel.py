@@ -328,21 +328,19 @@ def background_options():
     return jsonify(options=render_template('options.html', grouped_form_data=grouped_data))
 
 
-@app.route('/_background_summary_notice')
-def background_summary_notice():
+@app.route('/summary', methods=['GET'])
+def summary():
     global p
-    global summary_html_name
     summary_html_name = get_summary_html_name(p)
     summary_location = os.path.join(p.metadata.output_dir, summary_html_name)
-    presence_code = ("1" if os.path.isfile(summary_location) else "0")
-    return jsonify(present=presence_code, summary=render_template('summary_notice.html'))
-
-
-@app.route('/summary', methods=['POST'])
-def summary():
-    global summary_html_name
-    summary_string = "summary/{}".format(summary_html_name)
-    return redirect(summary_string)
+    if os.path.exists(summary_location):
+        summary_string = "summary/{}".format(summary_html_name)
+        return redirect(summary_string)
+    else:
+        flash("Summary hasn't been generated yet")
+        app.logger.warning("Summary file '{file}' not found in '{dir}'".format(file=summary_html_name,
+                                                                           dir=os.path.dirname(summary_location)))
+        return redirect(request.referrer)
 
 
 @app.route("/summary/<path:filename>", methods=['GET'])
