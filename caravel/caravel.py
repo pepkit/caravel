@@ -275,6 +275,7 @@ def process():
         if selected_project is None:
             app.logger.info("The project is not selected, redirecting to the index page.")
             flash("No project was selected, choose one from the list below.")
+            del selected_project
             return redirect(url_for('index'))
     else:
         new_selected_project = request.form.get('select_project')
@@ -331,6 +332,13 @@ def background_options():
 @app.route('/summary', methods=['GET'])
 def summary():
     global p
+    global selected_project
+    try:
+        selected_project
+    except NameError:
+        app.logger.info("The project is not selected, redirecting to the index page.")
+        flash("No project was selected, choose one from the list below.")
+        return redirect(url_for('index'))
     summary_html_name = get_summary_html_name(p)
     summary_location = os.path.join(p.metadata.output_dir, summary_html_name)
     if os.path.exists(summary_location):

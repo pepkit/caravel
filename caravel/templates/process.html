@@ -64,11 +64,6 @@ jQuery( document ).ready(function( $ ) {
 </script>
 {% endblock %}
 {% block title %}Process{% endblock %}
-{% block navbar %}
-  <li class="nav-item active">
-    <a class="nav-link" href="{{ url_for('summary') }}">Summary <i class="fa fa-bar-chart"></i></a>
-  </li>
-{% endblock %}
 {% block content %}
     <h2>Selected PEP info:</h2>
     {% for item in p_info %} 
