@@ -49,6 +49,9 @@
 			<a class="nav-link" href="{{ url_for('index', start_over=True) }}">
 				<button type="submit" class="btn btn-outline-light">START OVER <i class="fa fa-undo"></i></button>
 			</a>
+			{% if debug %}
+				<button type="submit" class="btn btn-danger" disabled><i class="fa fa-bug fa-spin fa-1x fa-fw"></i></button>
+			{% endif %}
 		</div>
 	</nav>
 

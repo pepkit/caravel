@@ -24,7 +24,7 @@ app.logger.info("Using python {}".format(python_version()))
 @app.context_processor
 def inject_dict_for_all_templates():
     return dict(caravel_version=CARAVEL_VERSION, looper_version=LOOPER_VERSION, python_version=python_version(),
-                referrer=request.referrer)
+                referrer=request.referrer, debug=app.config["DEBUG"])
 
 
 def clear_session_data(keys):
