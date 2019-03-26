@@ -207,7 +207,12 @@ def index():
     global projects
     global p
     global selected_project
-    if request.args.get('start_over'):
+    global reset_btn
+    try:
+        reset_btn
+    except NameError:
+        reset_btn = None
+    if request.args.get('reset'):
         try:
             del selected_project
         except NameError:
@@ -217,8 +222,10 @@ def index():
             app.logger.info("Project data removed")
         except NameError:
             app.logger.info("No project defined yet")
+        reset_btn = None
+    app.logger.info("reset button: {}".format(str(reset_btn)))
     projects = parse_config_file()
-    return render_template('index.html', projects=projects)
+    return render_template('index.html', projects=projects, reset_btn=reset_btn)
 
 
 @app.route("/set_comp_env")
@@ -227,7 +234,6 @@ def set_comp_env():
     global compute_config
     global active_settings
     global currently_selected_package
-
     try:
         compute_config
     except NameError:
@@ -262,6 +268,8 @@ def process():
     global p_info
     global selected_project
     global projects
+    global reset_btn
+    reset_btn = True
     from looper import build_parser as blp
 
     actions = get_positional_args(blp(), sort=True)

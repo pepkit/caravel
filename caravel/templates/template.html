@@ -24,30 +24,27 @@
 		<div class="collapse navbar-collapse" id="navbarTogglerDemo03">
 			<ul class="navbar-nav mr-auto mt-2 mt-lg-0">
 				<li class="nav-item active">
-					<a class="nav-link" href="{{ url_for('index') }}">Home <i class="fa fa-home" aria-hidden="true"></i></a>
+					<a class="nav-link" href="{{ url_for('index') }}"><i class="fa fa-2x fa-home" aria-hidden="true"></i></a>
 				</li>
 				<li class="nav-item active">
-					<a class="nav-link" href="{{ url_for('set_comp_env') }}">Environment settings <i class="fa fa-cog"></i></a>
+					<a class="nav-link" href="{{ url_for('set_comp_env') }}"><i class="fa fa-2x fa-cog"></i></a>
 				</li>
 				<li class="nav-item active">
-					<a class="nav-link" href="{{ url_for('process') }}">Process <i class="fa fa-tasks"></i></a>
+					<a class="nav-link" href="{{ url_for('process') }}"><i class="fa fa-tasks"></i> Process</a>
 				</li>
-				  <li class="nav-item active">
-				    <a class="nav-link" href="{{ url_for('summary') }}">Summary <i class="fa fa-bar-chart"></i></a>
-				  </li>
+				<li class="nav-item active">
+					<a class="nav-link" href="{{ url_for('summary') }}"><i class="fa fa-bar-chart"></i> Summary</a>
+				</li>
 				{% block navbar %}
 				{% endblock %}
+				{% if summary_links is defined %}
+					{{ summary_links|safe }}
+				{% endif %}
 			</ul> 
-			<ul class="nav justify-content-end">
-				<li class="nav-item active">
-					<a class="nav-link" href="http://code.databio.org/caravel/" target="_blank">Docs <i class="fa fa-book"></i></a>
-				</li>
-			</ul>
+			{% block navbar_right %}
+			{% endblock %}
 			<a class="nav-link" href="{{ url_for('shutdown') }}">
-				<button type="submit" class="btn btn-outline-light">CLOSE <i class="fa fa-times"></i></button>
-			</a>
-			<a class="nav-link" href="{{ url_for('index', start_over=True) }}">
-				<button type="submit" class="btn btn-outline-light">START OVER <i class="fa fa-undo"></i></button>
+				<button type="submit" class="btn btn-outline-light"><i class="fa fa-1x fa-times"></i></button>
 			</a>
 			{% if debug %}
 				<button type="submit" class="btn btn-danger" disabled><i class="fa fa-bug fa-spin fa-1x fa-fw"></i></button>
@@ -98,7 +95,7 @@
 			</tbody>
 		</table>
 		</span>
-		<span class="right">© 2018 <a href="http://databio.org/" target="_new">Sheffield Computational Biology Lab</a> at the University of Virginia</span>
+		<span class="right"><a href="http://code.databio.org/caravel/" target="_blank">Docs <i class="fa fa-book"></i></a> © 2018 <a href="http://databio.org/" target="_new">Sheffield Computational Biology Lab</a> at the University of Virginia</span>
 	</footer>
 {% endblock %}
 </html>

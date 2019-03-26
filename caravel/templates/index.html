@@ -1,5 +1,12 @@
 {% extends "template.html" %}
 {% block title %}Index{% endblock %}
+{% block navbar_right %}
+	{% if reset_btn is not none %}
+		<a href="{{ url_for('index', reset=True) }}">
+			<button type="submit" class="btn btn-outline-light">RESET <i class="fa fa-undo"></i></button>
+		</a>
+	{% endif %}		
+{% endblock %}
 {% block content %}
 <h2>Select the input project:</h2>
 <form class="form-inline" method="POST" action="{{ url_for('process') }}">
