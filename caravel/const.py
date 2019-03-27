@@ -46,3 +46,4 @@ REQUIRED_PEPPY_VERSION = get_req_version("peppy")["peppy"]
 REQUIRED_V_BY_NAME = {"looper": REQUIRED_LOOPER_VERSION, "peppy": REQUIRED_PEPPY_VERSION}
 V_BY_NAME = {"looper": LOOPER_VERSION, "peppy": PEPPY_VERSION, "caravel": CARAVEL_VERSION}
 DEFAULT_TERMINAL_WIDTH = 80
+SUMMARY_NAVBAR_PLACEHOLDER = "<li class='nav-item active'><a class='nav-link' href='#'>No summary yet</a></li>"

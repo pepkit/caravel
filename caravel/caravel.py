@@ -15,6 +15,8 @@ from textile import textile
 from peppy.utils import coll_like
 from platform import python_version
 from looper.project import Project
+from looper.html_reports import *
+from looper.looper import Summarizer
 
 
 app = Flask(__name__)
@@ -23,8 +25,13 @@ app.logger.info("Using python {}".format(python_version()))
 
 @app.context_processor
 def inject_dict_for_all_templates():
+    global summary_links
+    try:
+        summary_links
+    except NameError:
+        summary_links = SUMMARY_NAVBAR_PLACEHOLDER
     return dict(caravel_version=CARAVEL_VERSION, looper_version=LOOPER_VERSION, python_version=python_version(),
-                referrer=request.referrer, debug=app.config["DEBUG"])
+                referrer=request.referrer, debug=app.config["DEBUG"], summary_links=summary_links)
 
 
 def clear_session_data(keys):
@@ -208,11 +215,13 @@ def index():
     global p
     global selected_project
     global reset_btn
+    global summary_links
     try:
         reset_btn
     except NameError:
         reset_btn = None
     if request.args.get('reset'):
+        summary_links = SUMMARY_NAVBAR_PLACEHOLDER
         try:
             del selected_project
         except NameError:
@@ -375,6 +384,7 @@ def action():
     global log_path
     global logging_lvl
     global p
+    global summary_links
     args = argparse.Namespace()
     args_dict = vars(args)
     # Set the arguments from the forms
@@ -395,6 +405,8 @@ def action():
         p.dcc.activate_package("default")
     # run looper action
     run_looper(prj=p, args=args, act=act, log_path=log_path, logging_lvl=logging_lvl)
+    if act == "summarize":
+        summary_links = create_navbar_links(objs=Summarizer(p).objs, reports_dir=get_reports_dir(p), stats=s.stats, wd="current_path_placeholder", caravel=True)
     return render_template("/execute.html")
 
 
