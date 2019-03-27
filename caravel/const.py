@@ -48,3 +48,4 @@ V_BY_NAME = {"looper": LOOPER_VERSION, "peppy": PEPPY_VERSION, "caravel": CARAVE
 DEFAULT_TERMINAL_WIDTH = 80
 SUMMARY_NAVBAR_PLACEHOLDER = "<li class='nav-item active'><a class='nav-link' href='#'>No summary yet</a></li>"
 TEMPLATES_DIRNAME = "jinja_templates"
+TEMPLATES_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), TEMPLATES_DIRNAME)

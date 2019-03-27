@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 import argparse
-from const import V_BY_NAME, REQUIRED_V_BY_NAME, DEFAULT_PORT, DEFAULT_TERMINAL_WIDTH
+from const import V_BY_NAME, REQUIRED_V_BY_NAME, DEFAULT_PORT, DEFAULT_TERMINAL_WIDTH, TEMPLATES_PATH
 import glob
 from distutils.version import LooseVersion
 from itertools import chain
@@ -18,6 +18,8 @@ from flask import render_template
 import os
 from re import sub
 from functools import partial
+from looper.html_reports import *
+from looper.looper import Summarizer
 
 
 def get_items(i, l):
@@ -302,7 +304,14 @@ def run_looper(prj, args, act, log_path, logging_lvl):
             looper.looper.Destroyer(prj)(args)
 
         if act == "summarize":
-            looper.looper.Summarizer(prj)()
+            s = Summarizer(prj)
+            s()
+            hrb = HTMLReportBuilder(prj)
+            summary_links = hrb.create_navbar_links(objs=s.objs, reports_dir=get_reports_dir(prj), stats=s.stats, wd="", caravel=True)
+            j_env = get_jinja_env(TEMPLATES_PATH)
+            # TODO: fix links in the navbar
+            navbar = render_jinja_template("navbar.html", j_env, dict(summary_links=summary_links))
+            hrb.create_index_html(s.objs, s.stats, s.columns, navbar=navbar)
 
         if act == "check":
             looper.looper.Checker(prj)(flags=args.flags)
