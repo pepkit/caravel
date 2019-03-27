@@ -136,6 +136,10 @@ div.col-slider {
   color: white;
   }
 
+.navbar-nav li a {
+ line-height: 60px;
+}
+
 .left_footer {
 width: 30%;
 text-align: left;
