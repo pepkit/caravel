@@ -1,0 +1,35 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<a class="navbar-brand" href="{{ url_for('index') }}">
+			<img src="{{ url_for('static',filename='logo_caravel_dark.svg') }}" width="180" height="60" alt="">
+		</a>
+		<div class="collapse navbar-collapse" id="navbarTogglerDemo03">
+			<ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+				<li class="nav-item active">
+					<a class="nav-link" href="{{ url_for('index') }}"><i class="fa fa-2x fa-home" aria-hidden="true"></i></a>
+				</li>
+				<li class="nav-item active">
+					<a class="nav-link" href="{{ url_for('set_comp_env') }}"><i class="fa fa-2x fa-cog"></i></a>
+				</li>
+				<li class="nav-item active">
+					<a class="nav-link" href="{{ url_for('process') }}"><i class="fa fa-tasks"></i> Process</a>
+				</li>
+				<li class="nav-item active">
+					<a class="nav-link" href="{{ url_for('summary') }}"><i class="fa fa-bar-chart"></i> Summary</a>
+				</li>
+				{% block navbar %}
+				{% endblock %}
+				{% if summary_links is defined %}
+					{{ summary_links|safe }}
+				{% endif %}
+			</ul> 
+			<a class="nav-link" href="{{ url_for('shutdown') }}">
+				<button type="submit" class="btn btn-outline-light"><i class="fa fa-1x fa-times"></i></button>
+			</a>
+			{% if debug %}
+				<button type="submit" class="btn btn-danger" disabled><i class="fa fa-bug fa-spin fa-1x fa-fw"></i></button>
+			{% endif %}
+		</div>
+	</nav>
