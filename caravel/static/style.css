@@ -135,3 +135,34 @@ div.col-slider {
 .nav-link:hover {
   color: white;
   }
+
+.left_footer {
+width: 30%;
+text-align: left;
+float: left;
+display: inline-block;
+}
+
+.right_footer {
+width: 65%;
+padding-top: 10px;
+float: right;
+text-align:right;
+display: inline-block;
+}
+
+.center_footer {
+width: 5%;
+padding-top: 10px;
+overflow: hidden;
+display: inline-block;
+text-align: center;
+}
+
+.wrapper {
+  padding-left: 10px;
+  padding-right: 10px;
+  clear: both;
+  position: relative;
+  overflow: hidden;
+}
