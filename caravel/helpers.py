@@ -1,8 +1,9 @@
 """ General-purpose functions """
 
 from __future__ import print_function
+from platform import python_version
 import argparse
-from const import V_BY_NAME, REQUIRED_V_BY_NAME, DEFAULT_PORT, DEFAULT_TERMINAL_WIDTH, TEMPLATES_PATH
+from const import V_BY_NAME, REQUIRED_V_BY_NAME, DEFAULT_PORT, DEFAULT_TERMINAL_WIDTH, TEMPLATES_PATH, CARAVEL_VERSION, LOOPER_VERSION
 import glob
 from distutils.version import LooseVersion
 from itertools import chain
@@ -14,7 +15,7 @@ import peppy
 import fcntl
 import termios
 import struct
-from flask import render_template
+from flask import render_template, current_app
 import os
 from re import sub
 from functools import partial
@@ -311,7 +312,8 @@ def run_looper(prj, args, act, log_path, logging_lvl):
             j_env = get_jinja_env(TEMPLATES_PATH)
             # TODO: fix links in the navbar
             navbar = render_jinja_template("navbar.html", j_env, dict(summary_links=summary_links))
-            hrb.create_index_html(s.objs, s.stats, s.columns, navbar=navbar)
+            footer = render_jinja_template("footer.html", j_env, dict(caravel_version=CARAVEL_VERSION, looper_version=LOOPER_VERSION, python_version=python_version(), login=current_app.config["login"]))
+            hrb.create_index_html(s.objs, s.stats, s.columns, navbar=navbar, footer=footer)
 
         if act == "check":
             looper.looper.Checker(prj)(flags=args.flags)

@@ -30,7 +30,7 @@ def inject_dict_for_all_templates():
     except NameError:
         summary_links = SUMMARY_NAVBAR_PLACEHOLDER
     return dict(caravel_version=CARAVEL_VERSION, looper_version=LOOPER_VERSION, python_version=python_version(),
-                referrer=request.referrer, debug=app.config["DEBUG"], summary_links=summary_links, login=app.config["login"])
+                referrer=request.referrer, debug=app.config["DEBUG"], summary_links=summary_links, login=app.config['login'])
 
 
 def clear_session_data(keys):
@@ -408,7 +408,7 @@ def action():
     # TODO: will be changed
     s = Summarizer(p)
     hrb = HTMLReportBuilder(p)
-    summary_links = hrb.create_navbar_links(objs=s.objs, reports_dir=get_reports_dir(p), stats=s.stats, wd="",caravel=True)
+    summary_links = hrb.create_navbar_links(objs=s.objs, reports_dir=get_reports_dir(p), stats=s.stats, wd="", caravel=True)
     return render_template("/execute.html")
 
 
@@ -436,7 +436,7 @@ def main():
     app.config["project_configs"] = args.config
     app.config["DEBUG"] = args.debug
     app.config['SECRET_KEY'] = 'thisisthesecretkey'
-    app.config["login"] = os.getlogin()
+    app.config['login'] = os.getlogin()
     if app.config["DEBUG"]:
         warnings.warn("You have entered the debug mode. The server-client connection is not secure!")
         logging_lvl = 10

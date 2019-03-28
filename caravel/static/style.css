@@ -47,18 +47,16 @@ body {
   margin-bottom:15px;
 }
 
-th {
+th.footer {
   font-size:12px;
   padding: 3px;
   font-weight: bold;
   text-align: center;
   background-color: #464c56;
   color: white
-
-
 }
 
-td {
+td.footer {
   font-size:12px;
   padding: 3px;
   text-align: center;
@@ -141,26 +139,26 @@ div.col-slider {
 }
 
 .left_footer {
-width: 30%;
-text-align: left;
-float: left;
-display: inline-block;
+  width: 30%;
+  text-align: left;
+  float: left;
+  display: inline-block;
 }
 
 .right_footer {
-width: 30%;
-padding-top: 10px;
-float: right;
-text-align:right;
-display: inline-block;
+  width: 30%;
+  padding-top: 10px;
+  float: right;
+  text-align:right;
+  display: inline-block;
 }
 
 .center_footer {
-width: 40%;
-padding-top: 10px;
-overflow: hidden;
-display: inline-block;
-text-align: center;
+  width: 40%;
+  padding-top: 10px;
+  overflow: hidden;
+  display: inline-block;
+  text-align: center;
 }
 
 .wrapper {
