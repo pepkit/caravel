@@ -408,7 +408,7 @@ def action():
     # TODO: will be changed
     s = Summarizer(p)
     hrb = HTMLReportBuilder(p)
-    summary_links = hrb.create_navbar_links(objs=s.objs, reports_dir=get_reports_dir(p), stats=s.stats, wd="", caravel=True)
+    summary_links = hrb.create_navbar_links(objs=s.objs, reports_dir=get_reports_dir(p), stats=s.stats, wd="", caravel=True, summary_context=False)
     return render_template("/execute.html")
 
 
