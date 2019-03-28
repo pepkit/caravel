@@ -148,7 +148,7 @@ display: inline-block;
 }
 
 .right_footer {
-width: 65%;
+width: 30%;
 padding-top: 10px;
 float: right;
 text-align:right;
@@ -156,7 +156,7 @@ display: inline-block;
 }
 
 .center_footer {
-width: 5%;
+width: 40%;
 padding-top: 10px;
 overflow: hidden;
 display: inline-block;
