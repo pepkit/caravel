@@ -81,7 +81,10 @@ def get_form_elements_data(parser, project, command=None):
             continue
         else:
             opt_names.append(_get_long_opt(opt.option_strings))
-            type_data = opt.type(caravel=True)
+            try:
+                type_data = opt.type(caravel=True)
+            except TypeError:
+                raise TypeError("The option type is not defined for '{}'".format(str(opt.option_strings)))
             type = type_data.element_type
             params = process_type_args(type_data.element_args, project)
             html_elements_types.append(type)
