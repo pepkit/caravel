@@ -89,6 +89,16 @@ def get_summary_html_name(prj):
     return fname + "_summary.html"
 
 
+def check_for_summary(prj):
+    """
+    Check if the summary page has been produced
+
+    :param looper.Project prj: project to check for summary for
+    :return bool: whether the summary page was produced
+    """
+    return os.path.exists(os.path.join(prj.metadata.output_dir, get_summary_html_name(prj)))
+
+
 def ensure_version(current=V_BY_NAME, required=REQUIRED_V_BY_NAME):
     """
     Loose version assertion.
@@ -318,20 +328,37 @@ def run_looper(prj, args, act, log_path, logging_lvl):
 
 def _render_summary_pages(project, summarizer, html_report_builder):
     """
+    Render the summary pages with caravel navbars and footers
 
+    :param project:
     :param summarizer:
     :param html_report_builder:
     :return:
     """
-    links_summary = html_report_builder.create_navbar_links(objs=summarizer.objs, reports_dir=get_reports_dir(project),
-                                                            stats=summarizer.stats, wd="", caravel=True,
-                                                            context=["summary"])
-    links_reports = html_report_builder.create_navbar_links(objs=summarizer.objs, reports_dir=get_reports_dir(project),
-                                                            stats=summarizer.stats, wd="", caravel=True,
-                                                            context=["reports", "summary"])
+    links_summary = render_navbar_summary_links(project, ["summary"])
+    links_reports = render_navbar_summary_links(project, ["reports", "summary"])
     j_env = get_jinja_env(TEMPLATES_PATH)
     navbar_summary = render_jinja_template("navbar.html", j_env, dict(summary_links=links_summary))
     navbar_reports = render_jinja_template("navbar.html", j_env, dict(summary_links=links_reports))
     footer = render_jinja_template("footer.html", j_env, dict(caravel_version=CARAVEL_VERSION, looper_version=LOOPER_VERSION, python_version=python_version(), login=current_app.config["login"]))
     html_report_builder.create_index_html(summarizer.objs, summarizer.stats, summarizer.columns, navbar=navbar_summary, footer=footer)
     save_html(os.path.join(get_reports_dir(project), "status.html"), html_report_builder.create_status_html(summarizer.objs, summarizer.stats, get_reports_dir(project), navbar_reports, footer))
+
+
+def render_navbar_summary_links(project, context):
+    """
+    Render the summary-relsted links for the navbars in a specific context.
+    E.g. for the OG caravel pages or summary page or summary reports pages
+
+    :param project:
+    :param summarizer:
+    :param html_report_builder:
+    :param context:
+    :return str: html string with the links
+    """
+    summarizer = Summarizer(project)
+    html_report_builder = HTMLReportBuilder(project)
+    links = html_report_builder.create_navbar_links(objs=summarizer.objs, reports_dir=get_reports_dir(project),
+                                                            stats=summarizer.stats, wd="", caravel=True,
+                                                            context=context)
+    return links
