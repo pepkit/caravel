@@ -305,17 +305,33 @@ def run_looper(prj, args, act, log_path, logging_lvl):
             looper.looper.Destroyer(prj)(args)
 
         if act == "summarize":
+            hrb = HTMLReportBuilder(prj)
             s = Summarizer(prj)
             s()
-            hrb = HTMLReportBuilder(prj)
-            summary_links = hrb.create_navbar_links(objs=s.objs, reports_dir=get_reports_dir(prj), stats=s.stats, wd="", caravel=True, summary_context=True)
-            j_env = get_jinja_env(TEMPLATES_PATH)
-            navbar = render_jinja_template("navbar.html", j_env, dict(summary_links=summary_links))
-            footer = render_jinja_template("footer.html", j_env, dict(caravel_version=CARAVEL_VERSION, looper_version=LOOPER_VERSION, python_version=python_version(), login=current_app.config["login"]))
-            hrb.create_index_html(s.objs, s.stats, s.columns, navbar=navbar, footer=footer)
-
+            _render_summary_pages(prj, s, hrb)
         if act == "check":
             looper.looper.Checker(prj)(flags=args.flags)
 
         if act == "clean":
             looper.looper.Cleaner(prj)(args)
+
+
+def _render_summary_pages(project, summarizer, html_report_builder):
+    """
+
+    :param summarizer:
+    :param html_report_builder:
+    :return:
+    """
+    links_summary = html_report_builder.create_navbar_links(objs=summarizer.objs, reports_dir=get_reports_dir(project),
+                                                            stats=summarizer.stats, wd="", caravel=True,
+                                                            context=["summary"])
+    links_reports = html_report_builder.create_navbar_links(objs=summarizer.objs, reports_dir=get_reports_dir(project),
+                                                            stats=summarizer.stats, wd="", caravel=True,
+                                                            context=["reports", "summary"])
+    j_env = get_jinja_env(TEMPLATES_PATH)
+    navbar_summary = render_jinja_template("navbar.html", j_env, dict(summary_links=links_summary))
+    navbar_reports = render_jinja_template("navbar.html", j_env, dict(summary_links=links_reports))
+    footer = render_jinja_template("footer.html", j_env, dict(caravel_version=CARAVEL_VERSION, looper_version=LOOPER_VERSION, python_version=python_version(), login=current_app.config["login"]))
+    html_report_builder.create_index_html(summarizer.objs, summarizer.stats, summarizer.columns, navbar=navbar_summary, footer=footer)
+    save_html(os.path.join(get_reports_dir(project), "status.html"), html_report_builder.create_status_html(summarizer.objs, summarizer.stats, get_reports_dir(project), navbar_reports, footer))

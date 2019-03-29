@@ -10,9 +10,15 @@
 					</thead>
 					<tbody>
 						<tr>
-							<td scope="row" class="footer"><a href="http://code.databio.org/caravel/" target="_new"><img src="../static/caravel_icon.svg" width="30" height="30" alt=""></a><code class="footer">{{caravel_version}}</code></td>
-							<td scope="row" class="footer"><a href="https://looper.readthedocs.io/en/latest/" target="_new"><img src="../static/logo_looper.svg" width="30" height="30" alt=""></a><code class="footer">{{looper_version}}</code></td>
-							<td scope="row" class="footer"><a href="https://www.python.org/" target="_new"><img src="../static/python.svg" width="30" height="30" alt=""></a><code class="footer"> {{python_version}}</code></td>
+							<td scope="row" class="footer">
+								<a href="https://github.com/pepkit/caravel" target="_new">{% include "logo_caravel_icon.html" %}</a> <code class="footer">{{caravel_version}}</code>
+							</td>
+							<td scope="row" class="footer">
+								<a href="https://github.com/pepkit/looper" target="_new">{% include "logo_looper.html" %}</a> <code class="footer">{{looper_version}}</code>
+							</td>
+							<td scope="row" class="footer">
+								<a href="https://www.python.org/" target="_new">{% include "logo_python.html" %}</a> <code class="footer">{{python_version}}</code>
+							</td>
 						</tr>
 					</tbody>
 				</table>
