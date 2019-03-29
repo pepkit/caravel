@@ -308,9 +308,8 @@ def run_looper(prj, args, act, log_path, logging_lvl):
             s = Summarizer(prj)
             s()
             hrb = HTMLReportBuilder(prj)
-            summary_links = hrb.create_navbar_links(objs=s.objs, reports_dir=get_reports_dir(prj), stats=s.stats, wd="", caravel=True)
+            summary_links = hrb.create_navbar_links(objs=s.objs, reports_dir=get_reports_dir(prj), stats=s.stats, wd="", caravel=True, summary_context=True)
             j_env = get_jinja_env(TEMPLATES_PATH)
-            # TODO: fix links in the navbar
             navbar = render_jinja_template("navbar.html", j_env, dict(summary_links=summary_links))
             footer = render_jinja_template("footer.html", j_env, dict(caravel_version=CARAVEL_VERSION, looper_version=LOOPER_VERSION, python_version=python_version(), login=current_app.config["login"]))
             hrb.create_index_html(s.objs, s.stats, s.columns, navbar=navbar, footer=footer)
