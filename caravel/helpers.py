@@ -315,10 +315,8 @@ def run_looper(prj, args, act, log_path, logging_lvl):
             looper.looper.Destroyer(prj)(args)
 
         if act == "summarize":
-            hrb = HTMLReportBuilder(prj)
-            s = Summarizer(prj)
-            s()
-            _render_summary_pages(prj, s, hrb)
+            Summarizer(prj)()
+            _render_summary_pages(prj)
         if act == "check":
             looper.looper.Checker(prj)(flags=args.flags)
 
@@ -326,39 +324,44 @@ def run_looper(prj, args, act, log_path, logging_lvl):
             looper.looper.Cleaner(prj)(args)
 
 
-def _render_summary_pages(project, summarizer, html_report_builder):
+def _render_summary_pages(prj):
     """
     Render the summary pages with caravel navbars and footers
 
-    :param project:
-    :param summarizer:
-    :param html_report_builder:
+    :param looper.Project prj: a project the summary pages should be create for
     :return:
     """
-    links_summary = render_navbar_summary_links(project, ["summary"])
-    links_reports = render_navbar_summary_links(project, ["reports", "summary"])
+    # instantiate the objects needed fot he creation the pages
+    summarizer = Summarizer(prj)
+    html_report_builder = HTMLReportBuilder(prj)
     j_env = get_jinja_env(TEMPLATES_PATH)
+    # create navbar links
+    links_summary = render_navbar_summary_links(prj, ["summary"])
+    links_reports = render_navbar_summary_links(prj, ["reports", "summary"])
+    # create navbars
     navbar_summary = render_jinja_template("navbar.html", j_env, dict(summary_links=links_summary))
     navbar_reports = render_jinja_template("navbar.html", j_env, dict(summary_links=links_reports))
-    footer = render_jinja_template("footer.html", j_env, dict(caravel_version=CARAVEL_VERSION, looper_version=LOOPER_VERSION, python_version=python_version(), login=current_app.config["login"]))
+    # cresate footer
+    footer_vars = dict(caravel_version=CARAVEL_VERSION, looper_version=LOOPER_VERSION, python_version=python_version(),
+                       login=current_app.config["login"])
+    footer = render_jinja_template("footer.html", j_env, footer_vars)
     html_report_builder.create_index_html(summarizer.objs, summarizer.stats, summarizer.columns, navbar=navbar_summary, footer=footer)
-    save_html(os.path.join(get_reports_dir(project), "status.html"), html_report_builder.create_status_html(summarizer.objs, summarizer.stats, get_reports_dir(project), navbar_reports, footer))
+    save_html(os.path.join(get_reports_dir(prj), "status.html"), html_report_builder.create_status_html(summarizer.objs, summarizer.stats, get_reports_dir(prj), navbar_reports, footer))
+    save_html(os.path.join(get_reports_dir(prj), "objects.html"), html_report_builder.create_object_parent_html(summarizer.objs, navbar_reports, footer))
+    save_html(os.path.join(get_reports_dir(prj), "samples.html"), html_report_builder.create_sample_parent_html(navbar_reports, footer))
 
 
-def render_navbar_summary_links(project, context):
+def render_navbar_summary_links(prj, context):
     """
-    Render the summary-relsted links for the navbars in a specific context.
+    Render the summary-related links for the navbars in a specific context.
     E.g. for the OG caravel pages or summary page or summary reports pages
 
-    :param project:
-    :param summarizer:
-    :param html_report_builder:
-    :param context:
+    :param looper.Project prj: a project the navbar summary links should be created for
+    :param list context: the context for the links
     :return str: html string with the links
     """
-    summarizer = Summarizer(project)
-    html_report_builder = HTMLReportBuilder(project)
-    links = html_report_builder.create_navbar_links(objs=summarizer.objs, reports_dir=get_reports_dir(project),
-                                                            stats=summarizer.stats, wd="", caravel=True,
-                                                            context=context)
+    summarizer = Summarizer(prj)
+    html_report_builder = HTMLReportBuilder(prj)
+    links = html_report_builder.create_navbar_links(objs=summarizer.objs, reports_dir=get_reports_dir(prj),
+                                                    stats=summarizer.stats, wd="", caravel=True,context=context)
     return links
