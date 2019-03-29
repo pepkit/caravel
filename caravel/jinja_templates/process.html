@@ -95,11 +95,15 @@ jQuery( document ).ready(function( $ ) {
       </div>
     {% endif %}
     <hr class="col-xs-12">
-      <h2>Perform action on the PEP</h2>
-      <select id="show_options" name="actions" class="custom-select" style="width:auto;">
-        {% for i in actions %}
-          <option value="{{ i }}">{{ i|title }}</option>
-        {% endfor %}
-      </select>
-    <div id="options" class="divider-vertical"></div>
+    <div class="card border-light mb-3" style="display:inline-block;">
+      <div class="card-header"><b>Perform action on the project:</b></div>
+      <div class="card-body">
+        <select id="show_options" name="actions" class="custom-select" style="width:auto;">
+          {% for i in actions %}
+            <option value="{{ i }}">{{ i|title }}</option>
+          {% endfor %}
+        </select>
+        </div>
+        <div id="options" class="divider-vertical"></div>
+      </div>
 {% endblock %}

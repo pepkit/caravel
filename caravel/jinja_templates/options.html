@@ -11,7 +11,8 @@
         });
     </script>
 </head>
-<h3>Select options</h3>
+<div class="card-header">Set options</div>
+<div class="card-body">
 <form id="action_form" method="POST" action="{{ url_for('action') }}">
     <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
     {% for type, data in grouped_form_data.items() %}
@@ -59,4 +60,5 @@
     <div class="divider-vertical">
         <button id="execute" type="submit" class="btn btn-outline-dark ml-2">GO</i></button>
     </div>
+</div>
 </form>
