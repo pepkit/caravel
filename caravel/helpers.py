@@ -315,7 +315,6 @@ def run_looper(prj, args, act, log_path, logging_lvl):
             looper.looper.Destroyer(prj)(args)
 
         if act == "summarize":
-            Summarizer(prj)()
             _render_summary_pages(prj)
         if act == "check":
             looper.looper.Checker(prj)(flags=args.flags)
@@ -348,64 +347,7 @@ def _render_summary_pages(prj):
     footer_vars = dict(caravel_version=CARAVEL_VERSION, looper_version=LOOPER_VERSION, python_version=python_version(),
                        login=current_app.config["login"])
     footer = render_jinja_template("footer.html", j_env, footer_vars)
-    html_report_builder.create_index_html(objs, stats, columns, navbar=navbar_summary, footer=footer)
-    save_html(os.path.join(get_reports_dir(prj), "status.html"), html_report_builder.create_status_html(objs, stats, get_reports_dir(prj), navbar_reports, footer))
-    save_html(os.path.join(get_reports_dir(prj), "objects.html"), html_report_builder.create_object_parent_html(objs, navbar_reports, footer))
-    save_html(os.path.join(get_reports_dir(prj), "samples.html"), html_report_builder.create_sample_parent_html(navbar_reports, footer))
-    # Create objects pages
-    if not objs.dropna().empty:
-        for key in objs['key'].drop_duplicates().sort_values():
-            single_object = objs[objs['key'] == key]
-            html_report_builder.create_object_html(single_object, navbar_reports, footer)
-
-
-    if not objs.dropna().empty:
-        objs.drop_duplicates(keep='last', inplace=True)
-
-    # Add stats_summary.tsv button link
-    tsv_outfile_path = os.path.join(prj.metadata.output_dir, prj.name)
-    if hasattr(prj, "subproject") and prj.subproject:
-        tsv_outfile_path += '_' + prj.subproject
-    tsv_outfile_path += '_stats_summary.tsv'
-    stats_file_path = os.path.relpath(tsv_outfile_path, prj.metadata.output_dir)
-    # Add stats summary table to index page and produce individual
-    # sample pages
-    if os.path.isfile(tsv_outfile_path):
-        # Produce table rows
-        sample_pos = 0
-        col_pos = 0
-        num_columns = len(columns)
-        table_row_data = []
-        for row in stats:
-            # Match row value to column
-            # Row is disordered and does not handle empty cells
-            table_row = []
-            while col_pos < num_columns:
-                value = row.get(columns[col_pos])
-                if value is None:
-                    value = ''
-                table_row.append(value)
-                col_pos += 1
-            # Reset column position counter
-            col_pos = 0
-            sample_name = str(stats[sample_pos]['sample_name'])
-            # Order table_row by col_names
-            sample_stats = OrderedDict(zip(columns, table_row))
-            table_cell_data = []
-            for value in table_row:
-                if value == sample_name:
-                    # Generate individual sample page and return link
-                    sample_page = html_report_builder.create_sample_html(objs, sample_name, sample_stats, navbar_reports, footer)
-                    # Treat sample_name as a link to sample page
-                    data = [sample_page, sample_name]
-                # If not the sample name, add as an unlinked cell value
-                else:
-                    data = str(value)
-                table_cell_data.append(data)
-            sample_pos += 1
-            table_row_data.append(table_cell_data)
-    else:
-        current_app.logger.warning("No stats file '%s'", tsv_outfile_path)
+    html_report_builder.create_index_html(objs, stats, columns, navbar=navbar_summary, navbar_reports=navbar_reports, footer=footer)
 
 def render_navbar_summary_links(prj, context):
     """
