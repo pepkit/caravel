@@ -46,6 +46,6 @@ REQUIRED_PEPPY_VERSION = get_req_version("peppy")["peppy"]
 REQUIRED_V_BY_NAME = {"looper": REQUIRED_LOOPER_VERSION, "peppy": REQUIRED_PEPPY_VERSION}
 V_BY_NAME = {"looper": LOOPER_VERSION, "peppy": PEPPY_VERSION, "caravel": CARAVEL_VERSION}
 DEFAULT_TERMINAL_WIDTH = 80
-SUMMARY_NAVBAR_PLACEHOLDER = "<li class='nav-item active'><a class='nav-link' href='#'>No summary yet</a></li>"
+SUMMARY_NAVBAR_PLACEHOLDER = "<li class='nav-item'><a class='nav-link disabled' href='#'>No summary yet</a></li>"
 TEMPLATES_DIRNAME = "jinja_templates"
 TEMPLATES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), TEMPLATES_DIRNAME)
