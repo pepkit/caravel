@@ -3,13 +3,13 @@
 {% block content %}
 <h2>Caravel server encountered exception(s):</h2>
 <div class="divider-15">
-	<ul>
+	<ul class="list-group" style="display:inline-block">
 	  {% for ei in e %}
 	  {% set i = loop.index - 1 %}
 		  {% if types is not none %}
-		  	<li><code><b>{{ types[i]}}</b>: {{ ei }}</code></li>
+		  	<li class="list-group-item list-group-item-danger"><code class="footer"><b>{{ types[i]}}</b>: {{ ei }}</code></li>
 		  {% else %}
-		  	<li><code>{{ ei }}</code></li>
+		  	<li class="list-group-item list-group-item-danger"><code class="footer">{{ ei }}</code></li>
 		  {% endif %}
 	  {% endfor %}
 	</ul>
