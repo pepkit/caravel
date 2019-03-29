@@ -220,6 +220,12 @@ def index():
         reset_btn
     except NameError:
         reset_btn = None
+    try:
+        summary_exists = check_for_summary(p)
+    except NameError:
+        app.logger.info("No project defined yet")
+    else:
+        summary_links = render_navbar_summary_links(p, []) if summary_exists else SUMMARY_NAVBAR_PLACEHOLDER
     if request.args.get('reset'):
         summary_links = SUMMARY_NAVBAR_PLACEHOLDER
         try:
@@ -278,6 +284,7 @@ def process():
     global selected_project
     global projects
     global reset_btn
+    global summary_links
     reset_btn = True
     from looper import build_parser as blp
 
@@ -307,6 +314,7 @@ def process():
         subprojects = list(p.subprojects.keys())
     except AttributeError:
         subprojects = None
+    summary_links = render_navbar_summary_links(p, []) if check_for_summary(p) else SUMMARY_NAVBAR_PLACEHOLDER
     # TODO: p_info will be removed altogether in the future version
     p_info = {
         "name": p.name,
@@ -350,6 +358,7 @@ def background_options():
 def summary():
     global p
     global selected_project
+    global summary_exists
     try:
         selected_project
     except NameError:
@@ -358,7 +367,7 @@ def summary():
         return redirect(url_for('index'))
     summary_html_name = get_summary_html_name(p)
     summary_location = os.path.join(p.metadata.output_dir, summary_html_name)
-    if os.path.exists(summary_location):
+    if check_for_summary(p):
         summary_string = "summary/{}".format(summary_html_name)
         return redirect(summary_string)
     else:
@@ -405,10 +414,7 @@ def action():
         p.dcc.activate_package("default")
     # run looper action
     run_looper(prj=p, args=args, act=act, log_path=log_path, logging_lvl=logging_lvl)
-    # TODO: will be changed
-    s = Summarizer(p)
-    hrb = HTMLReportBuilder(p)
-    summary_links = hrb.create_navbar_links(objs=s.objs, reports_dir=get_reports_dir(p), stats=s.stats, wd="", caravel=True, context=[])
+    summary_links = render_navbar_summary_links(p, []) if check_for_summary(p) else SUMMARY_NAVBAR_PLACEHOLDER
     return render_template("/execute.html")
 
 
