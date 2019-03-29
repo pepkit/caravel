@@ -65,26 +65,34 @@ jQuery( document ).ready(function( $ ) {
 {% endblock %}
 {% block title %}Process{% endblock %}
 {% block content %}
-    <h2>Selected PEP info:</h2>
-    {% for item in p_info %} 
-        <p><b>{{ item }}: </b><code id="{{ item }}">{{ p_info[item] }}</code></p>
-    {% endfor %}
-    {% if p_info["subprojects"] is not none %}
-        <h3>Subprojects:</h3>    
-        <select name="subprojects" class="custom-select" style="width:auto;">
-            {% for i in p_info["subprojects"] %}
-                <option value="{{ i }}">{{ i }}</option>
-            {% endfor %}
-        </select>
-        <a href='#' id=activate_subproject><button id="activate_btn" type="submit" class="btn btn-outline-dark ml-2">ACTIVATE</button></a>
-        {% if selected_subproject is none %}
-          <a href='#' id=deactivate_subproject><button id="deactivate_btn" disabled type="submit" class="btn btn-outline-dark ml-2">DEACTIVATE</button></a>
-        {% else %}
-          <a href='#' id=deactivate_subproject><button id="deactivate_btn" type="submit" class="btn btn-outline-dark ml-2">DEACTIVATE</button></a>
-        {% endif %}
-        <div class="divider-vertical">
-          <p id=subproj_txt class="badge badge-primary">Activated subproject: {{ selected_subproject }}</p>
+    <div class="card border-light mb-3" style="display:inline-block;">
+      <div class="card-header"><b>Project Metadata</b></div>
+      <div class="card-body">
+        {% for item in p_info %} 
+        <p class="card-text"><b>{{ item }}: </b><code id="{{ item }}">{{ p_info[item] }}</code></p>
+        {% endfor %}
+      </div>
+    <!-- </div> -->
+      {% if p_info["subprojects"] is not none %}
+      <!-- <div class="card border-secondary mb-3" style="display:inline-block;"> -->
+        <div class="card-header">Select subproject</div>
+        <div class="card-body">
+          <select name="subprojects" class="custom-select" style="width:auto;">
+              {% for i in p_info["subprojects"] %}
+                  <option value="{{ i }}">{{ i }}</option>
+              {% endfor %}
+          </select>
+          <a href='#' id=activate_subproject><button id="activate_btn" type="submit" class="btn btn-outline-dark ml-2">ACTIVATE</button></a>
+          {% if selected_subproject is none %}
+            <a href='#' id=deactivate_subproject><button id="deactivate_btn" disabled type="submit" class="btn btn-outline-dark ml-2">DEACTIVATE</button></a>
+          {% else %}
+            <a href='#' id=deactivate_subproject><button id="deactivate_btn" type="submit" class="btn btn-outline-dark ml-2">DEACTIVATE</button></a>
+          {% endif %}
+          <div class="divider-vertical">
+            <p id=subproj_txt class="badge badge-primary">Activated subproject: {{ selected_subproject }}</p>
+          </div>
         </div>
+      </div>
     {% endif %}
     <hr class="col-xs-12">
       <h2>Perform action on the PEP</h2>

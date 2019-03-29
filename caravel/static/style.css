@@ -44,7 +44,11 @@ body {
 }
 .divider-vertical {
   margin-top:15px;
-  margin-bottom:15px;
+  /*margin-bottom:15px;*/
+}
+
+p#subproj_txt.badge.badge-primary {
+  margin-bottom: 0px;
 }
 
 th.footer {

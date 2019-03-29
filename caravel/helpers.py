@@ -349,7 +349,8 @@ def _render_summary_pages(prj):
     footer = render_jinja_template("footer.html", j_env, footer_vars)
     html_report_builder.create_index_html(objs, stats, columns, navbar=navbar_summary, navbar_reports=navbar_reports, footer=footer)
 
-def render_navbar_summary_links(prj, context):
+
+def render_navbar_summary_links(prj, context=[]):
     """
     Render the summary-related links for the navbars in a specific context.
     E.g. for the OG caravel pages or summary page or summary reports pages

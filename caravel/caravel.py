@@ -223,9 +223,9 @@ def index():
     try:
         summary_exists = check_for_summary(p)
     except NameError:
-        app.logger.info("No project defined yet")
+        app.logger.debug("No project defined yet, summary links not created")
     else:
-        summary_links = render_navbar_summary_links(p, []) if summary_exists else SUMMARY_NAVBAR_PLACEHOLDER
+        summary_links = render_navbar_summary_links(p) if summary_exists else SUMMARY_NAVBAR_PLACEHOLDER
     if request.args.get('reset'):
         summary_links = SUMMARY_NAVBAR_PLACEHOLDER
         try:
@@ -314,7 +314,7 @@ def process():
         subprojects = list(p.subprojects.keys())
     except AttributeError:
         subprojects = None
-    summary_links = render_navbar_summary_links(p, []) if check_for_summary(p) else SUMMARY_NAVBAR_PLACEHOLDER
+    summary_links = render_navbar_summary_links(p) if check_for_summary(p) else SUMMARY_NAVBAR_PLACEHOLDER
     # TODO: p_info will be removed altogether in the future version
     p_info = {
         "name": p.name,
@@ -414,7 +414,7 @@ def action():
         p.dcc.activate_package("default")
     # run looper action
     run_looper(prj=p, args=args, act=act, log_path=log_path, logging_lvl=logging_lvl)
-    summary_links = render_navbar_summary_links(p, []) if check_for_summary(p) else SUMMARY_NAVBAR_PLACEHOLDER
+    summary_links = render_navbar_summary_links(p) if check_for_summary(p) else SUMMARY_NAVBAR_PLACEHOLDER
     return render_template("/execute.html")
 
 

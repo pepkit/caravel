@@ -1,7 +1,7 @@
 {% extends "template.html" %}
 {% block title %}Index{% endblock %}
 {% block content %}
-<h2>Select the input project:</h2>
+<h3>Select the input project:</h3>
 <form class="form-inline" method="POST" action="{{ url_for('process') }}">
 	<input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
 	<select name="select_project" class="custom-select" style="width:auto;">
@@ -9,11 +9,13 @@
 			<option value="{{ p }}">{{ p }}</option>
 		{% endfor %}
 	</select>
-	<button type="submit" class="btn btn-outline-dark ml-2">Go</button>
+	<button type="submit" class="btn btn-outline-dark ml-2">GO</button>
 </form>
 {% if reset_btn is not none %}
+	<div class="divider-vertical">
 	<a href="{{ url_for('index', reset=True) }}">
-		<button type="submit" class="btn btn-outline-light">RESET <i class="fa fa-undo"></i></button>
+		<button class="btn btn-outline-danger">RESET PROJECT <i class="fa fa-undo"></i></button>
 	</a>
+	</div>
 {% endif %}	
 {% endblock %}
