@@ -80,18 +80,14 @@ def get_form_elements_data(parser, project, command=None):
         if _is_set_elsewhere(opt.option_strings):
             continue
         else:
-            name = _get_long_opt(opt.option_strings)
-            opt_names.append(name)
+            opt_names.append(_get_long_opt(opt.option_strings))
             try:
                 type_data = opt.type(caravel=True)
             except TypeError:
                 raise TypeError("The option type is not defined for '{}'".format(str(opt.option_strings)))
-            t = type_data.element_type
-            elem_args = type_data.element_args
-            if name == "--file-checks":
-                elem_args["checked"] = True
-            params = process_type_args(elem_args, project)
-            html_elements_types.append(t)
+            type = type_data.element_type
+            params = process_type_args(type_data.element_args, project)
+            html_elements_types.append(type)
             html_params.append(_html_param_builder(params))
             html_dest.append(opt.dest)
     ret_vals_lens = set(map(len, [html_elements_types, html_params, html_dest, opt_names]))
@@ -168,15 +164,17 @@ def _has_long_opt(opt):
     return False
 
 
-def _get_long_opt(names):
+def _get_long_opt(opt):
     """
     Get only the long option name from the option strings
 
-    :param list[str] names: a list of option name(s)
+    :param list opt: a list of option name(s)
     :return str: a long option name or empty string
     """
-    return names[map(_is_long_optname, names).index(True)] \
-        if _has_long_opt(names) else ""
+    if _has_long_opt(opt):
+        return opt[map(_is_long_optname, opt).index(True)]
+    else:
+        return ""
 
 
 def _is_long_optname(n):
