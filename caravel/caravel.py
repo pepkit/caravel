@@ -157,8 +157,9 @@ def parse_config_file():
 
     The CLI argument is given the priority.
     Path to the PEP projects and predefined token are extracted if file is read successfully.
+    Additionally, looks for a custom command to execute.
 
-    :return list[str]: project list
+    :return (list[str], list[str]): a pair of projects list and list of commands
     """
 
     project_list_path = app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
@@ -177,7 +178,13 @@ def parse_config_file():
         # additionally expand the environment variables and the user
         projects = sorted(flatten([glob_if_exists(os.path.join(
             os.path.dirname(project_list_path), os.path.expanduser(os.path.expandvars(prj)))) for prj in projects]))
-    return projects
+        # check if the custom command/script is listed in the config and return it
+        try:
+            command = pl[COMMAND_KEY]
+        except KeyError:
+            app.logger.debug("No custom command found in config")
+            command = None
+    return projects, command
 
 
 def parse_token_file(path=TOKEN_FILE_NAME):
@@ -216,6 +223,7 @@ def index():
     global selected_project
     global reset_btn
     global summary_links
+    global command
     try:
         reset_btn
     except NameError:
@@ -239,8 +247,16 @@ def index():
             app.logger.info("No project defined yet")
         reset_btn = None
     app.logger.info("reset button: {}".format(str(reset_btn)))
-    projects = parse_config_file()
-    return render_template('index.html', projects=projects, reset_btn=reset_btn)
+    projects, command = parse_config_file()
+    return render_template('index.html', projects=projects, reset_btn=reset_btn, command_btn=command[0])
+
+
+@app.route('/_background_exec')
+def background_exec():
+    global command
+    import subprocess
+    out = subprocess.call(command, shell=True)
+    return jsonify(exec_txt=out)
 
 
 @app.route("/set_comp_env")
@@ -285,7 +301,6 @@ def process():
     global projects
     global reset_btn
     global summary_links
-    reset_btn = True
     from looper import build_parser as blp
 
     actions = get_positional_args(blp(), sort=True)
@@ -323,6 +338,7 @@ def process():
         "output_dir": p.metadata.output_dir,
         "subprojects": subprojects
     }
+    reset_btn = True
     return render_template('process.html', p_info=p_info, change=None, selected_subproject=p.subproject, actions=actions)
 
 

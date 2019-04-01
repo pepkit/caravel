@@ -1,4 +1,22 @@
 {% extends "template.html" %}
+{% block head %}
+{{ super() }}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type=text/javascript>
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+<script type=text/javascript>
+  // subproject activation
+  $(function() {
+    $('a#exec').bind('click', function() {
+      $.getJSON($SCRIPT_ROOT + '/_background_exec', 
+      	function(data) {
+        $("#exec_txt").text(data.exec_txt);
+      });
+    });
+  });
+</script>
+{% endblock %}
 {% block title %}Index{% endblock %}
 {% block content %}
 <h3>Select the input project:</h3>
@@ -13,9 +31,17 @@
 </form>
 {% if reset_btn is not none %}
 	<div class="divider-vertical">
-	<a href="{{ url_for('index', reset=True) }}">
-		<button class="btn btn-outline-danger">RESET PROJECT <i class="fa fa-undo"></i></button>
-	</a>
+		<a href="{{ url_for('index', reset=True) }}">
+			<button class="btn btn-outline-danger">RESET PROJECT <i class="fa fa-undo"></i></button>
+		</a>
 	</div>
-{% endif %}	
+{% endif %}
+{% if command_btn is not none %}
+	<div class="divider-vertical">
+		<a href='#' id=exec>
+			<button class="btn btn-outline-dark">Run <code>{{ command_btn }}</code></button>
+		</a>
+        Result: <p id=exec_txt class="badge badge-primary">No exit code yet</p>
+	</div>
+{% endif %}
 {% endblock %}

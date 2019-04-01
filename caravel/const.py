@@ -49,3 +49,4 @@ DEFAULT_TERMINAL_WIDTH = 80
 SUMMARY_NAVBAR_PLACEHOLDER = "<li class='nav-item'><a class='nav-link disabled' href='#'>No summary yet</a></li>"
 TEMPLATES_DIRNAME = "jinja_templates"
 TEMPLATES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), TEMPLATES_DIRNAME)
+COMMAND_KEY = "execute"
