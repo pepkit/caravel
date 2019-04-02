@@ -248,14 +248,16 @@ def index():
         reset_btn = None
     app.logger.info("reset button: {}".format(str(reset_btn)))
     projects, command = parse_config_file()
-    return render_template('index.html', projects=projects, reset_btn=reset_btn, command_btn=command[0])
+    return render_template('index.html', projects=projects, reset_btn=reset_btn, command_btn=command)
 
 
 @app.route('/_background_exec')
 def background_exec():
     global command
     import subprocess
-    out = subprocess.call(command, shell=True)
+    # get command to execute, if it's None it means the select was not used which means that there's only one option
+    cmd = request.args.get('cmd', type=str) or command
+    out = subprocess.call(cmd, shell=True)
     return jsonify(exec_txt=out)
 
 

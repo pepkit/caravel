@@ -9,8 +9,9 @@
   // subproject activation
   $(function() {
     $('a#exec').bind('click', function() {
-      $.getJSON($SCRIPT_ROOT + '/_background_exec', 
-      	function(data) {
+      $.getJSON($SCRIPT_ROOT + '/_background_exec', {
+      	cmd: $('select[name="command"]').val(),
+      }, function(data) {
         $("#exec_txt").text(data.exec_txt);
       });
     });
@@ -36,12 +37,21 @@
 		</a>
 	</div>
 {% endif %}
+<div class="divider-vertical">
 {% if command_btn is not none %}
-	<div class="divider-vertical">
-		<a href='#' id=exec>
-			<button class="btn btn-outline-dark">Run <code>{{ command_btn }}</code></button>
-		</a>
-        Result: <p id=exec_txt class="badge badge-primary">No exit code yet</p>
-	</div>
+	{% if command_btn|length > 1 %}
+		<select name="command" class="custom-select" style="width:auto;">
+		{% for cmd in command_btn %}
+			<option value="{{ cmd }}"><code>{{ cmd }}</code></option>
+		{% endfor %}
+		</select>
+	{% else %}
+		<code>{{ command_btn }}</code>
+	{% endif %}
+	<a href='#' id=exec>
+		<button class="btn btn-outline-dark ml-2">Execute</button>
+	</a>
+    Exit code: <p id=exec_txt class="badge badge-primary">None</p>
 {% endif %}
+</div>	
 {% endblock %}
