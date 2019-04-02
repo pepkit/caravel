@@ -19,7 +19,6 @@ from looper.html_reports import *
 
 
 app = Flask(__name__, template_folder=TEMPLATES_PATH)
-app.logger.info("Using python {}".format(python_version()))
 
 
 @app.context_processor
@@ -468,6 +467,7 @@ def main():
         logging_lvl = DEFAULT_LOGGING_LVL
         generate_token(token=parse_token_file())
     logging.getLogger().setLevel(logging_lvl)
+    app.logger.info("Using python {}".format(python_version()))
     app.run(port=args.port)
 
 
