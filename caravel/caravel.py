@@ -1,6 +1,7 @@
 """ Main UI application for using looper """
 
 from functools import wraps
+import getpass
 import logging
 import traceback
 import warnings
@@ -462,7 +463,7 @@ def main():
     app.config["project_configs"] = args.config
     app.config["DEBUG"] = args.debug
     app.config['SECRET_KEY'] = 'thisisthesecretkey'
-    app.config['login'] = os.getlogin()
+    app.config['login'] = getpass.getuser()
     if app.config["DEBUG"]:
         warnings.warn("You have entered the debug mode. The server-client connection is not secure!")
         logging_lvl = 10
