@@ -24,25 +24,30 @@
 </script>
 {% endblock %}
 {% block content %}
-	<h1>Configure computing environment</h1>
-	<p>Compute packages read from: <code>{{ env_conf_file }}</code></p>
-	<select name="select_compute" class="custom-select" style="width:auto;">
-	{% for item in compute_packages %}
-		{% if item == currently_selected_package %}
-			<option value="{{ item }}" selected="selected">{{ item }}</option>
-		{% else %}
-			<option value="{{ item }}">{{ item }}</option>
-		{% endif %}
-	{% endfor %}
-	</select>
-	<a href='#' id=show_compute><button type="submit" class="btn btn-outline-dark ml-2">Select</button></a>
-	<div class="divider-vertical" id="compute_info">
-	<h2>Selected compute package info:</h2>
-	{% for item in active_settings %} 
-		<p><b>{{ item }}: </b><code id="{{ item }}">{{ active_settings[item] }}</code></p>
-	{% endfor %}
+    <div class="card border-light mb-3" style="display:inline-block;">
+      <div class="card-header"><b>Configure computing environment</b></div>
+      <div class="card-body">
+		<select name="select_compute" class="custom-select" style="width:auto;">
+		{% for item in compute_packages %}
+			{% if item == currently_selected_package %}
+				<option value="{{ item }}" selected="selected">{{ item }}</option>
+			{% else %}
+				<option value="{{ item }}">{{ item }}</option>
+			{% endif %}
+		{% endfor %}
+		</select>
+		<a href='#' id=show_compute><button type="submit" class="btn btn-outline-dark ml-2">Select</button></a>
+      </div>
+	<div class="card-footer text-muted">
+		<small>Compute packages read from: <code>{{ env_conf_file }}</code></small>
 	</div>
-	{% if notify_not_set is not none %}
+    </div>
+
+	<div class="divider-vertical" id="compute_info">
+		{% include "compute_info.html"%}
+	</div>
+
+    {% if notify_not_set is not none %}
 		<hr class="col-xs-12">
 		<h3>Environment variable(s) pointing to the <code>DIVCFG</code> file not found, using default file.</h3>
 		<p>The <code>{{ notify_not_set }}</code> environment variable is not set. Set it with: 
