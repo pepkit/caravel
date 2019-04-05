@@ -172,7 +172,7 @@ def _get_long_opt(opt):
     :return str: a long option name or empty string
     """
     if _has_long_opt(opt):
-        return opt[map(_is_long_optname, opt).index(True)]
+        return opt[list(map(_is_long_optname, opt)).index(True)]
     else:
         return ""
 

@@ -5,7 +5,6 @@ from platform import python_version
 import argparse
 from const import V_BY_NAME, REQUIRED_V_BY_NAME, DEFAULT_PORT, DEFAULT_TERMINAL_WIDTH, TEMPLATES_PATH, CARAVEL_VERSION,\
     LOOPER_VERSION
-import glob
 from distutils.version import LooseVersion
 from itertools import chain
 import random
@@ -17,11 +16,11 @@ import fcntl
 import termios
 import struct
 from flask import render_template, current_app
-import os
 from re import sub
 from functools import partial
 from looper.html_reports import *
 from looper.looper import Summarizer
+from logmuse import setup_logger
 
 
 def get_items(i, l):
@@ -301,7 +300,7 @@ def run_looper(prj, args, act, log_path, logging_lvl):
     :param int logging_lvl: logging level code
     """
     # Establish looper logger
-    looper.setup_looper_logger(level=logging_lvl, additional_locations=log_path)
+    setup_logger("looper", level=logging_lvl, stream=sys.stdout, logfile=log_path)
     eprint("\nAction: {}\n".format(act))
     # run selected looper action
     with peppy.ProjectContext(prj) as prj:

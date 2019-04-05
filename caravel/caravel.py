@@ -15,6 +15,7 @@ import divvy
 from textile import textile
 from peppy.utils import coll_like
 from platform import python_version
+from logmuse import setup_logger
 from looper.project import Project
 from looper.html_reports import *
 
@@ -466,11 +467,12 @@ def main():
     app.config['login'] = getpass.getuser()
     if app.config["DEBUG"]:
         warnings.warn("You have entered the debug mode. The server-client connection is not secure!")
-        logging_lvl = 10
+        logging_lvl = logging.DEBUG
     else:
         logging_lvl = DEFAULT_LOGGING_LVL
         generate_token(token=parse_token_file())
-    logging.getLogger().setLevel(logging_lvl)
+    setup_logger("looper", level=logging_lvl, stream=sys.stdout)
+    #logging.getLogger().setLevel(logging_lvl)
     app.logger.info("Using python {}".format(python_version()))
     app.run(port=args.port)
 
