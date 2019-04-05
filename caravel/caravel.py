@@ -372,6 +372,7 @@ def background_options():
 
 
 @app.route('/summary', methods=['GET'])
+@token_required
 def summary():
     global p
     global selected_project
@@ -395,6 +396,7 @@ def summary():
 
 
 @app.route("/summary/<path:filename>", methods=['GET'])
+@token_required
 def serve_static(filename):
     global p
     return send_from_directory(p.output_dir, filename)
@@ -419,10 +421,11 @@ def action():
         args_dict[arg] = value
     # hardcode upfront confirmation in the yes/no query; used in clean and destroy actions
     args_dict["force_yes"] = True
+    log_path = os.path.join(p.output_dir, LOG_FILENAME)
+    args_dict["logfile"] = log_path
     # perform necessary changes so the looper understands the Namespace
     args_dict = parse_namespace(args_dict)
     # establish the looper log path
-    log_path = os.path.join(p.output_dir, LOG_FILENAME)
     # set the selected computing environment in the Project object
     try:
         p.dcc.activate_package(currently_selected_package)
