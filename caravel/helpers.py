@@ -300,7 +300,7 @@ def run_looper(prj, args, act, log_path, logging_lvl):
     :param int logging_lvl: logging level code
     """
     # Establish looper logger
-    setup_logger("looper", level=logging_lvl, stream=sys.stdout, logfile=log_path)
+    setup_logger("looper", level=logging_lvl, stream=sys.stdout, logfile=log_path, plain_format=True)
     eprint("\nAction: {}\n".format(act))
     # run selected looper action
     with peppy.ProjectContext(prj) as prj:
