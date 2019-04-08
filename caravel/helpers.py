@@ -61,7 +61,7 @@ def _color_to_bold(txt):
     :param txt: the string to be edited
     :return str: the uncolored and bolded string
     """
-    return sub(pattern=r"\[\d{1}\w{1}", repl="</b>", string=sub(pattern=r"\[\d{2}\w{1}", repl="<b>", string=txt))
+    return sub(pattern=r"\[\d{1}[a-z]{1}", repl="</b>", string=sub(pattern=r"\[\d{2}[a-z]{1}", repl="<b>", string=txt))
 
 
 def find_in_list(x, l):
