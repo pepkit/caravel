@@ -369,15 +369,14 @@ def _render_summary_pages(prj):
     rep_dir = os.path.basename(get_reports_dir(prj))
     # instantiate the objects needed fot he creation the pages
     j_env = get_jinja_env(TEMPLATES_PATH)
-    summarizer = Summarizer(prj)
-    globs.summarizer = summarizer
+    globs.summarizer = Summarizer(prj)
     html_report_builder = HTMLReportBuilder(prj)
-    objs = summarizer.objs
-    stats = summarizer.stats
-    columns = summarizer.columns
+    objs = globs.summarizer.objs
+    stats = globs.summarizer.stats
+    columns = globs.summarizer.columns
     # create navbar links
-    links_summary = render_navbar_summary_links(prj, summarizer, ["summary"])
-    links_reports = render_navbar_summary_links(prj, summarizer, [rep_dir, "summary"])
+    links_summary = render_navbar_summary_links(prj, globs.summarizer, ["summary"])
+    links_reports = render_navbar_summary_links(prj, globs.summarizer, [rep_dir, "summary"])
     # create navbars
     navbar_summary = render_jinja_template("navbar.html", j_env, dict(summary_links=links_summary))
     navbar_reports = render_jinja_template("navbar.html", j_env, dict(summary_links=links_reports))
