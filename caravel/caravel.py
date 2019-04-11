@@ -21,18 +21,6 @@ from looper.html_reports import *
 
 
 app = Flask(__name__, template_folder=TEMPLATES_PATH)
-globs.init_globals()
-
-
-@app.context_processor
-def inject_dict_for_all_templates():
-    global summary_links
-    try:
-        summary_links
-    except NameError:
-        summary_links = SUMMARY_NAVBAR_PLACEHOLDER
-    return dict(caravel_version=CARAVEL_VERSION, looper_version=LOOPER_VERSION, python_version=python_version(),
-                referrer=request.referrer, debug=app.config["DEBUG"], summary_links=summary_links, login=app.config['login'])
 
 
 def clear_session_data(keys):
@@ -153,42 +141,6 @@ def csrf_protect():
             return render_error_msg("The CSRF token is invalid")
 
 
-def parse_config_file():
-    """
-    Parses the config file (YAML) provided as an CLI argument or in a environment variable ($CARAVEL).
-
-    The CLI argument is given the priority.
-    Path to the PEP projects and predefined token are extracted if file is read successfully.
-    Additionally, looks for a custom command to execute.
-
-    :return (list[str], list[str]): a pair of projects list and list of commands
-    """
-
-    project_list_path = app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
-    if project_list_path is None:
-        raise ValueError("Please set the environment variable {} or provide a YAML file listing paths to project "
-                         "config files".format(CONFIG_ENV_VAR))
-    project_list_path = os.path.normpath(os.path.join(os.getcwd(), os.path.expanduser(project_list_path)))
-    if not os.path.isfile(project_list_path):
-        raise ValueError("Project configs list isn't a file: {}".format(project_list_path))
-    with open(project_list_path, 'r') as stream:
-        pl = yaml.safe_load(stream)
-        assert CONFIG_PRJ_KEY in pl, \
-            "'{}' key not in the projects list file.".format(CONFIG_PRJ_KEY)
-        projects = pl[CONFIG_PRJ_KEY]
-        # for each project use the dirname of the yaml file to establish the paths to the project itself,
-        # additionally expand the environment variables and the user
-        projects = sorted(flatten([glob_if_exists(os.path.join(
-            os.path.dirname(project_list_path), os.path.expanduser(os.path.expandvars(prj)))) for prj in projects]))
-        # check if the custom command/script is listed in the config and return it
-        try:
-            command = pl[COMMAND_KEY]
-        except KeyError:
-            app.logger.debug("No custom command found in config")
-            command = None
-    return projects, command
-
-
 def parse_token_file(path=TOKEN_FILE_NAME):
     """
     Get the token from the hidden dotfile
@@ -201,7 +153,7 @@ def parse_token_file(path=TOKEN_FILE_NAME):
             out = yaml.safe_load(stream)
         assert CONFIG_TOKEN_KEY in out, \
             "'{token}' key not in the {file} file.".format(token=CONFIG_TOKEN_KEY, file=TOKEN_FILE_NAME)
-        token = out[CONFIG_TOKEN_KEY]
+        token = out[CONFIG_TOKEN_KEY][0]
         token_unique_len = len(''.join(set(token)))
         if token_unique_len < 5:
             app.logger.warning("The predefined authentication token in the config file has to be composed of at least 5"
@@ -215,42 +167,40 @@ def parse_token_file(path=TOKEN_FILE_NAME):
     return token
 
 
+@app.context_processor
+def inject_dict_for_all_templates():
+    if globs.summary_links is None:
+        globs.summary_links = SUMMARY_NAVBAR_PLACEHOLDER
+    return dict(caravel_version=CARAVEL_VERSION, looper_version=LOOPER_VERSION, python_version=python_version(),
+                referrer=request.referrer, debug=app.config["DEBUG"], summary_links=globs.summary_links, login=app.config['login'])
+
+
 # Routes
 @app.route("/")
 @app.route("/index")
 @token_required
 def index():
-    global projects
-    global selected_project
-    global reset_btn
-    global summary_links
-    global command
-    try:
-        reset_btn
-    except NameError:
-        reset_btn = None
     if globs.p is not None:
         summary_exists = check_for_summary(globs.p)
     else:
         app.logger.debug("No project defined yet, summary links not created")
         summary_exists = False
-    summary_links = render_navbar_summary_links(globs.p, globs.summarizer) if summary_exists else SUMMARY_NAVBAR_PLACEHOLDER
+    globs.summary_links = render_navbar_summary_links(globs.p, globs.summarizer) if summary_exists else SUMMARY_NAVBAR_PLACEHOLDER
     if request.args.get('reset'):
         globs.init_globals()
-        summary_links = SUMMARY_NAVBAR_PLACEHOLDER
-        reset_btn = None
+        globs.summary_links = SUMMARY_NAVBAR_PLACEHOLDER
+        globs.reset_btn = None
         app.logger.info("Project data removed")
-    app.logger.debug("reset button: {}".format(str(reset_btn)))
-    projects, command = parse_config_file()
-    return render_template('index.html', projects=projects, reset_btn=reset_btn, command_btn=command)
+    app.logger.debug("reset button: {}".format(str(globs.reset_btn)))
+    projects, globs.command = parse_config_file()
+    return render_template('index.html', projects=projects, reset_btn=globs.reset_btn, command_btn=globs.command)
 
 
 @app.route('/_background_exec')
 def background_exec():
-    global command
     import subprocess
     # get command to execute, if it's None it means the select was not used which means that there's only one option
-    cmd = request.args.get('cmd', type=str) or command
+    cmd = request.args.get('cmd', type=str) or globs.command
     out = subprocess.call(cmd, shell=True)
     return jsonify(exec_txt=out)
 
@@ -259,21 +209,18 @@ def background_exec():
 @token_required
 def set_comp_env():
     global active_settings
-    global currently_selected_package
     if globs.compute_config is None:
         globs.compute_config = divvy.ComputingConfiguration()
     selected_package = request.args.get('compute', type=str)
-    try:
-        currently_selected_package
-    except NameError:
-        currently_selected_package = "default"
+    if globs.currently_selected_package is None:
+        globs.currently_selected_package = "default"
     if selected_package is not None:
         success = globs.compute_config.clean_start(selected_package)
         if not success:
             msg = "Compute package '{}' cannot be activated".format(selected_package)
             app.logger.warning(msg)
             return jsonify(active_settings=render_template('compute_info.html', active_settings=None, msg=msg))
-        currently_selected_package = selected_package
+        globs.currently_selected_package = selected_package
         active_settings = globs.compute_config.get_active_package()
         return jsonify(active_settings=render_template('compute_info.html', active_settings=active_settings))
     active_settings = globs.compute_config.get_active_package()
@@ -281,18 +228,12 @@ def set_comp_env():
         else None
     return render_template('set_comp_env.html', env_conf_file=globs.compute_config.config_file,
                            compute_packages=globs.compute_config.list_compute_packages(), active_settings=active_settings,
-                           currently_selected_package=currently_selected_package, notify_not_set=notify_not_set)
+                           currently_selected_package=globs.currently_selected_package, notify_not_set=notify_not_set)
 
 
 @app.route("/process", methods=['GET', 'POST'])
 @token_required
 def process():
-    global config_file
-    global p_info
-    global selected_project
-    global projects
-    global reset_btn
-    global summary_links
     from looper import build_parser as blp
     actions = get_positional_args(blp(), sort=True)
     # this try-except block is used to determine whether the user should be redirected to the index page
@@ -312,7 +253,7 @@ def process():
         subprojects = list(globs.p.subprojects.keys())
     except AttributeError:
         subprojects = None
-    summary_links = render_navbar_summary_links(globs.p, globs.summarizer) if check_for_summary(globs.p) else SUMMARY_NAVBAR_PLACEHOLDER
+    globs.summary_links = render_navbar_summary_links(globs.p, globs.summarizer) if check_for_summary(globs.p) else SUMMARY_NAVBAR_PLACEHOLDER
     # TODO: p_info will be removed altogether in the future version
     p_info = {
         "name": globs.p.name,
@@ -321,13 +262,12 @@ def process():
         "output_dir": globs.p.metadata.output_dir,
         "subprojects": subprojects
     }
-    reset_btn = True
+    globs.reset_btn = True
     return render_template('process.html', p_info=p_info, change=None, selected_subproject=globs.p.subproject, actions=actions)
 
 
 @app.route('/_background_subproject')
 def background_subproject():
-    global config_file
     sp = request.args.get('sp', type=str)
     output = "Activated subproject: " + sp
     if sp == "None":
@@ -339,13 +279,11 @@ def background_subproject():
 
 @app.route('/_background_options')
 def background_options():
-    global p_info
-    global dests
     from looper.looper import build_parser as blp
     globs.act = request.args.get('act', type=str) or "run"
     parser_looper = blp()
     form_elements_data = get_form_elements_data(parser_looper, globs.p, globs.act)
-    dests = form_elements_data[2]
+    globs.dests = form_elements_data[2]
     grouped_data = form_elements_data_by_type(form_elements_data)
     return jsonify(options=render_template('options.html', grouped_form_data=grouped_data))
 
@@ -353,7 +291,6 @@ def background_options():
 @app.route('/summary', methods=['GET'])
 @token_required
 def summary():
-    global summary_exists
     if globs.selected_project is None:
         app.logger.info("The project is not selected, redirecting to the index page.")
         flash("No project was selected, choose one from the list below.")
@@ -379,15 +316,10 @@ def serve_static(filename):
 @app.route("/action", methods=['GET', 'POST'])
 @token_required
 def action():
-    global config_file
-    global dests
-    global currently_selected_package
-    global logging_lvl
-    global summary_links
     args = argparse.Namespace()
     args_dict = vars(args)
     # Set the arguments from the forms
-    for arg in dests:
+    for arg in globs.dests:
         value = convert_value(request.form.get(arg))
         args_dict[arg] = value
     # hardcode upfront confirmation in the yes/no query; used in clean and destroy actions
@@ -400,19 +332,18 @@ def action():
     # establish the looper log path
     # set the selected computing environment in the Project object
     try:
-        globs.p.dcc.activate_package(currently_selected_package)
+        globs.p.dcc.activate_package(globs.currently_selected_package)
     except NameError:
         app.logger.info("The compute package was not selected, using 'default'.")
         globs.p.dcc.activate_package("default")
     # run looper action
-    run_looper(prj=globs.p, args=args, act=globs.act, log_path=globs.log_path, logging_lvl=logging_lvl)
-    summary_links = render_navbar_summary_links(globs.p, globs.summarizer) if check_for_summary(globs.p) else SUMMARY_NAVBAR_PLACEHOLDER
+    run_looper(prj=globs.p, args=args, act=globs.act, log_path=globs.log_path, logging_lvl=globs.logging_lvl)
+    globs.summary_links = render_navbar_summary_links(globs.p, globs.summarizer) if check_for_summary(globs.p) else SUMMARY_NAVBAR_PLACEHOLDER
     return render_template("/execute.html")
 
 
 @app.route('/_background_result')
 def background_result():
-    global p_info
     page = compile_results_content(globs.log_path, globs.act)
     return jsonify(result=textile(page))
 
@@ -424,7 +355,6 @@ def favicon():
 
 
 def main():
-    global logging_lvl
     ensure_version()
     parser = CaravelParser()
     args = parser.parse_args()
@@ -433,11 +363,12 @@ def main():
     app.config["DEBUG"] = args.debug
     app.config['SECRET_KEY'] = 'thisisthesecretkey'
     app.config['login'] = getpass.getuser()
+    globs.init_globals()
     if app.config["DEBUG"]:
         warnings.warn("You have entered the debug mode. The server-client connection is not secure!")
-        logging_lvl = logging.DEBUG
+        globs.logging_lvl = logging.DEBUG
     else:
-        logging_lvl = DEFAULT_LOGGING_LVL
+        globs.logging_lvl = DEFAULT_LOGGING_LVL
         generate_token(token=parse_token_file())
     app.logger.info("Using python {}".format(python_version()))
     app.run(port=args.port)

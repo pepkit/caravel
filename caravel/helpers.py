@@ -5,12 +5,13 @@ from platform import python_version
 import argparse
 import globs
 from const import V_BY_NAME, REQUIRED_V_BY_NAME, DEFAULT_PORT, DEFAULT_TERMINAL_WIDTH, TEMPLATES_PATH, CARAVEL_VERSION,\
-    LOOPER_VERSION
+    LOOPER_VERSION, CONFIG_ENV_VAR, CONFIG_PRJ_KEY, COMMAND_KEY
 from distutils.version import LooseVersion
 from itertools import chain
 import random
 import string
 import sys
+import yaml
 import looper
 import peppy
 import fcntl
@@ -98,6 +99,42 @@ def check_for_summary(prj):
     :return bool: whether the summary page was produced
     """
     return os.path.exists(os.path.join(prj.metadata.output_dir, get_summary_html_name(prj)))
+
+
+def parse_config_file():
+    """
+    Parses the config file (YAML) provided as an CLI argument or in a environment variable ($CARAVEL).
+
+    The CLI argument is given the priority.
+    Path to the PEP projects and predefined token are extracted if file is read successfully.
+    Additionally, looks for a custom command to execute.
+
+    :return (list[str], list[str]): a pair of projects list and list of commands
+    """
+
+    project_list_path = current_app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
+    if project_list_path is None:
+        raise ValueError("Please set the environment variable {} or provide a YAML file listing paths to project "
+                         "config files".format(CONFIG_ENV_VAR))
+    project_list_path = os.path.normpath(os.path.join(os.getcwd(), os.path.expanduser(project_list_path)))
+    if not os.path.isfile(project_list_path):
+        raise ValueError("Project configs list isn't a file: {}".format(project_list_path))
+    with open(project_list_path, 'r') as stream:
+        pl = yaml.safe_load(stream)
+        assert CONFIG_PRJ_KEY in pl, \
+            "'{}' key not in the projects list file.".format(CONFIG_PRJ_KEY)
+        projects = pl[CONFIG_PRJ_KEY]
+        # for each project use the dirname of the yaml file to establish the paths to the project itself,
+        # additionally expand the environment variables and the user
+        projects = sorted(flatten([glob_if_exists(os.path.join(
+            os.path.dirname(project_list_path), os.path.expanduser(os.path.expandvars(prj)))) for prj in projects]))
+        # check if the custom command/script is listed in the config and return it
+        try:
+            command = pl[COMMAND_KEY]
+        except KeyError:
+            current_app.logger.debug("No custom command found in config")
+            command = None
+    return projects, command
 
 
 def ensure_version(current=V_BY_NAME, required=REQUIRED_V_BY_NAME):
