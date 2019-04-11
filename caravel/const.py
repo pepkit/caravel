@@ -5,7 +5,6 @@ from looper import __version__ as LOOPER_VERSION
 from peppy import __version__ as PEPPY_VERSION
 from _version import __version__ as CARAVEL_VERSION
 
-
 def get_req_version(module=None):
     """
     Read the required version of the specified module from the requirements file
@@ -15,6 +14,7 @@ def get_req_version(module=None):
     """
     reqs_file = os.path.join(os.path.dirname(__file__),
                              "requirements", "requirements-all.txt")
+
     if module is not None and os.path.isfile(reqs_file):
         with open(reqs_file) as rf:
             for l in rf:
@@ -28,6 +28,8 @@ def get_req_version(module=None):
                 raise Exception("Requirement parse failed: {}".
                                 format(reqs_file))
     else:
+        raise IOError("The requirements file '{rf}' not found or module arg '{mod}' is missing. "
+                      "The version of '{mod}' could not be asserted.".format(rf=reqs_file, mod=module))
         return None
 
 

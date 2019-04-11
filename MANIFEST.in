@@ -1,4 +1,4 @@
-include requirements/*
+include caravel/requirements/*
 include caravel/_version.py
 include README.md
 include caravel/static/*
