@@ -312,7 +312,6 @@ def run_looper(prj, args, act, log_path, logging_lvl):
 
         if act == "destroy":
             looper.looper.Destroyer(prj)(args)
-
         if act == "summarize":
             _render_summary_pages(prj)
         if act == "check":
@@ -331,15 +330,15 @@ def _render_summary_pages(prj):
     """
     rep_dir = os.path.basename(get_reports_dir(prj))
     # instantiate the objects needed fot he creation the pages
+    j_env = get_jinja_env(TEMPLATES_PATH)
     summarizer = Summarizer(prj)
     html_report_builder = HTMLReportBuilder(prj)
-    j_env = get_jinja_env(TEMPLATES_PATH)
     objs = summarizer.objs
     stats = summarizer.stats
     columns = summarizer.columns
     # create navbar links
-    links_summary = render_navbar_summary_links(prj=prj, context=["summary"])
-    links_reports = render_navbar_summary_links(prj=prj, context=[rep_dir, "summary"])
+    links_summary = render_navbar_summary_links(prj, summarizer, ["summary"])
+    links_reports = render_navbar_summary_links(prj, summarizer, [rep_dir, "summary"])
     # create navbars
     navbar_summary = render_jinja_template("navbar.html", j_env, dict(summary_links=links_summary))
     navbar_reports = render_jinja_template("navbar.html", j_env, dict(summary_links=links_reports))
@@ -351,18 +350,21 @@ def _render_summary_pages(prj):
                                           footer=footer)
 
 
-def render_navbar_summary_links(prj, context=None):
+def render_navbar_summary_links(prj, summarizer=None, context=None):
     """
     Render the summary-related links for the navbars in a specific context.
     E.g. for the OG caravel pages or summary page or summary reports pages
 
     :param looper.Project prj: a project the navbar summary links should be created for
+    :param looper.Summarizer summarizer: an object that runs the summarizers for the project
     :param list[str] context: the context for the links
     :return str: html string with the links
     """
     context = context or list()
-    summarizer = Summarizer(prj)
     html_report_builder = HTMLReportBuilder(prj)
-    links = html_report_builder.create_navbar_links(prj=prj, objs=summarizer.objs, stats=summarizer.stats,
-                                                    context=context)
+    if summarizer is not None:
+        args = dict(prj=prj, objs=summarizer.objs, stats=summarizer.stats, context=context)
+    else:
+        args = dict(prj=prj, objs=None, stats=None, context=context)
+    links = html_report_builder.create_navbar_links(**args)
     return links
