@@ -3,6 +3,7 @@
 from __future__ import print_function
 from platform import python_version
 import argparse
+import globs
 from const import V_BY_NAME, REQUIRED_V_BY_NAME, DEFAULT_PORT, DEFAULT_TERMINAL_WIDTH, TEMPLATES_PATH, CARAVEL_VERSION,\
     LOOPER_VERSION
 from distutils.version import LooseVersion
@@ -332,6 +333,7 @@ def _render_summary_pages(prj):
     # instantiate the objects needed fot he creation the pages
     j_env = get_jinja_env(TEMPLATES_PATH)
     summarizer = Summarizer(prj)
+    globs.summarizer = summarizer
     html_report_builder = HTMLReportBuilder(prj)
     objs = summarizer.objs
     stats = summarizer.stats

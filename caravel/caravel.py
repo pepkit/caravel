@@ -8,6 +8,7 @@ import warnings
 from flask import Blueprint, Flask, render_template, request, jsonify, session, redirect, send_from_directory, url_for,\
     flash
 import yaml
+import globs
 from const import *
 from helpers import *
 from looper_parser import *
@@ -20,6 +21,7 @@ from looper.html_reports import *
 
 
 app = Flask(__name__, template_folder=TEMPLATES_PATH)
+globs.init_globals()
 
 
 @app.context_processor
@@ -219,7 +221,6 @@ def parse_token_file(path=TOKEN_FILE_NAME):
 @token_required
 def index():
     global projects
-    global p
     global selected_project
     global reset_btn
     global summary_links
@@ -228,25 +229,18 @@ def index():
         reset_btn
     except NameError:
         reset_btn = None
-    try:
-        summary_exists = check_for_summary(p)
-    except NameError:
-        app.logger.debug("No project defined yet, summary links not created")
+    if globs.p is not None:
+        summary_exists = check_for_summary(globs.p)
     else:
-        summary_links = render_navbar_summary_links(p) if summary_exists else SUMMARY_NAVBAR_PLACEHOLDER
+        app.logger.debug("No project defined yet, summary links not created")
+        summary_exists = False
+    summary_links = render_navbar_summary_links(globs.p, globs.summarizer) if summary_exists else SUMMARY_NAVBAR_PLACEHOLDER
     if request.args.get('reset'):
+        globs.init_globals()
         summary_links = SUMMARY_NAVBAR_PLACEHOLDER
-        try:
-            del selected_project
-        except NameError:
-            app.logger.info("No project selected yet")
-        try:
-            del p
-            app.logger.info("Project data removed")
-        except NameError:
-            app.logger.info("No project defined yet")
         reset_btn = None
-    app.logger.info("reset button: {}".format(str(reset_btn)))
+        app.logger.info("Project data removed")
+    app.logger.debug("reset button: {}".format(str(reset_btn)))
     projects, command = parse_config_file()
     return render_template('index.html', projects=projects, reset_btn=reset_btn, command_btn=command)
 
@@ -264,39 +258,35 @@ def background_exec():
 @app.route("/set_comp_env")
 @token_required
 def set_comp_env():
-    global compute_config
     global active_settings
     global currently_selected_package
-    try:
-        compute_config
-    except NameError:
-        compute_config = divvy.ComputingConfiguration()
+    if globs.compute_config is None:
+        globs.compute_config = divvy.ComputingConfiguration()
     selected_package = request.args.get('compute', type=str)
     try:
         currently_selected_package
     except NameError:
         currently_selected_package = "default"
     if selected_package is not None:
-        success = compute_config.clean_start(selected_package)
+        success = globs.compute_config.clean_start(selected_package)
         if not success:
             msg = "Compute package '{}' cannot be activated".format(selected_package)
             app.logger.warning(msg)
             return jsonify(active_settings=render_template('compute_info.html', active_settings=None, msg=msg))
         currently_selected_package = selected_package
-        active_settings = compute_config.get_active_package()
+        active_settings = globs.compute_config.get_active_package()
         return jsonify(active_settings=render_template('compute_info.html', active_settings=active_settings))
-    active_settings = compute_config.get_active_package()
-    notify_not_set = COMPUTE_SETTINGS_VARNAME[0] if compute_config.default_config_file == compute_config.config_file\
+    active_settings = globs.compute_config.get_active_package()
+    notify_not_set = COMPUTE_SETTINGS_VARNAME[0] if globs.compute_config.default_config_file == globs.compute_config.config_file\
         else None
-    return render_template('set_comp_env.html', env_conf_file=compute_config.config_file,
-                           compute_packages=compute_config.list_compute_packages(), active_settings=active_settings,
+    return render_template('set_comp_env.html', env_conf_file=globs.compute_config.config_file,
+                           compute_packages=globs.compute_config.list_compute_packages(), active_settings=active_settings,
                            currently_selected_package=currently_selected_package, notify_not_set=notify_not_set)
 
 
 @app.route("/process", methods=['GET', 'POST'])
 @token_required
 def process():
-    global p
     global config_file
     global p_info
     global selected_project
@@ -304,69 +294,57 @@ def process():
     global reset_btn
     global summary_links
     from looper import build_parser as blp
-
     actions = get_positional_args(blp(), sort=True)
-
     # this try-except block is used to determine whether the user should be redirected to the index page
     # to select the project when they land on the process subpage from the set_comp_env subpage
-    try:
-        selected_project
-    except NameError:
-        selected_project = request.form.get('select_project')
-        if selected_project is None:
-            app.logger.info("The project is not selected, redirecting to the index page.")
-            flash("No project was selected, choose one from the list below.")
-            del selected_project
-            return redirect(url_for('index'))
+    if globs.selected_project is None and request.form.get('select_project') is None:
+        app.logger.info("The project is not selected, redirecting to the index page.")
+        flash("No project was selected, choose one from the list below.")
+        return redirect(url_for('index'))
     else:
         new_selected_project = request.form.get('select_project')
-        if new_selected_project is not None and selected_project != new_selected_project:
-            selected_project = new_selected_project
-    config_file = str(os.path.expandvars(os.path.expanduser(selected_project)))
+        if new_selected_project is not None and globs.selected_project != new_selected_project:
+            globs.selected_project = new_selected_project
+    config_file = str(os.path.expandvars(os.path.expanduser(globs.selected_project)))
+    if globs.p is None:
+        globs.p = Project(config_file)
     try:
-        p
-    except NameError:
-        p = Project(config_file)
-    try:
-        subprojects = list(p.subprojects.keys())
+        subprojects = list(globs.p.subprojects.keys())
     except AttributeError:
         subprojects = None
-    summary_links = render_navbar_summary_links(p) if check_for_summary(p) else SUMMARY_NAVBAR_PLACEHOLDER
+    summary_links = render_navbar_summary_links(globs.p, globs.summarizer) if check_for_summary(globs.p) else SUMMARY_NAVBAR_PLACEHOLDER
     # TODO: p_info will be removed altogether in the future version
     p_info = {
-        "name": p.name,
-        "config_file": p.config_file,
-        "sample_count": p.num_samples,
-        "output_dir": p.metadata.output_dir,
+        "name": globs.p.name,
+        "config_file": globs.p.config_file,
+        "sample_count": globs.p.num_samples,
+        "output_dir": globs.p.metadata.output_dir,
         "subprojects": subprojects
     }
     reset_btn = True
-    return render_template('process.html', p_info=p_info, change=None, selected_subproject=p.subproject, actions=actions)
+    return render_template('process.html', p_info=p_info, change=None, selected_subproject=globs.p.subproject, actions=actions)
 
 
 @app.route('/_background_subproject')
 def background_subproject():
-    global p
     global config_file
     sp = request.args.get('sp', type=str)
     output = "Activated subproject: " + sp
     if sp == "None":
-        p.deactivate_subproject()
+        globs.p.deactivate_subproject()
     else:
-        p.activate_subproject(sp)
+        globs.p.activate_subproject(sp)
     return jsonify(subproj_txt=output, sample_count=p.num_samples)
 
 
 @app.route('/_background_options')
 def background_options():
     global p_info
-    global act
     global dests
-    global p
     from looper.looper import build_parser as blp
-    act = request.args.get('act', type=str) or "run"
+    globs.act = request.args.get('act', type=str) or "run"
     parser_looper = blp()
-    form_elements_data = get_form_elements_data(parser_looper, p, act)
+    form_elements_data = get_form_elements_data(parser_looper, globs.p, globs.act)
     dests = form_elements_data[2]
     grouped_data = form_elements_data_by_type(form_elements_data)
     return jsonify(options=render_template('options.html', grouped_form_data=grouped_data))
@@ -375,18 +353,14 @@ def background_options():
 @app.route('/summary', methods=['GET'])
 @token_required
 def summary():
-    global p
-    global selected_project
     global summary_exists
-    try:
-        selected_project
-    except NameError:
+    if globs.selected_project is None:
         app.logger.info("The project is not selected, redirecting to the index page.")
         flash("No project was selected, choose one from the list below.")
         return redirect(url_for('index'))
-    summary_html_name = get_summary_html_name(p)
-    summary_location = os.path.join(p.metadata.output_dir, summary_html_name)
-    if check_for_summary(p):
+    summary_html_name = get_summary_html_name(globs.p)
+    summary_location = os.path.join(globs.p.metadata.output_dir, summary_html_name)
+    if check_for_summary(globs.p):
         summary_string = "summary/{}".format(summary_html_name)
         return redirect(summary_string)
     else:
@@ -399,20 +373,16 @@ def summary():
 @app.route("/summary/<path:filename>", methods=['GET'])
 @token_required
 def serve_static(filename):
-    global p
-    return send_from_directory(p.output_dir, filename)
+    return send_from_directory(globs.p.output_dir, filename)
 
 
 @app.route("/action", methods=['GET', 'POST'])
 @token_required
 def action():
-    global act
     global config_file
     global dests
     global currently_selected_package
-    global log_path
     global logging_lvl
-    global p
     global summary_links
     args = argparse.Namespace()
     args_dict = vars(args)
@@ -422,29 +392,28 @@ def action():
         args_dict[arg] = value
     # hardcode upfront confirmation in the yes/no query; used in clean and destroy actions
     args_dict["force_yes"] = True
-    log_path = os.path.join(p.output_dir, LOG_FILENAME)
-    args_dict["logfile"] = log_path
+    if globs.log_path is None:
+        globs.log_path = os.path.join(globs.p.output_dir, LOG_FILENAME)
+    args_dict["logfile"] = globs.log_path
     # perform necessary changes so the looper understands the Namespace
     args_dict = parse_namespace(args_dict)
     # establish the looper log path
     # set the selected computing environment in the Project object
     try:
-        p.dcc.activate_package(currently_selected_package)
+        globs.p.dcc.activate_package(currently_selected_package)
     except NameError:
         app.logger.info("The compute package was not selected, using 'default'.")
-        p.dcc.activate_package("default")
+        globs.p.dcc.activate_package("default")
     # run looper action
-    run_looper(prj=p, args=args, act=act, log_path=log_path, logging_lvl=logging_lvl)
-    summary_links = render_navbar_summary_links(p) if check_for_summary(p) else SUMMARY_NAVBAR_PLACEHOLDER
+    run_looper(prj=globs.p, args=args, act=globs.act, log_path=globs.log_path, logging_lvl=logging_lvl)
+    summary_links = render_navbar_summary_links(globs.p, globs.summarizer) if check_for_summary(globs.p) else SUMMARY_NAVBAR_PLACEHOLDER
     return render_template("/execute.html")
 
 
 @app.route('/_background_result')
 def background_result():
     global p_info
-    global log_path
-    global act
-    page = compile_results_content(log_path, act)
+    page = compile_results_content(globs.log_path, globs.act)
     return jsonify(result=textile(page))
 
 
