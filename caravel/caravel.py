@@ -115,9 +115,6 @@ def generate_csrf_token(n=100):
     return session['_csrf_token']
 
 
-app.jinja_env.globals['csrf_token'] = generate_csrf_token
-
-
 @app.errorhandler(Exception)
 def unhandled_exception(e):
     app.logger.error('Unhandled Exception: %s', (e))
@@ -167,12 +164,37 @@ def parse_token_file(path=TOKEN_FILE_NAME):
     return token
 
 
+def gdsv(s):
+    """
+    Get default slider value (gdsv)
+
+    Custom filter for jinja environment. Extracts default value from string returned by looper custom types
+
+    :param str s: string with default value encoded by "value=<number>". Like "min=1 max=430 step=1 value=430"
+    :return str: default value
+    """
+    try:
+        lst = s.split(' ')
+        value_idx = [x.startswith("value") for x in lst].index(True)
+        value_string = lst[value_idx]
+        result = value_string.split("=")[1]
+    except:
+        app.logger.warning("could not determine default option for slider out of string: '{}'."
+                           " Returning 'None' instead".format(s))
+        result = None
+    return result
+
+
 @app.context_processor
 def inject_dict_for_all_templates():
     if globs.summary_links is None:
         globs.summary_links = SUMMARY_NAVBAR_PLACEHOLDER
     return dict(caravel_version=CARAVEL_VERSION, looper_version=LOOPER_VERSION, python_version=python_version(),
                 referrer=request.referrer, debug=app.config["DEBUG"], summary_links=globs.summary_links, login=app.config['login'])
+
+
+app.jinja_env.filters['gdsv'] = gdsv
+app.jinja_env.globals['csrf_token'] = generate_csrf_token
 
 
 # Routes
@@ -274,7 +296,7 @@ def background_subproject():
         globs.p.deactivate_subproject()
     else:
         globs.p.activate_subproject(sp)
-    return jsonify(subproj_txt=output, sample_count=p.num_samples)
+    return jsonify(subproj_txt=output, sample_count=globs.p.num_samples)
 
 
 @app.route('/_background_options')
