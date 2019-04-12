@@ -5,7 +5,7 @@ from platform import python_version
 import argparse
 import globs
 from const import V_BY_NAME, REQUIRED_V_BY_NAME, DEFAULT_PORT, DEFAULT_TERMINAL_WIDTH, TEMPLATES_PATH, CARAVEL_VERSION,\
-    LOOPER_VERSION, CONFIG_ENV_VAR, CONFIG_PRJ_KEY, COMMAND_KEY
+    LOOPER_VERSION, CONFIG_ENV_VAR, CONFIG_PRJ_KEY, COMMAND_KEY, SUMMARY_NAVBAR_PLACEHOLDER
 from distutils.version import LooseVersion
 from itertools import chain
 import random
@@ -34,6 +34,12 @@ def get_items(i, l):
     :return list: a list of the desired elements
     """
     return map(l.__getitem__, i)
+
+
+def get_navbar_summary_links(summary_exists):
+    if globs.p is not None and globs.summarizer is None:
+        globs.summarizer = Summarizer(globs.p)
+    globs.summary_links = render_navbar_summary_links(globs.p, globs.summarizer) if summary_exists else SUMMARY_NAVBAR_PLACEHOLDER
 
 
 def compile_results_content(log_path, act):

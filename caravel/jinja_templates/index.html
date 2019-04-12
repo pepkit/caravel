@@ -1,27 +1,35 @@
 {% extends "template.html" %}
 {% block head %}
-{{ super() }}
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<script type=text/javascript>
-    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-</script>
-<script type=text/javascript>
-  // subproject activation
-  $(function() {
-    $('a#exec').bind('click', function() {
-      $.getJSON($SCRIPT_ROOT + '/_background_exec', {
-      	cmd: $('select[name="command"]').val(),
-      }, function(data) {
-        $("#exec_txt").text(data.exec_txt);
-      });
-    });
-  });
-</script>
+	{{ super() }}
+	<script type=text/javascript>
+		$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+	</script>
+	<script type=text/javascript>
+	  $(function() {
+		$('a#exec').bind('click', function() {
+		  $.getJSON($SCRIPT_ROOT + '/_background_exec', {
+			cmd: $('select[name="command"]').val(),
+		  }, function(data) {
+			$("#exec_txt").text(data.exec_txt);
+		  });
+		});
+	  });
+	</script>
+	<script type="text/javascript">
+		$(function() {
+			$('#gobtn').bind('click', function() {
+				$('#gobtn').html('Loading project data <i class="fa fa-spinner fa-pulse fa-fw"></i>');
+				$('#gobtn').className="btn btn-outline-dark ml-2 disabled"
+				$('#select_project').submit();
+				return false;
+			});
+		});
+	</script>
 {% endblock %}
 {% block title %}Index{% endblock %}
 {% block content %}
 <h3>Select the input project:</h3>
-<form class="form-inline" method="POST" action="{{ url_for('process') }}">
+<form id="select_project" class="form-inline" method="POST" action="{{ url_for('process') }}">
 	<input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
 	<select name="select_project" class="custom-select" style="width:auto;">
 		{% for p in projects %}
@@ -31,8 +39,9 @@
 	{% if reset_btn is not none %}
 		<button type="button" class="btn btn-outline-dark ml-2 disabled">GO (reset to proceed)</button>
 	{% else %}
-		<button type="submit" class="btn btn-outline-dark ml-2">GO</button>
+		<button id="gobtn" type="submit" class="btn btn-outline-dark ml-2">GO</button>
 	{% endif %}
+	<div id="loading"></div>
 </form>
 {% if reset_btn is not none %}
 	<div class="divider-vertical">

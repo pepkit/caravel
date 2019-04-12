@@ -13,43 +13,43 @@
 </head>
 <div class="card-header">Set options</div>
 <div class="card-body">
-<form id="action_form" method="POST" action="{{ url_for('action') }}">
-    <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
-    {% for type, data in grouped_form_data.items() %}
-        {% set opts = data[0] %}
-        {% set names = data[1] %}
-        {% set labels = data[2] %}
-        {% for name in names %}
-            {% set i = loop.index - 1 %}
-            <div class="row justify-content-left">
-                {% if type == "select" %}
-                    <div class="col-auto">
-                        <select class="form-control" multiple size="3" name="{{ names[i] }}">
-                            {% for e in opts[i] %}
-                                <option value="{{ e }}">{{ e }}</option>   
-                            {% endfor %}
-                        </select>
-                        <p><small>ctrl to select multiple</small></p>
+    <form id="action_form" method="POST" action="{{ url_for('action') }}">
+        <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
+        {% for type, data in grouped_form_data.items() %}
+            {% set opts = data[0] %}
+            {% set names = data[1] %}
+            {% set labels = data[2] %}
+            {% for name in names %}
+                {% set i = loop.index - 1 %}
+                <div class="row justify-content-left">
+                    {% if type == "select" %}
+                        <div class="col-auto">
+                            <select class="form-control" multiple size="3" name="{{ names[i] }}">
+                                {% for e in opts[i] %}
+                                    <option value="{{ e }}">{{ e }}</option>
+                                {% endfor %}
+                            </select>
+                            <p><small>ctrl to select multiple</small></p>
+                        </div>
+                    {% elif type == "range" %}
+                        <div class="col-2 col-slider">
+                            <input type="{{ type }}" {{ opts[i] }} name="{{ names[i] }}" oninput="show_value(this.name,this.value)">
+                            {% set input = opts[i] %}
+                            <button id="{{ names[i] }}" class="disp-value" disabled>{{ input|gdsv }}</button>
+                        </div>
+                    {% else %}
+                        <div class="col-auto">
+                            <input class="{{ type }}" type="{{ type }}" {{ opts[i] }} name="{{ names[i] }}">
+                        </div>
+                    {% endif %}
+                    <div class="col-auto" id="label">
+                        <label class="col-form-label"><b><pre class="form">{{ labels[i] }}</pre></b></label>
                     </div>
-                {% elif type == "range" %}
-                    <div class="col-2 col-slider">
-                        <input type="{{ type }}" {{ opts[i] }} name="{{ names[i] }}" oninput="show_value(this.name,this.value)">
-                        {% set input = opts[i] %}
-                        <button id="{{ names[i] }}" class="disp-value" disabled>{{ input|gdsv }}</button>
-                    </div>
-                {% else %}
-                    <div class="col-auto">
-                        <input class="{{ type }}" type="{{ type }}" {{ opts[i] }} name="{{ names[i] }}">
-                    </div>
-                {% endif %}
-                <div class="col-auto" id="label">
-                    <label class="col-form-label"><b><pre class="form">{{ labels[i] }}</pre></b></label>
                 </div>
-            </div>
+            {% endfor %}
         {% endfor %}
-    {% endfor %}
-    <div class="divider-vertical">
-        <button id="execute" type="submit" class="btn btn-outline-dark ml-2">GO</i></button>
-    </div>
+        <div class="divider-vertical">
+            <button id="execute" type="submit" class="btn btn-outline-dark ml-2">GO</button>
+        </div>
+    </form>
 </div>
-</form>

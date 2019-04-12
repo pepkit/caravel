@@ -138,6 +138,20 @@ def csrf_protect():
             return render_error_msg("The CSRF token is invalid")
 
 
+@app.after_request
+def add_header(r):
+    """
+    Add headers to both force the browser not to cache the pages
+
+    This is relevant for serving the summary pages for multiple projects one after another
+    """
+    r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    r.headers["Pragma"] = "no-cache"
+    r.headers["Expires"] = "0"
+    r.headers["Cache-Control"] = 'public, max-age=0'
+    return r
+
+
 def parse_token_file(path=TOKEN_FILE_NAME):
     """
     Get the token from the hidden dotfile
@@ -207,7 +221,7 @@ def index():
     else:
         app.logger.debug("No project defined yet, summary links not created")
         summary_exists = False
-    globs.summary_links = render_navbar_summary_links(globs.p, globs.summarizer) if summary_exists else SUMMARY_NAVBAR_PLACEHOLDER
+    get_navbar_summary_links(summary_exists)
     if request.args.get('reset'):
         globs.init_globals()
         globs.summary_links = SUMMARY_NAVBAR_PLACEHOLDER
@@ -275,8 +289,8 @@ def process():
         subprojects = list(globs.p.subprojects.keys())
     except AttributeError:
         subprojects = None
-    globs.summary_links = render_navbar_summary_links(globs.p, globs.summarizer) if check_for_summary(globs.p) else SUMMARY_NAVBAR_PLACEHOLDER
-    # TODO: p_info will be removed altogether in the future version
+        # TODO: p_info will be removed altogether in the future version
+    get_navbar_summary_links(check_for_summary(globs.p))
     p_info = {
         "name": globs.p.name,
         "config_file": globs.p.config_file,
@@ -360,7 +374,7 @@ def action():
         globs.p.dcc.activate_package("default")
     # run looper action
     run_looper(prj=globs.p, args=args, act=globs.act, log_path=globs.log_path, logging_lvl=globs.logging_lvl)
-    globs.summary_links = render_navbar_summary_links(globs.p, globs.summarizer) if check_for_summary(globs.p) else SUMMARY_NAVBAR_PLACEHOLDER
+    get_navbar_summary_links(check_for_summary(globs.p))
     return render_template("/execute.html")
 
 
