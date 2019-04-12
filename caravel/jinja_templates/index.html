@@ -19,7 +19,7 @@
 		$(function() {
 			$('#gobtn').bind('click', function() {
 				$('#gobtn').html('Loading project data <i class="fa fa-spinner fa-pulse fa-fw"></i>');
-				$('#gobtn').className="btn btn-outline-dark ml-2 disabled"
+				$("#gobtn").attr("disabled", true);
 				$('#select_project').submit();
 				return false;
 			});
@@ -41,7 +41,6 @@
 	{% else %}
 		<button id="gobtn" type="submit" class="btn btn-outline-dark ml-2">GO</button>
 	{% endif %}
-	<div id="loading"></div>
 </form>
 {% if reset_btn is not none %}
 	<div class="divider-vertical">

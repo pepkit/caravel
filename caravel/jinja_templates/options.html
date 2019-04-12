@@ -6,6 +6,7 @@
     <script type="text/javascript">
         $('#execute').bind('click', function() {
             $('#execute').html('Processing <i class="fa fa-spinner fa-pulse fa-fw"></i>');
+            $("#execute").attr("disabled", true);
             $('#action_form').submit();
             return false;
         });
