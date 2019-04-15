@@ -19,12 +19,14 @@
 				<li class="nav-item active">
 					<a class="nav-link" href="/summary"><i class="fa fa-bar-chart"></i> Summary</a>
 				</li>
+				<div id="navbar_links">
 				{% block navbar %}
 				{% endblock %}
 				{% if summary_links is defined %}
 					{{ summary_links|safe }}
 				{% endif %}
-			</ul> 
+				</div>
+			</ul>
 			<a class="nav-link" href="/shutdown">
 				<button type="submit" class="btn btn-outline-light"><i class="fa fa-1x fa-times"></i></button>
 			</a>

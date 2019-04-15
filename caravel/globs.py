@@ -17,6 +17,8 @@ def init_globals():
     global reset_btn
     global command
     global currently_selected_package
+    global current_subproj
+
     summarizer = None
     p = None
     selected_project = None
@@ -29,5 +31,6 @@ def init_globals():
     reset_btn = None
     command = None
     currently_selected_package = None
+    current_subproj = None
 
 

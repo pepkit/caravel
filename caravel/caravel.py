@@ -310,7 +310,8 @@ def background_subproject():
         globs.p.deactivate_subproject()
     else:
         globs.p.activate_subproject(sp)
-    return jsonify(subproj_txt=output, sample_count=globs.p.num_samples)
+    get_navbar_summary_links(check_for_summary(globs.p))
+    return jsonify(subproj_txt=output, sample_count=globs.p.num_samples, navbar_links=globs.summary_links)
 
 
 @app.route('/_background_options')

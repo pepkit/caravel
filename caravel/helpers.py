@@ -37,8 +37,15 @@ def get_items(i, l):
 
 
 def get_navbar_summary_links(summary_exists):
-    if globs.p is not None and globs.summarizer is None:
+    """
+    Set the global variable summary_links to the current links HTML string
+
+    :param bool summary_exists: if summary exist for the current project
+    :return str: navbar links HTML
+    """
+    if globs.p is not None and (globs.summarizer is None or globs.current_subproj != globs.p.subproject):
         globs.summarizer = Summarizer(globs.p)
+        globs.current_subproj = globs.p.subproject
     globs.summary_links = render_navbar_summary_links(globs.p, globs.summarizer) if summary_exists else SUMMARY_NAVBAR_PLACEHOLDER
 
 

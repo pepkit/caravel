@@ -9,11 +9,14 @@
   // subproject activation
   $(function() {
     $('a#activate_subproject').bind('click', function() {
+    $('#activate_btn').html('ACTIVATING <i class="fa fa-spinner fa-pulse fa-fw"></i>');
       $.getJSON($SCRIPT_ROOT + '/_background_subproject', {
         sp: $('select[name="subprojects"]').val(),
       }, function(data) {
         $("#subproj_txt").text(data.subproj_txt);
         $("#sample_count").text(data.sample_count);
+        $("div#navbar_links").html(data.navbar_links);
+        $('#activate_btn').html('ACTIVATE');
       });
       document.getElementById("deactivate_btn").disabled = false;
     });
@@ -23,11 +26,14 @@
   // subproject deactivation
   $(function() {
     $('a#deactivate_subproject').bind('click', function() {
+      $('#deactivate_btn').html('DEACTIVATING <i class="fa fa-spinner fa-pulse fa-fw"></i>');
       $.getJSON($SCRIPT_ROOT + '/_background_subproject', {
         sp: "None",
       }, function(data) {
         $("#subproj_txt").text(data.subproj_txt);
         $("#sample_count").text(data.sample_count);
+        $("div#navbar_links").html(data.navbar_links);
+        $('#deactivate_btn').html('DEACTIVATE');
       });
       document.getElementById("deactivate_btn").disabled = true;
     });
@@ -54,13 +60,6 @@
     // get the name of the element to control and the value that should be displayed
    document.getElementById(name).innerHTML=value;
   };
-</script>
-<script type="text/javascript">
-jQuery( document ).ready(function( $ ) {
-   $(window).on('popstate', function() {
-      location.reload(true);
-   });
-});
 </script>
 {% endblock %}
 {% block title %}Process{% endblock %}
