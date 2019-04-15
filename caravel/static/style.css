@@ -168,3 +168,7 @@ div.col-slider {
   position: relative;
   overflow: hidden;
 }
+
+div#navbar_links {
+  display: flex;
+}
