@@ -18,10 +18,9 @@
 	<script type="text/javascript">
 		$(function() {
 			$('#gobtn').bind('click', function() {
-				$('#gobtn').html('Loading project data <i class="fa fa-spinner fa-pulse fa-fw"></i>');
-				$("#gobtn").attr("disabled", true);
 				$('#select_project').submit();
-				return false;
+				$("#gobtn").attr("disabled", true);
+				$('#gobtn').html('LOADING PROJECT DATA <i class="fa fa-spinner fa-pulse fa-fw"></i>');
 			});
 		});
 	</script>
