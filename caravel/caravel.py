@@ -80,8 +80,7 @@ def token_required(func):
                     except NameError:
                         return render_error_msg("No login token and session token found.")
                     else:
-                        return render_error_msg("Other instance of caravel is running elsewhere."
-                                                " Log in using the URL printed to the terminal when it was started.")
+                        return render_error_msg("Log in using the URL printed to the terminal when it was started.")
                 else:
                     app.logger.info("Using the token from the session")
                     if session["token"] != login_token:
