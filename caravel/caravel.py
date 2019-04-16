@@ -358,6 +358,22 @@ def data2(filename):
     return(send_from_directory(dir, filename))
 
 
+@app.route('/igv-old', methods=['GET'])
+def igvxml():
+    items = []
+    print(globs.p.name)
+    for sample in globs.p.samples:
+        print(sample.name)
+        items.append({
+            "name": sample.name,
+            "path": "{base_url}data/results_pipeline/{name}/aligned_mm10/{name}_smooth.bw".format(
+                base_url=request.url_root,
+                name=sample.name)
+        })
+    print(items)
+    return(render_template("igv_project.xml", items=items, project=globs.p.name,mimetype='application/xml'))
+
+
 @app.route('/igv', methods=['GET'])
 def igvxml():
     items = []
