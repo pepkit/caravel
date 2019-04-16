@@ -3,7 +3,7 @@ def init_globals():
     """
     This function initializes global variables, which then can be used in the whole app
 
-    Just need to import globals and then say glob.<variable>
+    Just need to import globals and then say globs.<variable>
     """
     global summarizer
     global p
@@ -18,6 +18,7 @@ def init_globals():
     global command
     global currently_selected_package
     global current_subproj
+    global summary_requested
 
     summarizer = None
     p = None
@@ -32,5 +33,6 @@ def init_globals():
     command = None
     currently_selected_package = None
     current_subproj = None
+    summary_requested = None
 
 

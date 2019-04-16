@@ -38,14 +38,17 @@ def get_items(i, l):
     return map(l.__getitem__, i)
 
 
-def get_navbar_summary_links(summary_exists):
+def get_navbar_summary_links():
     """
     Set the global variable summary_links to the current links HTML string
 
     :param bool summary_exists: if summary exist for the current project
     :return str: navbar links HTML
     """
-    globs.summary_links = render_navbar_summary_links(globs.p) if summary_exists else SUMMARY_NAVBAR_PLACEHOLDER
+    if globs.p is not None and globs.summary_requested:
+        globs.summary_links = render_navbar_summary_links(globs.p) if check_for_summary(globs.p) else SUMMARY_NAVBAR_PLACEHOLDER
+    else:
+        globs.summary_links = ""
 
 
 def compile_results_content(log_path, act):
@@ -57,12 +60,11 @@ def compile_results_content(log_path, act):
     :param str act: the name of the action to be shown in the header of the page
     :return str: the page
     """
+    log_wrpr = "<h2><code>looper {act} </code>results:</br></h2><hr>{content}<hr>log read from <code>{path}</code></br>"
     try:
         with open(log_path, "r") as log:
             log_content = log.read()
-            compiled_text = "<h2><code>looper {act} </code>results:</br></h2><hr>".format(act=act) +\
-                            log_content +\
-                            "<hr>log read from <code>{log_path}</code></br>".format(log_path=log_path)
+            compiled_text = log_wrpr.format(act=act, content=log_content, path=log_path)
     except IOError:
         compiled_text = "<b>Cannot find the log file: '{}'</b>".format(log_path)
     return _color_to_bold(compiled_text)
@@ -363,6 +365,7 @@ def run_looper(prj, args, act, log_path, logging_lvl):
         if act == "destroy":
             looper.looper.Destroyer(prj)(args)
         if act == "summarize":
+            globs.summary_requested = True
             _render_summary_pages(prj)
         if act == "check":
             looper.looper.Checker(prj)(flags=args.flags)
