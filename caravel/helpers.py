@@ -17,11 +17,13 @@ import peppy
 import fcntl
 import termios
 import struct
+import pandas as _pd
+from csv import DictReader
 from flask import render_template, current_app
 from re import sub
 from functools import partial
 from looper.html_reports import *
-from looper.looper import Summarizer
+from looper.looper import Summarizer, get_file_for_project, uniqify
 from logmuse import setup_logger
 
 
@@ -43,10 +45,7 @@ def get_navbar_summary_links(summary_exists):
     :param bool summary_exists: if summary exist for the current project
     :return str: navbar links HTML
     """
-    if globs.p is not None and (globs.summarizer is None or globs.current_subproj != globs.p.subproject):
-        globs.summarizer = Summarizer(globs.p)
-        globs.current_subproj = globs.p.subproject
-    globs.summary_links = render_navbar_summary_links(globs.p, globs.summarizer) if summary_exists else SUMMARY_NAVBAR_PLACEHOLDER
+    globs.summary_links = render_navbar_summary_links(globs.p) if summary_exists else SUMMARY_NAVBAR_PLACEHOLDER
 
 
 def compile_results_content(log_path, act):
@@ -382,14 +381,18 @@ def _render_summary_pages(prj):
     rep_dir = os.path.basename(get_reports_dir(prj))
     # instantiate the objects needed fot he creation the pages
     j_env = get_jinja_env(TEMPLATES_PATH)
-    globs.summarizer = Summarizer(prj)
     html_report_builder = HTMLReportBuilder(prj)
-    objs = globs.summarizer.objs
-    stats = globs.summarizer.stats
-    columns = globs.summarizer.columns
+    summarizer_data = use_existing_stats_objs(prj)
+    if summarizer_data is None:
+        globs.summarizer = Summarizer(prj)
+        objs = globs.summarizer.objs
+        stats = globs.summarizer.stats
+        columns = globs.summarizer.columns
+    else:
+        stats, objs, columns = summarizer_data
     # create navbar links
-    links_summary = render_navbar_summary_links(prj, globs.summarizer, ["summary"])
-    links_reports = render_navbar_summary_links(prj, globs.summarizer, [rep_dir, "summary"])
+    links_summary = render_navbar_summary_links(prj, ["summary"])
+    links_reports = render_navbar_summary_links(prj, [rep_dir, "summary"])
     # create navbars
     navbar_summary = render_jinja_template("navbar.html", j_env, dict(summary_links=links_summary))
     navbar_reports = render_jinja_template("navbar.html", j_env, dict(summary_links=links_reports))
@@ -401,7 +404,43 @@ def _render_summary_pages(prj):
                                           footer=footer)
 
 
-def render_navbar_summary_links(prj, summarizer=None, context=None):
+def use_existing_stats_objs(prj):
+    """
+    Check for existence of the 'stats_summary.tsv' and 'objs_summary.tsv' -- files needed for
+    the creation of the summary pages. Additionally get the unique summary columns for the project.
+
+    Return the contents or None if one of them does not exist.
+    :param looper.Projct prj: the project that the files should be checked for
+    :return (list, pandas.DataFrame, list): a pair of read files
+    """
+    stats_path = get_file_for_project(prj, "stats_summary.tsv")
+    objs_path = get_file_for_project(prj, "objs_summary.tsv")
+    warn_msg = "Could not read file: '{}'. Creating new '" + stats_path + "' and '" + objs_path + "'"
+    if not all([os.path.isfile(f) for f in [stats_path, objs_path]]):
+        current_app.logger.debug("'{}' and/or '{}' is missing. Creating new ones...".format(stats_path, objs_path))
+        return None
+    current_app.logger.debug("Both '{}' and '{}' exist".format(stats_path, objs_path))
+    try:
+        objs = _pd.read_csv(objs_path, sep="\t", index_col=0)
+    except Exception as e:
+        current_app.logger.debug(e)
+        current_app.logger.warning(warn_msg.format(objs_path))
+        return None
+    stats = []
+    try:
+        with open(stats_path) as f:
+            reader = DictReader(f, delimiter="\t")
+            for row in reader:
+                stats.append(row)
+    except Exception as e:
+        current_app.logger.debug(e)
+        current_app.logger.warning(warn_msg.format(stats_path))
+        return None
+    columns = uniqify(flatten([list(i.keys()) for i in stats]))
+    return stats, objs, columns
+
+
+def render_navbar_summary_links(prj, context=None):
     """
     Render the summary-related links for the navbars in a specific context.
     E.g. for the OG caravel pages or summary page or summary reports pages
@@ -413,9 +452,13 @@ def render_navbar_summary_links(prj, summarizer=None, context=None):
     """
     context = context or list()
     html_report_builder = HTMLReportBuilder(prj)
-    if summarizer is not None:
-        args = dict(prj=prj, objs=summarizer.objs, stats=summarizer.stats, context=context)
+    data = use_existing_stats_objs(prj)
+    if data is not None:
+        stats, objs, _ = data
     else:
-        args = dict(prj=prj, objs=None, stats=None, context=context)
+        globs.summarizer = Summarizer(prj)
+        objs = globs.summarizer.objs
+        stats = globs.summarizer.stats
+    args = dict(prj=prj, objs=objs, stats=stats, context=context)
     links = html_report_builder.create_navbar_links(**args)
     return links
