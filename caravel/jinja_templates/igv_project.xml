@@ -16,3 +16,26 @@
     </Category>
 </Global>
 
+
+
+{% for dict_item in parent_dict %}
+   {% for key, value in dict_item.items() %}
+      <h1>Key: {{key}}</h1>
+      <h2>Value: {{value}}</h2>
+   {% endfor %}
+{% endfor %}
+
+
+
+
+{% for pipeline_name, pipeline_outputs in project_outputs %}
+    <Category name="{{ pipeline_name }}">
+    {% for output_name, output_samples in pipeline_outputs %}
+        <Category name="{{ output_name }}">
+        {% for sample_name, sample_path in output_samples.items() %}
+            <Resource name="{{ sample_name }}" path="{{ sample_path }}">
+        {% endfor %}
+        </Category>
+    {% endfor %}
+    </Category>
+{% endfor %}

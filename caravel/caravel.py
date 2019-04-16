@@ -358,22 +358,29 @@ def data2(filename):
     return(send_from_directory(dir, filename))
 
 
-
-
 @app.route('/igv', methods=['GET'])
 def igvxml():
     items = []
-    print(globs.p.samples)
-    for sample in globs.p.samples:
-        print(sample.name)
-        items.append({
-            "name": sample.name,
-            "path": "{base_url}data/results_pipeline/{name}/aligned_mm10/{name}_smooth.bw".format(
-                base_url=request.url_root,
-                name=sample.name)
-        })
-    print(items)
-    return(render_template("igv_project.xml", items=items, mimetype='application/xml'))
+    print(globs.p.name)
+
+    project_outputs = globs.p.get_outputs()
+    populated_outputs = {}
+    # populate path variables
+    for pipeline_name, pipeline_outputs in project_outputs:
+        populated_outputs[pipeline_name] = {}
+        for output_name, output_info in pipeline_outputs:
+            populated_outputs[pipeline_name][output_name] = {}
+            for sample in output_info.samples:
+                populated_output = "".join("{base_url}data/results_pipeline/{sample.name}",
+                    output_info.path).format(sample=globs.p.get_sample(sample), 
+                    base_url=request.url_root,
+                    project=globs.p)
+
+                populated_outputs[pipeline_name][output_name][sample_name] = populated_output
+    
+    print(populated_outputs)
+
+    return render_template("igv_project.xml", populated_outputs=populated_outputs, project=globs.p.name, mimetype='application/xml')
 
 
 @app.route("/action", methods=['GET', 'POST'])
