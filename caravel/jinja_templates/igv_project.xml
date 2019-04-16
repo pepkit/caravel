@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Global name="{{ project }}"  infolink="http://www.broadinstitute.org/igv/" version="1">
+    <Category name="Category (hg38)">
+        <Category name="Subcategory One">
+            {% for item in items %}
+            <Resource name="{{ item.name }}"
+                  path="{{ item.path }}" />
+            {% endfor %}
+            <Resource name="pi.12mer.tdf"
+                  path="http://localhost:5000/data/RRBS_AML_blast_322.bw" />
+        </Category>
+        <Category name="Subcategory One">
+            <Resource name="omega.12mer.tdf"
+                  path="http://www.broadinstitute.org/igvdata/annotations/hg18/conservation/omega.12mer.tdf" />
+        </Category>
+    </Category>
+</Global>
+

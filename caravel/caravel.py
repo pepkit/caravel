@@ -349,6 +349,33 @@ def summary():
 def serve_static(filename):
     return send_from_directory(globs.p.output_dir, filename)
 
+@app.route('/data/<path:filename>', methods=['GET', 'POST'])
+def data(filename):
+    return send_from_directory(globs.p.output_dir, filename)
+
+@app.route('/data2/<path:filename>', methods=['GET', 'POST'])
+def data2(filename):
+    dir = "/sfs/lustre/allocations/shefflab/processed/GSE86952/results_pipeline/AML_blast_322/bigwig_hg38"
+    return(send_from_directory(dir, filename))
+
+
+
+
+@app.route('/igv', methods=['GET'])
+def igvxml():
+    items = []
+    print(globs.p.samples)
+    for sample in globs.p.samples:
+        print(sample.name)
+        items.append({
+            "name": sample.name,
+            "path": "{base_url}data/results_pipeline/{name}/aligned_mm10/{name}_smooth.bw".format(
+                base_url=request.url_root,
+                name=sample.name)
+        })
+    print(items)
+    return(render_template("igv_project.xml", items=items, mimetype='application/xml'))
+
 
 @app.route("/action", methods=['GET', 'POST'])
 @token_required
