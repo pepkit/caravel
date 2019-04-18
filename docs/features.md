@@ -21,7 +21,7 @@ Looper **completely divides sample handling from pipeline processing**. This mod
 
 ![file_yaml][file_yaml] **Standardized project format**
 
-Looper subscribes to a single, standardized project metadata format called standard [PEP format](<http://pepkit.github.io>). This means **you only need to learn 1 way to format your project metadata, and it will work with any pipeline**. You can also use the [`pepr`](<https://github.com/pepkit/pepr>) R package or the [`peppy`](<https://github.com/pepkit/peppy>`) python package to import all your sample metadata (and pipeline results) in an R or python analysis environment.
+Looper subscribes to a single, standardized project metadata format called standard [PEP format](<http://pepkit.github.io>). This means **you only need to learn 1 way to format your project metadata, and it will work with any pipeline**. You can also use the [`pepr`](<https://github.com/pepkit/pepr>) R package or the [`peppy`](<https://github.com/pepkit/peppy>) python package to import all your sample metadata (and pipeline results) in an R or python analysis environment.
 
 ![computing][computing] **Universal parallelization implementation**
 
