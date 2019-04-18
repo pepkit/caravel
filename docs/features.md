@@ -21,7 +21,7 @@ Looper **completely divides sample handling from pipeline processing**. This mod
 
 ![file_yaml][file_yaml] **Standardized project format**
 
-Looper subscribes to a single, standardized project metadata format called `standard PEP format <http://pepkit.github.io>`_. This means **you only need to learn 1 way to format your project metadata, and it will work with any pipeline**. You can also use the `pepr <https://github.com/pepkit/pepr>`_ R package or the `peppy <https://github.com/pepkit/peppy>`_ python package to import all your sample metadata (and pipeline results) in an R or python analysis environment.
+Looper subscribes to a single, standardized project metadata format called standard [PEP format](<http://pepkit.github.io>). This means **you only need to learn 1 way to format your project metadata, and it will work with any pipeline**. You can also use the [`pepr`](<https://github.com/pepkit/pepr>) R package or the [`peppy`](<https://github.com/pepkit/peppy>) python package to import all your sample metadata (and pipeline results) in an R or python analysis environment.
 
 ![computing][computing] **Universal parallelization implementation**
 
@@ -29,7 +29,7 @@ Looper's sample-level parallelization applies to all pipelines, so individual pi
 
 ![flexible_pipelines][flexible_pipelines] **Flexible pipelines** 
 
-Use looper with any pipeline, any library, in any domain. We designed it to work with `pypiper <http://pypiper.readthedocs.io/>`_, but **looper has an infinitely flexible command-line argument system that will let you configure it to work with  any script (pipeline) that accepts command-line arguments**. You can also configure looper to submit multiple pipelines per sample.
+Use looper with any pipeline, any library, in any domain. We designed it to work with [`pypiper`](<http://pypiper.readthedocs.io/>), but **looper has an infinitely flexible command-line argument system that will let you configure it to work with  any script (pipeline) that accepts command-line arguments**. You can also configure looper to submit multiple pipelines per sample.
 
 ![subprojects][subprojects] **Subprojects**
 	

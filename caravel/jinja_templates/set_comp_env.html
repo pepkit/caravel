@@ -1,0 +1,58 @@
+{% extends "template.html" %}
+{% block title %}Computing Configuration{% endblock %}
+{% block head %}
+{{ super() }}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type=text/javascript>
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+<script type=text/javascript>
+  function render_compute_settings() {
+  	var send_data = {
+        compute: $('select[name="select_compute"]').val(),
+      };
+      $.getJSON($SCRIPT_ROOT + '/set_comp_env', send_data , function(data) {
+      	$("div#compute_info").html(data.active_settings);
+      });
+      return false;
+    }
+    $(function() {
+    	// The function is triggered on page load and with the "a#show_compute" click
+    	render_compute_settings
+        $('a#show_compute').bind('click', render_compute_settings)
+  });
+</script>
+{% endblock %}
+{% block content %}
+    <div class="card border-light mb-3" style="display:inline-block;">
+      <div class="card-header"><b>Configure computing environment</b></div>
+      <div class="card-body">
+		<select name="select_compute" class="custom-select" style="width:auto;">
+		{% for item in compute_packages %}
+			{% if item == currently_selected_package %}
+				<option value="{{ item }}" selected="selected">{{ item }}</option>
+			{% else %}
+				<option value="{{ item }}">{{ item }}</option>
+			{% endif %}
+		{% endfor %}
+		</select>
+		<a href='#' id=show_compute><button type="submit" class="btn btn-outline-dark ml-2">Select</button></a>
+      </div>
+	<div class="card-footer text-muted">
+		<small>Compute packages read from: <code>{{ env_conf_file }}</code></small>
+	</div>
+    </div>
+
+	<div class="divider-vertical" id="compute_info">
+		{% include "compute_info.html"%}
+	</div>
+
+    {% if notify_not_set is not none %}
+		<hr class="col-xs-12">
+		<h3>Environment variable(s) pointing to the <code>DIVCFG</code> file not found, using default file.</h3>
+		<p>The <code>{{ notify_not_set }}</code> environment variable is not set. Set it with: 
+		<code>export {{ notify_not_set }}=path/to/file</code> and run <code>caravel</code> again.</p>
+		<p>Learn more about <a href="http://code.databio.org/divvy/configuration/" target="_blank"><code>DIVCFG</code></a> files concept <a href="http://code.databio.org/divvy/" target="_blank">here</a>.</p>
+	{% endif %}
+	{% include 'back_referrer.html' %}
+{% endblock %}

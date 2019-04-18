@@ -1,0 +1,5 @@
+include caravel/requirements/*
+include caravel/_version.py
+include README.md
+include caravel/static/*
+include caravel/jinja_templates/*

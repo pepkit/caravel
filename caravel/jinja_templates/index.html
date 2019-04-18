@@ -1,0 +1,68 @@
+{% extends "template.html" %}
+{% block head %}
+	{{ super() }}
+	<script type=text/javascript>
+		$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+	</script>
+	<script type=text/javascript>
+	  $(function() {
+		$('a#exec').bind('click', function() {
+		  $.getJSON($SCRIPT_ROOT + '/_background_exec', {
+			cmd: $('select[name="command"]').val(),
+		  }, function(data) {
+			$("#exec_txt").text(data.exec_txt);
+		  });
+		});
+	  });
+	</script>
+	<script type="text/javascript">
+		$(function() {
+			$('#gobtn').bind('click', function() {
+				$('#select_project').submit();
+				$("#gobtn").attr("disabled", true);
+				$('#gobtn').html('LOADING PROJECT DATA <i class="fa fa-spinner fa-pulse fa-fw"></i>');
+			});
+		});
+	</script>
+{% endblock %}
+{% block title %}Index{% endblock %}
+{% block content %}
+<h3>Select the input project:</h3>
+<form id="select_project" class="form-inline" method="POST" action="{{ url_for('process') }}">
+	<input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
+	<select name="select_project" class="custom-select" style="width:auto;">
+		{% for p in projects %}
+			<option value="{{ p }}">{{ p }}</option>
+		{% endfor %}
+	</select>
+	{% if reset_btn is not none %}
+		<button type="button" class="btn btn-outline-dark ml-2 disabled">GO (reset to proceed)</button>
+	{% else %}
+		<button id="gobtn" type="submit" class="btn btn-outline-dark ml-2">GO</button>
+	{% endif %}
+</form>
+{% if reset_btn is not none %}
+	<div class="divider-vertical">
+		<a href="{{ url_for('index', reset=True) }}">
+			<button class="btn btn-outline-danger">RESET PROJECT <i class="fa fa-undo"></i></button>
+		</a>
+	</div>
+{% endif %}
+<div class="divider-vertical">
+{% if command_btn is not none %}
+	{% if command_btn|length > 1 %}
+		<select name="command" class="custom-select" style="width:auto;">
+		{% for cmd in command_btn %}
+			<option value="{{ cmd }}"><code>{{ cmd }}</code></option>
+		{% endfor %}
+		</select>
+	{% else %}
+		<code>{{ command_btn }}</code>
+	{% endif %}
+	<a href='#' id=exec>
+		<button class="btn btn-outline-dark ml-2">Execute</button>
+	</a>
+    Exit code: <p id=exec_txt class="badge badge-primary">None</p>
+{% endif %}
+</div>	
+{% endblock %}

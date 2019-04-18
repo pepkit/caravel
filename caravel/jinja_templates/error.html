@@ -1,0 +1,19 @@
+{% extends "template.html" %}
+{% block title %}Error{% endblock %}
+{% block content %}
+<h2>Caravel server encountered exception(s):</h2>
+<div class="divider-15">
+	<ul class="list-group" style="display:inline-block">
+	  {% for ei in e %}
+	  {% set i = loop.index - 1 %}
+		  {% if types is not none %}
+		  	<li class="list-group-item list-group-item-danger"><code class="footer"><b>{{ types[i]}}</b>: {{ ei }}</code></li>
+		  {% else %}
+		  	<li class="list-group-item list-group-item-danger"><code class="footer">{{ ei }}</code></li>
+		  {% endif %}
+	  {% endfor %}
+	</ul>
+</div>
+<br style = “line-height:2;”><br>
+{% include 'back_referrer.html' %}
+{% endblock %}

@@ -28,5 +28,147 @@ body {
   margin-top: -40px;
   /* negative value of footer height */
   height: 40px;
-  padding-left: 40px;
+  padding-top: 5px;
+  padding-left: 10px;
+}
+
+.divider-15 {
+  /* adds spacing 15px */
+  width:90%; 
+  min-height:1px; 
+  margin-top:15px; 
+  margin-bottom:15px;
+  margin-left:15px;  
+  display:inline-block; 
+  position:relative;
+}
+.divider-vertical {
+  margin-top:15px;
+  /*margin-bottom:15px;*/
+}
+
+p#subproj_txt.badge.badge-primary {
+  margin-bottom: 0px;
+}
+
+th.footer {
+  font-size:12px;
+  padding: 3px;
+  font-weight: bold;
+  text-align: center;
+  background-color: #464c56;
+  color: white
+}
+
+td.footer {
+  font-size:12px;
+  padding: 3px;
+  text-align: center;
+  color: #464c56;
+  font-weight: bold;
+  font-family: Courier New
+}
+
+code.footer {
+  color:#464c56
+}
+
+.left {
+  float:left;
+  padding-left: 10px;
+  padding-bottom: 10px;
+}
+
+.right {
+  float:right;
+  padding-top: 15px;
+  padding-right: 10px;
+}
+
+input[type="range"] { 
+  float: left;
+  width: 75%;
+  min-width: 50px;
+}
+
+span {
+  margin-left: 5px;
+}
+
+div.col-auto {
+  padding-left: 10px;
+  padding-right: 0px;
+}
+
+label.col-form-label {
+  padding-bottom: 0px;
+  padding-top: 0px;
+}
+
+pre.form {
+  margin-bottom: 0px;
+  margin-top: 0px;
+}
+
+button.disp-value {
+  font-weight: bold; 
+  font-size: 12px; 
+  border-radius: 5px; 
+  margin-left: 5px; 
+  color: white; 
+  padding: 1px; 
+  background-color: #007bff; 
+  width: 50px; 
+  opacity: 1;
+  border: none;
+}
+
+div.col-slider {
+  display: inline-block;
+  width: 100%;
+  min-width: 240px;
+  padding-right: 0px;
+}
+
+.nav-item {
+  color: white;
+  }
+
+.nav-link {
+  color: white;
+  }
+
+.left_footer {
+  width: 30%;
+  text-align: left;
+  float: left;
+  display: inline-block;
+}
+
+.right_footer {
+  width: 30%;
+  padding-top: 10px;
+  float: right;
+  text-align:right;
+  display: inline-block;
+}
+
+.center_footer {
+  width: 40%;
+  padding-top: 10px;
+  overflow: hidden;
+  display: inline-block;
+  text-align: center;
+}
+
+.wrapper {
+  padding-left: 10px;
+  padding-right: 10px;
+  clear: both;
+  position: relative;
+  overflow: hidden;
+}
+
+div#navbar_links {
+  display: flex;
 }
