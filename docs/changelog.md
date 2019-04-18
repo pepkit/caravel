@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.2 (unreleased)
+## v0.2 (*2019-04-18*)
 
 Changed: 
 
@@ -17,11 +17,11 @@ Added:
   - Deactivate subproject with a dedicated button
   - Use `divvy` for computing environment configuration
   - Display `looper` log in the terminal and in a separate page, when finished
-  - `looper` version assurance
+  - `looper` and `peppy` versions assurance
   - New way of `caravel`, `looper` and `python` versions monitoring on the client side in the footer
-  - Reactive button for summary page display (produced by `looper summarize`)
   - Systematic HTML form elements determination based on `looper` arguments options
-  - The port that the server will be run on can be determined manually from the CLI (`-p` and `--port` options) 
+  - The port that the server will be run on can be determined manually from the CLI (`-p` and `--port` options)
+  - Seamless integration with `looper` reporting module, the pages are displayed with `caravel`'s navbar and footer
 
 ## v0.1.1 (*2019-01-15*)
 
