@@ -25,7 +25,7 @@ pip install --user --upgrade https://github.com/pepkit/caravel/zipball/master
 You can now try running `caravel` on the command line: 
 
 ```bash
-caravel example_config.yaml
+caravel -c example_config.yaml
 ```
 
 The `example_config.yaml` file is a simple configuration file that points to your PEPs. See [how to configure caravel](configure-caravel).
