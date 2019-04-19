@@ -220,7 +220,7 @@ def index():
     else:
         app.logger.debug("No project defined yet, summary links not created")
         summary_exists = False
-    get_navbar_summary_links(summary_exists)
+    get_navbar_summary_links()
     if request.args.get('reset'):
         globs.init_globals()
         globs.summary_links = SUMMARY_NAVBAR_PLACEHOLDER
@@ -289,7 +289,7 @@ def process():
     except AttributeError:
         subprojects = None
         # TODO: p_info will be removed altogether in the future version
-    get_navbar_summary_links(check_for_summary(globs.p))
+    get_navbar_summary_links()
     p_info = {
         "name": globs.p.name,
         "config_file": globs.p.config_file,
@@ -309,7 +309,8 @@ def background_subproject():
         globs.p.deactivate_subproject()
     else:
         globs.p.activate_subproject(sp)
-    get_navbar_summary_links(check_for_summary(globs.p))
+    globs.summary_requested = None
+    get_navbar_summary_links()
     return jsonify(subproj_txt=output, sample_count=globs.p.num_samples, navbar_links=globs.summary_links)
 
 
@@ -327,6 +328,7 @@ def background_options():
 @app.route('/summary', methods=['GET'])
 @token_required
 def summary():
+    globs.summary_requested = True
     if globs.selected_project is None:
         app.logger.info("The project is not selected, redirecting to the index page.")
         flash("No project was selected, choose one from the list below.")
@@ -424,7 +426,7 @@ def action():
         globs.p.dcc.activate_package("default")
     # run looper action
     run_looper(prj=globs.p, args=args, act=globs.act, log_path=globs.log_path, logging_lvl=globs.logging_lvl)
-    get_navbar_summary_links(check_for_summary(globs.p))
+    get_navbar_summary_links()
     return render_template("/execute.html")
 
 

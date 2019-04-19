@@ -1,16 +1,16 @@
 # Usage reference
 
 
-Here you can see the command-line usage instructions for the main caravel command and for each subcommand:
+Here you can see the command-line usage instructions for `caravel`:
 
 
-`python caravel/caravel.py --help`
+`caravel --help`
 ```
 caravel version: 0.2
 looper version: 0.11.0
-usage: caravel.py [-h] [-V] [-c CONFIG] [-p PORT] [-d]
+usage: caravel [-h] [-V] [-c CONFIG] [-p PORT] [-d]
 
-caravel.py - Run a web interface for looper.
+caravel - run a web interface for looper
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -22,5 +22,7 @@ optional arguments:
                         5000)
   -d, --dbg             Use this option if you want to enter the debug mode.
                         Unsecured. (default: False)
+
+See docs at: http://code.databio.org/caravel/
 
 ```
