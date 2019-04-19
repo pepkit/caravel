@@ -5,15 +5,11 @@
 
 [![PEP compatible](http://pepkit.github.io/img/PEP-compatible-green.svg)](http://pepkit.github.io)
 
-
-`Caravel` is a local web GUI for [looper](https://looper.readthedocs.io/). `Caravel` gives you a slick web interface to interact with your projects formatted as [PEPs](http://pepkit.github.io). You can use it to submit jobs to any cluster resource manager, monitor jobs, summarize results, and browse project summary web pages. `caravel` basically builds on top of `looper`, but uses the lightweight `flask` microframework to give you a web interface, making it even easier to manage your jobs for those who like pointy-clicky.
+`Caravel` provides a web interface to interact with your [PEP-formatted projects](http://pepkit.github.io). `Caravel` lets you submit jobs to any cluster resource manager, monitor jobs, summarize results, and browse project summary web pages. `Caravel` is a local web GUI using [flask](http://flask.pocoo.org/) for [looper](https://code.databio.org/looper/). 
 
 ## Installing
 
-Release versions are posted on the GitHub [`caravel` releases page](https://github.com/databio/caravel/releases).  Eventually we will submit caravel to pypi but for now you just clone the git repository
- and then run it as described below.
-
-You can install the latest release directly from GitHub using pip:
+Release versions are posted on the GitHub [caravel releases page](https://github.com/databio/caravel/releases). You can install the latest release directly from GitHub using `pip`:
 
 ```bash
 pip install --user https://github.com/pepkit/caravel/zipball/master
@@ -23,12 +19,6 @@ Update `caravel` with:
 
 ```bash
 pip install --user --upgrade https://github.com/pepkit/caravel/zipball/master
-```
-
-To put the ``caravel`` executable in your ``$PATH``, add the following line to your ``.bashrc`` or ``.profile``:
-
-```bash
-export PATH=~/.local/bin:$PATH
 ```
 ## Hello, world!
 
