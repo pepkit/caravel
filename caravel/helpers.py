@@ -23,7 +23,7 @@ from flask import render_template, current_app
 from re import sub
 from functools import partial
 from looper.html_reports import *
-from looper.looper import Summarizer, get_file_for_project, uniqify
+from looper.looper import Summarizer, get_file_for_project, uniqify, run_custom_summarizers
 from logmuse import setup_logger
 
 
@@ -366,6 +366,7 @@ def run_looper(prj, args, act, log_path, logging_lvl):
             looper.looper.Destroyer(prj)(args)
         if act == "summarize":
             globs.summary_requested = True
+            run_custom_summarizers(prj)
             _render_summary_pages(prj)
         if act == "check":
             looper.looper.Checker(prj)(flags=args.flags)
