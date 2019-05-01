@@ -291,7 +291,7 @@ def _version_text():
 
     :return str: a compiled string
     """
-    return "caravel version: {cv}\nlooper version: {lv}\n".format(cv=V_BY_NAME["caravel"], lv=V_BY_NAME["looper"])
+    return "caravel version: {cv}\nlooper version: {lv}\n".format(cv=V_BY_NAME["caravel"], lv=V_BY_NAME["loopercli"])
 
 
 def _print_terminal_width(txt=None, char="-"):
@@ -355,10 +355,10 @@ def run_looper(prj, args, act, log_path, logging_lvl):
     eprint("\nAction: {}\n".format(act))
     # run selected looper action
     with peppy.ProjectContext(prj) as prj:
-        if act == "run":
+        if act in ["run", "rerun"]:
             run = looper.looper.Runner(prj)
             try:
-                run(args, None)
+                run(args, None, rerun=(act == "rerun"))
             except IOError:
                 raise Exception("{} pipelines_dir: '{}'".format(prj.__class__.__name__, prj.metadata.pipelines_dir))
 
