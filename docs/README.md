@@ -40,7 +40,7 @@ caravel -c example_caravel.yaml
 
 ## Setup and configuration
 
-* Set environment variable `$CARAVEL` to point to a YAML file formatted as shown below:
+* Set environment variable `$CARAVEL` to point to a [YAML file](http://yaml.org) with a hypen-bulleted list of [PEP config files](https://pepkit.github.io/docs/project_config/), like this:
 
 ```yaml
 projects:
