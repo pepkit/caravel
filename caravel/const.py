@@ -43,10 +43,10 @@ TOKEN_LEN = 15
 SET_ELSEWHERE = [["--force-yes"], ["--sp"], ["--compute"], ["--env"], ["--help"], ["--version"], ["--selector-attribute"],
                  ["--selector-exclude"], ["--selector-include"], ['--resources'], ['']]
 LOG_FILENAME = "caravel.log"
-REQUIRED_LOOPER_VERSION = get_req_version("looper")["looper"]
+REQUIRED_LOOPER_VERSION = get_req_version("loopercli")["loopercli"]
 REQUIRED_PEPPY_VERSION = get_req_version("peppy")["peppy"]
-REQUIRED_V_BY_NAME = {"looper": REQUIRED_LOOPER_VERSION, "peppy": REQUIRED_PEPPY_VERSION}
-V_BY_NAME = {"looper": LOOPER_VERSION, "peppy": PEPPY_VERSION, "caravel": CARAVEL_VERSION}
+REQUIRED_V_BY_NAME = {"loopercli": REQUIRED_LOOPER_VERSION, "peppy": REQUIRED_PEPPY_VERSION}
+V_BY_NAME = {"loopercli": LOOPER_VERSION, "peppy": PEPPY_VERSION, "caravel": CARAVEL_VERSION}
 DEFAULT_TERMINAL_WIDTH = 80
 SUMMARY_NAVBAR_PLACEHOLDER = "<li class='nav-item'><a class='nav-link disabled'>No summary yet</a></li>"
 TEMPLATES_DIRNAME = "jinja_templates"
