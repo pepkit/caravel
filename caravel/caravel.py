@@ -14,10 +14,10 @@ from helpers import *
 from looper_parser import *
 import divvy
 from textile import textile
-from peppy.utils import coll_like
 from platform import python_version
 from looper.project import Project
 from looper.html_reports import *
+from ubiquerg import is_collection_like
 
 
 app = Flask(__name__, template_folder=TEMPLATES_PATH)
@@ -28,7 +28,7 @@ def clear_session_data(keys):
     Removes the non default data (created in the app lifetime) from the flask.session object.
     :param keys: a list of keys to be removed from the session
     """
-    if not coll_like(keys):
+    if not is_collection_like(keys):
         raise TypeError("Keys to clear must be collection-like; "
                         "got {}".format(type(keys)))
     for key in keys:

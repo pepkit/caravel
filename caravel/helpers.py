@@ -25,6 +25,7 @@ from functools import partial
 from looper.html_reports import *
 from looper.looper import Summarizer, get_file_for_project, uniqify, run_custom_summarizers
 from logmuse import setup_logger
+from ubiquerg import is_collection_like
 
 
 def get_items(i, l):
@@ -225,7 +226,7 @@ def glob_if_exists(x):
     :param x: a string with path containing globs
     :return list[str]: a list of paths
     """
-    return [glob.glob(e) or e for e in x] if peppy.utils.coll_like(x) else (glob.glob(x) or [x])
+    return [glob.glob(e) or e for e in x] if is_collection_like(x) else (glob.glob(x) or [x])
 
 
 def random_string(n):
