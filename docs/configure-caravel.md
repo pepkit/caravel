@@ -1,8 +1,8 @@
 # How to configure caravel
 
-## Setup and configuration
+## The caravel configuration file
 
-* Set environment variable `$CARAVEL` to point to a YAML file formatted as shown below:
+`Caravel` just needs a list of your [PEP-formatted](http://pepkit.github.io) projects, which you specify like this:
 
 ```
 projects:
@@ -10,4 +10,21 @@ projects:
   - path/to/project2_config.yaml
 ```
 
-The paths in the file above should be either absolute or relative to the file location.
+You can also use `globs` to add a variable-named projects:
+
+```
+projects:
+  - folder/where/I/store/PEPs/*/*_config.yaml
+```
+
+The paths in the file should be either absolute or *relative to the location of the caravel configuration file*.
+
+## The `$CARAVEL` environment variable
+
+You can avoid passing the configuration file with `-c` by putting that path into the `$CARAVEL` environment variable:
+
+```
+export CARAVEL="/path/to/caravel.yaml"
+```
+
+This way you can start it up with nothing more than `caravel`.
