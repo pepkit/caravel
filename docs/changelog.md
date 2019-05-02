@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.13.0 (*2019-05-02*)
+
+Fixed:
+
+  - silent failing of `looper rerun`
+  - `looper summarize` not overwriting the existing summary-related files
+
+Changed: 
+
+  - `lump` and `lumpn` defaults to 0 and 1, respectively
+  
+Added:
+  
+  - custom summarizers support
+  - subproject activation and deactivation updates all the `Project` object attributes in the "Process" page
+  - link to the computing configuration settings in the "Home" page
+
 ## v0.2 (*2019-04-18*)
 
 Changed: 
