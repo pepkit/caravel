@@ -295,10 +295,11 @@ def process():
         "config_file": globs.p.config_file,
         "sample_count": globs.p.num_samples,
         "output_dir": globs.p.metadata.output_dir,
-        "subprojects": subprojects
+        "subprojects": ",".join(subprojects)
     }
     globs.reset_btn = True
-    return render_template('process.html', p_info=p_info, change=None, selected_subproject=globs.p.subproject, actions=actions)
+    return render_template('process.html', p_info=p_info, change=None, selected_subproject=globs.p.subproject,
+                           actions=actions, subprojects=subprojects)
 
 
 @app.route('/_background_subproject')
@@ -311,7 +312,18 @@ def background_subproject():
         globs.p.activate_subproject(sp)
     globs.summary_requested = None
     get_navbar_summary_links()
-    return jsonify(subproj_txt=output, sample_count=globs.p.num_samples, navbar_links=globs.summary_links)
+    try:
+        subprojects = list(globs.p.subprojects.keys())
+    except AttributeError:
+        subprojects = None
+    p_info = {
+        "name": globs.p.name,
+        "config_file": globs.p.config_file,
+        "sample_count": globs.p.num_samples,
+        "output_dir": globs.p.metadata.output_dir,
+        "subprojects": ",".join(subprojects)
+    }
+    return jsonify(subproj_txt=output, p_info=p_info, navbar_links=globs.summary_links)
 
 
 @app.route('/_background_options')

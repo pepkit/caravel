@@ -12,8 +12,12 @@
         $.getJSON($SCRIPT_ROOT + '/_background_subproject', {
           sp: $('select[name="subprojects"]').val(),
         }, function(data) {
+          // iterate over the dictionary sent from the server and update the values in all the fields
+          for(key in data.p_info) {
+            console.log("activation: The value of ", key, " is ", data.p_info[key]);
+            $("#" + key).text(data.p_info[key]);
+          }
           $("#subproj_txt").text(data.subproj_txt);
-          $("#sample_count").text(data.sample_count);
           $("div#navbar_links").html(data.navbar_links);
           $('#activate_btn').html('ACTIVATE');
         });
@@ -30,8 +34,12 @@
         $.getJSON($SCRIPT_ROOT + '/_background_subproject', {
           sp: "None",
         }, function(data) {
+          // iterate over the dictionary sent from the server and update the values in all the fields
+          for(key in data.p_info) {
+            console.log("deactivation: The value of ", key, " is ", data.p_info[key]);
+            $("#" + key).text(data.p_info[key]);
+          }
           $("#subproj_txt").text(data.subproj_txt);
-          $("#sample_count").text(data.sample_count);
           $("div#navbar_links").html(data.navbar_links);
           $('#deactivate_btn').html('DEACTIVATE');
         });
@@ -73,12 +81,12 @@
         {% endfor %}
       </div>
     <!-- </div> -->
-      {% if p_info["subprojects"] is not none %}
+      {% if subprojects is not none %}
       <!-- <div class="card border-secondary mb-3" style="display:inline-block;"> -->
         <div class="card-header">Select subproject</div>
         <div class="card-body">
           <select name="subprojects" class="custom-select" style="width:auto;">
-              {% for i in p_info["subprojects"] %}
+              {% for i in subprojects %}
                   <option value="{{ i }}">{{ i }}</option>
               {% endfor %}
           </select>
