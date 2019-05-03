@@ -28,15 +28,5 @@ From within the root of the cloned repository
 caravel -c example_config.yaml
 ```
 
-The `example_config.yaml` file is a simple configuration file that points to your PEPs. See [how to configure caravel](configure-caravel).
-
-## Setup and configuration
-
-You can avoid passing the a config file with `-c` if you set environment variable `$CARAVEL` to point to a [YAML file](http://yaml.org) with a hyphen-bulleted list of [PEP config files](https://pepkit.github.io/docs/project_config/), like this:
-
-```yaml
-projects:
-  - path/to/project1_config.yaml
-  - path/to/project2_config.yaml
-```
+The `example_config.yaml` file is a simple configuration file that points to your PEPs. You can avoid passing the a config file with `-c` if you set environment variable `$CARAVEL`, see [how to configure caravel](configure-caravel).
 
