@@ -219,6 +219,30 @@ def geprint(txt):
     eprint("\033[92m {}\033[00m".format(txt))
 
 
+def _get_sp_txt(p):
+    """
+    Produces a comma separated string of the defined subproject names, if avaialble
+
+    :param looper.Project p: project to search the subprojects in
+    :return str | NoneType: subprojects names
+    """
+    try:
+        sp_names = p.subprojects.keys()
+    except AttributeError:
+        sp_names = None
+    return ",".join(sp_names) if sp_names is not None else sp_names
+
+
+def project_info_dict(p):
+    """
+    Composes a simple dictionary used to display the project information
+    :param looper.Project p: project that the info should be based on
+    :return dict: dictionary with project information
+    """
+    return {"name": p.name, "config_file": p.config_file, "sample_count": p.num_samples,
+             "output_dir": p.metadata.output_dir, "subprojects": _get_sp_txt(globs.p)}
+
+
 def glob_if_exists(x):
     """
     Return all matches in the directory for x and x if nothing matches

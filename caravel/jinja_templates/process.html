@@ -76,13 +76,11 @@
     <div class="card border-light mb-3" style="display:inline-block;">
       <div class="card-header"><b>Project Metadata</b></div>
       <div class="card-body">
-        {% for item in p_info %} 
+        {% for item in p_info %}
         <p class="card-text"><b>{{ item }}: </b><code id="{{ item }}">{{ p_info[item] }}</code></p>
         {% endfor %}
       </div>
-    <!-- </div> -->
       {% if subprojects is not none %}
-      <!-- <div class="card border-secondary mb-3" style="display:inline-block;"> -->
         <div class="card-header">Select subproject</div>
         <div class="card-body">
           <select name="subprojects" class="custom-select" style="width:auto;">
