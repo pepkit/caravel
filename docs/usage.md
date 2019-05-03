@@ -4,10 +4,10 @@
 Here you can see the command-line usage instructions for `caravel`:
 
 
-`caravel --help`
+`caravel --help`:
 ```
-caravel version: 0.2
-looper version: 0.11.0
+caravel version: 0.13.0
+looper version: 0.12
 usage: caravel [-h] [-V] [-c CONFIG] [-p PORT] [-d]
 
 caravel - run a web interface for looper

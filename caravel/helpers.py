@@ -23,8 +23,9 @@ from flask import render_template, current_app
 from re import sub
 from functools import partial
 from looper.html_reports import *
-from looper.looper import Summarizer, get_file_for_project, uniqify
+from looper.looper import Summarizer, get_file_for_project, uniqify, run_custom_summarizers
 from logmuse import setup_logger
+from ubiquerg import is_collection_like
 
 
 def get_items(i, l):
@@ -218,6 +219,30 @@ def geprint(txt):
     eprint("\033[92m {}\033[00m".format(txt))
 
 
+def _get_sp_txt(p):
+    """
+    Produces a comma separated string of the defined subproject names, if avaialble
+
+    :param looper.Project p: project to search the subprojects in
+    :return str | NoneType: subprojects names
+    """
+    try:
+        sp_names = p.subprojects.keys()
+    except AttributeError:
+        sp_names = None
+    return ",".join(sp_names) if sp_names is not None else sp_names
+
+
+def project_info_dict(p):
+    """
+    Composes a simple dictionary used to display the project information
+    :param looper.Project p: project that the info should be based on
+    :return dict: dictionary with project information
+    """
+    return {"name": p.name, "config_file": p.config_file, "sample_count": p.num_samples,
+             "output_dir": p.metadata.output_dir, "subprojects": _get_sp_txt(globs.p)}
+
+
 def glob_if_exists(x):
     """
     Return all matches in the directory for x and x if nothing matches
@@ -225,7 +250,7 @@ def glob_if_exists(x):
     :param x: a string with path containing globs
     :return list[str]: a list of paths
     """
-    return [glob.glob(e) or e for e in x] if peppy.utils.coll_like(x) else (glob.glob(x) or [x])
+    return [glob.glob(e) or e for e in x] if is_collection_like(x) else (glob.glob(x) or [x])
 
 
 def random_string(n):
@@ -291,7 +316,7 @@ def _version_text():
 
     :return str: a compiled string
     """
-    return "caravel version: {cv}\nlooper version: {lv}\n".format(cv=V_BY_NAME["caravel"], lv=V_BY_NAME["looper"])
+    return "caravel version: {cv}\nlooper version: {lv}\n".format(cv=V_BY_NAME["caravel"], lv=V_BY_NAME["loopercli"])
 
 
 def _print_terminal_width(txt=None, char="-"):
@@ -355,10 +380,10 @@ def run_looper(prj, args, act, log_path, logging_lvl):
     eprint("\nAction: {}\n".format(act))
     # run selected looper action
     with peppy.ProjectContext(prj) as prj:
-        if act == "run":
+        if act in ["run", "rerun"]:
             run = looper.looper.Runner(prj)
             try:
-                run(args, None)
+                run(args, None, rerun=(act == "rerun"))
             except IOError:
                 raise Exception("{} pipelines_dir: '{}'".format(prj.__class__.__name__, prj.metadata.pipelines_dir))
 
@@ -366,6 +391,7 @@ def run_looper(prj, args, act, log_path, logging_lvl):
             looper.looper.Destroyer(prj)(args)
         if act == "summarize":
             globs.summary_requested = True
+            run_custom_summarizers(prj)
             _render_summary_pages(prj)
         if act == "check":
             looper.looper.Checker(prj)(flags=args.flags)
@@ -385,14 +411,10 @@ def _render_summary_pages(prj):
     # instantiate the objects needed fot he creation the pages
     j_env = get_jinja_env(TEMPLATES_PATH)
     html_report_builder = HTMLReportBuilder(prj)
-    summarizer_data = use_existing_stats_objs(prj)
-    if summarizer_data is None:
-        globs.summarizer = Summarizer(prj)
-        objs = globs.summarizer.objs
-        stats = globs.summarizer.stats
-        columns = globs.summarizer.columns
-    else:
-        stats, objs, columns = summarizer_data
+    globs.summarizer = Summarizer(prj)
+    objs = globs.summarizer.objs
+    stats = globs.summarizer.stats
+    columns = globs.summarizer.columns
     # create navbar links
     links_summary = render_navbar_summary_links(prj, ["summary"])
     links_reports = render_navbar_summary_links(prj, [rep_dir, "summary"])

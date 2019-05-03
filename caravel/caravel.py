@@ -14,10 +14,10 @@ from helpers import *
 from looper_parser import *
 import divvy
 from textile import textile
-from peppy.utils import coll_like
 from platform import python_version
 from looper.project import Project
 from looper.html_reports import *
+from ubiquerg import is_collection_like
 
 
 app = Flask(__name__, template_folder=TEMPLATES_PATH)
@@ -28,7 +28,7 @@ def clear_session_data(keys):
     Removes the non default data (created in the app lifetime) from the flask.session object.
     :param keys: a list of keys to be removed from the session
     """
-    if not coll_like(keys):
+    if not is_collection_like(keys):
         raise TypeError("Keys to clear must be collection-like; "
                         "got {}".format(type(keys)))
     for key in keys:
@@ -285,20 +285,13 @@ def process():
     if globs.p is None:
         globs.p = Project(config_file)
     try:
-        subprojects = list(globs.p.subprojects.keys())
+        subprojects = globs.p.subprojects.keys()
     except AttributeError:
         subprojects = None
-        # TODO: p_info will be removed altogether in the future version
     get_navbar_summary_links()
-    p_info = {
-        "name": globs.p.name,
-        "config_file": globs.p.config_file,
-        "sample_count": globs.p.num_samples,
-        "output_dir": globs.p.metadata.output_dir,
-        "subprojects": subprojects
-    }
     globs.reset_btn = True
-    return render_template('process.html', p_info=p_info, change=None, selected_subproject=globs.p.subproject, actions=actions)
+    return render_template('process.html', p_info=project_info_dict(globs.p), change=None, selected_subproject=globs.p.subproject,
+                           actions=actions, subprojects=subprojects)
 
 
 @app.route('/_background_subproject')
@@ -311,7 +304,7 @@ def background_subproject():
         globs.p.activate_subproject(sp)
     globs.summary_requested = None
     get_navbar_summary_links()
-    return jsonify(subproj_txt=output, sample_count=globs.p.num_samples, navbar_links=globs.summary_links)
+    return jsonify(subproj_txt=output, p_info=project_info_dict(globs.p), navbar_links=globs.summary_links)
 
 
 @app.route('/_background_options')

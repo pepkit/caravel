@@ -1,7 +1,7 @@
 site_name: Caravel
 site_logo: img/logo_caravel_dark.svg
 site_url: http://code.databio.org/caravel/
-
+pypi_name: caravel
 repo_url: http://github.com/pepkit/caravel
 
 nav:
@@ -9,8 +9,10 @@ nav:
     - Introduction: README.md
   - How-to Guides:
     - How to configure caravel: configure-caravel.md
+    - How to run on a remote server: remote-server.md
+    - Configuring logging: logging.md
   - Reference:
-    - Features: features.md
+    - Advanced features: advanced.md
     - Usage: usage.md
     - FAQ: faq.md
     - Support: support.md
