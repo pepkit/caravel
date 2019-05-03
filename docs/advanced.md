@@ -1,7 +1,5 @@
 # Advanced caravel features
 
-
-
 ## Security in `caravel`
 
 `Caravel` uses an authentication token printed to your terminal to provide security. This way others are not able to connect to your `caravel` session and execute `looper` commands as _you_ on the remote server. 
@@ -13,11 +11,6 @@ token: ABCD1234
 ```
 
 Keep in mind that this is a less secure way of authentication as the token is exposed to ones that have the access to the `.token_caravel` file. Therefore make sure to set proper read permissions for this file.
-
-## Verbosity of `caravel`
-
-Both `looper` and `caravel` logging levels can be changed by toggling the debug mode at the server launch (`-d`, `--dbg` options). 
-By default all the errors, warnings and information are displayed. The debug logs are activated when in debug mode.
 
 
 ## Debug/development mode
