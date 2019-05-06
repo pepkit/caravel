@@ -1,0 +1,40 @@
+<div class="container-fluid">
+    <div class="d-flex justify-content-between">
+        <div class="table-responsive-sm">
+            <table class="table table-sm table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th>Sample name</th>
+                    <th>Status</th>
+                    <th>Log file</th>
+                    <th>Runtime</th>
+                    <th>Peak memory use</th>
+                </tr>
+            </thead>
+                <tbody>
+                    {% for sample_name, flag in flags.items() %}
+                        {% set i = loop.index - 1 %}
+                        <tr>
+                            <td>
+                                {{ sample_name }}
+                            </td>
+                            <td>
+                                {{ flag }}
+                            </td>
+                            <td>
+                                No log
+                            </td>
+                            <td>
+                                No time
+                            </td>
+                            <td>
+                                No mem
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

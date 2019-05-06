@@ -26,6 +26,7 @@ from looper.html_reports import *
 from looper.looper import Summarizer, get_file_for_project, uniqify, run_custom_summarizers
 from logmuse import setup_logger
 from ubiquerg import is_collection_like
+from looper.utils import fetch_sample_flags
 
 
 def get_items(i, l):
@@ -386,7 +387,6 @@ def run_looper(prj, args, act, log_path, logging_lvl):
                 run(args, None, rerun=(act == "rerun"))
             except IOError:
                 raise Exception("{} pipelines_dir: '{}'".format(prj.__class__.__name__, prj.metadata.pipelines_dir))
-
         if act == "destroy":
             looper.looper.Destroyer(prj)(args)
         if act == "summarize":
@@ -487,3 +487,18 @@ def render_navbar_summary_links(prj, context=None):
     args = dict(prj=prj, objs=objs, stats=stats, context=context)
     links = html_report_builder.create_navbar_links(**args)
     return links
+
+
+def get_sample_flags(p, samples):
+    """
+    Get
+    :param looper.Project p: project object
+    :param dict ps: succesfully submitted samples
+    :return dict: a dictionary of sample names and the corresponding flags
+    """
+    ret = {}
+    if samples is None or p is None:
+        return None
+    for s in samples:
+        ret[s] = fetch_sample_flags(p,s)
+    return ret

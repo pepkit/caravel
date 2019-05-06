@@ -5,6 +5,24 @@
       $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
   </script>
   <script type=text/javascript>
+    // flags checking
+    function check_flags() {
+      $('#check_btn').html('CHECKING FOR FLAGS <i class="fa fa-spinner fa-pulse fa-fw"></i>');
+      console.log("checking status...");
+      $.getJSON($SCRIPT_ROOT + '/_background_check_status', {
+        sp: "test",
+        }, function(data) {
+          $("div#status_table").html(data.status_table);
+      });
+        $('#check_btn').html('CHECK STATUS');
+      };
+    $(function() {
+      // The function is triggered on page load and with the a#check_flags click
+      check_flags();
+      $('a#check_flags').bind('click', check_flags)
+    });
+  </script>
+  <script type=text/javascript>
     // subproject activation
     $(function() {
       $('a#activate_subproject').bind('click', function() {
@@ -23,6 +41,7 @@
         });
         document.getElementById("deactivate_btn").disabled = false;
         render_options();
+        check_flags();
       });
     });
   </script>
@@ -31,9 +50,8 @@
     $(function() {
       $('a#deactivate_subproject').bind('click', function() {
         $('#deactivate_btn').html('DEACTIVATING <i class="fa fa-spinner fa-pulse fa-fw"></i>');
-        $.getJSON($SCRIPT_ROOT + '/_background_subproject', {
-          sp: "None",
-        }, function(data) {
+        $.getJSON($SCRIPT_ROOT + '/_background_subproject',
+        function(data) {
           // iterate over the dictionary sent from the server and update the values in all the fields
           for(key in data.p_info) {
             console.log("deactivation: The value of ", key, " is ", data.p_info[key]);
@@ -45,6 +63,7 @@
         });
         document.getElementById("deactivate_btn").disabled = true;
         render_options();
+        check_flags();
       });
     });
   </script>
@@ -98,8 +117,8 @@
             <p id=subproj_txt class="badge badge-primary">Activated subproject: {{ selected_subproject }}</p>
           </div>
         </div>
-      </div>
     {% endif %}
+    </div>
     <hr class="col-xs-12">
     <div class="card border-light mb-3" style="display:inline-block;">
       <div class="card-header"><b>Perform action on the project:</b></div>
@@ -109,7 +128,17 @@
             <option value="{{ i }}">{{ i|title }}</option>
           {% endfor %}
         </select>
-        </div>
         <div id="options" class="divider-vertical"></div>
       </div>
+    </div>
+    <hr class="col-xs-12">
+    <div class="card border-light mb-3" style="display:inline-block;">
+      <div class="card-header"><b>Status by sample</b></div>
+      <div class="card-body" id="status_table">
+        After <code>looper run</code> click "CHECK STATUS" to update
+      </div>
+      <div class="card-footer">
+        <a href='#' id=check_flags><button id="check_btn" type="submit" class="btn btn-outline-dark">CHECK STATUS</button></a>
+      </div>
+    </div>
 {% endblock %}
