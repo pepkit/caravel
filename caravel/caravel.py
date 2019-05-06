@@ -21,7 +21,6 @@ from ubiquerg import is_collection_like
 
 
 app = Flask(__name__, template_folder=TEMPLATES_PATH)
-_LOGGER = app.logger
 
 
 def clear_session_data(keys):
@@ -227,7 +226,7 @@ def index():
         globs.summary_links = SUMMARY_NAVBAR_PLACEHOLDER
         globs.reset_btn = None
         app.logger.info("Project data removed")
-    _LOGGER.debug("reset button: {}".format(str(globs.reset_btn)))
+    app.logger.debug("reset button: {}".format(str(globs.reset_btn)))
     projects, globs.command = parse_config_file()
     return render_template('index.html', projects=projects, reset_btn=globs.reset_btn, command_btn=globs.command)
 
