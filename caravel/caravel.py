@@ -375,6 +375,7 @@ def action():
 
 @app.route('/_background_check_status')
 def background_check_status():
+    app.logger.info("checking flags for {} samples".format(len(list(globs.p.sample_names))))
     flags = get_sample_flags(globs.p, list(globs.p.sample_names))
     if all(not value for value in flags.values()):
         return jsonify(status_table="No samples were processed yet. Use <code>looper run</code> and then check the status")

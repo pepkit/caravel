@@ -7,11 +7,10 @@
   <script type=text/javascript>
     // flags checking
     function check_flags() {
-      $('#check_btn').html('CHECKING FOR FLAGS <i class="fa fa-spinner fa-pulse fa-fw"></i>');
-      console.log("checking status...");
-      $.getJSON($SCRIPT_ROOT + '/_background_check_status', {
-        sp: "test",
-        }, function(data) {
+      $("div#status_table").html('CHECKING FOR FLAGS <i class="fa fa-spinner fa-pulse fa-fw"></i>');
+      console.log("checking status");
+      $.getJSON($SCRIPT_ROOT + '/_background_check_status',
+      function(data) {
           $("div#status_table").html(data.status_table);
       });
         $('#check_btn').html('CHECK STATUS');
@@ -41,7 +40,7 @@
         });
         document.getElementById("deactivate_btn").disabled = false;
         render_options();
-        check_flags();
+        $("div#status_table").html('Subproject was activated, check the status again');
       });
     });
   </script>
@@ -50,8 +49,9 @@
     $(function() {
       $('a#deactivate_subproject').bind('click', function() {
         $('#deactivate_btn').html('DEACTIVATING <i class="fa fa-spinner fa-pulse fa-fw"></i>');
-        $.getJSON($SCRIPT_ROOT + '/_background_subproject',
-        function(data) {
+        $.getJSON($SCRIPT_ROOT + '/_background_subproject', {
+          sp: "None",
+        }, function(data) {
           // iterate over the dictionary sent from the server and update the values in all the fields
           for(key in data.p_info) {
             console.log("deactivation: The value of ", key, " is ", data.p_info[key]);
@@ -63,7 +63,7 @@
         });
         document.getElementById("deactivate_btn").disabled = true;
         render_options();
-        check_flags();
+        $("div#status_table").html('Subproject was deactivated, check the status again');
       });
     });
   </script>
