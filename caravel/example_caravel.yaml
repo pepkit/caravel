@@ -1,0 +1,2 @@
+projects:
+  - examples/count_reads/metadata/*.yaml

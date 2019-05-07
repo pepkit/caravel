@@ -39,6 +39,7 @@ CONFIG_ENV_VAR = "CARAVEL"
 CONFIG_PRJ_KEY = "projects"
 CONFIG_TOKEN_KEY = "token"
 TOKEN_FILE_NAME = ".caravel_token"
+EXAMPLE_FILENAME = "example_caravel.yaml"
 TOKEN_LEN = 15
 SET_ELSEWHERE = [["--force-yes"], ["--sp"], ["--compute"], ["--env"], ["--help"], ["--version"], ["--selector-attribute"],
                  ["--selector-exclude"], ["--selector-include"], ['--resources'], ['--compute-packages'], ['']]
@@ -51,4 +52,5 @@ DEFAULT_TERMINAL_WIDTH = 80
 SUMMARY_NAVBAR_PLACEHOLDER = "<li class='nav-item'><a class='nav-link disabled'>No summary yet</a></li>"
 TEMPLATES_DIRNAME = "jinja_templates"
 TEMPLATES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), TEMPLATES_DIRNAME)
+DEMO_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), EXAMPLE_FILENAME)
 COMMAND_KEY = "execute"

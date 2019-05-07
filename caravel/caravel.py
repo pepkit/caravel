@@ -402,6 +402,7 @@ def main():
     app.config["port"] = args.port
     app.config["project_configs"] = args.config
     app.config["DEBUG"] = args.debug
+    app.config["demo"] = args.demo
     app.config['SECRET_KEY'] = 'thisisthesecretkey'
     app.config['login'] = getpass.getuser()
     globs.init_globals()
