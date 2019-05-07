@@ -1,0 +1,3 @@
+﻿sample_name,protocol,filename,data_source,read_type
+ATAC-seq_human_PE,ATAC-seq,atac-seq_PE.bam,microtest,paired
+ATAC-seq_human_SE,ATAC-seq,atac-seq_SE.bam,microtest,single
