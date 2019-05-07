@@ -5,7 +5,7 @@ from platform import python_version
 import argparse
 import globs
 from const import V_BY_NAME, REQUIRED_V_BY_NAME, DEFAULT_PORT, DEFAULT_TERMINAL_WIDTH, TEMPLATES_PATH, CARAVEL_VERSION,\
-    LOOPER_VERSION, CONFIG_ENV_VAR, CONFIG_PRJ_KEY, COMMAND_KEY, SUMMARY_NAVBAR_PLACEHOLDER
+    LOOPER_VERSION, CONFIG_ENV_VAR, CONFIG_PRJ_KEY, COMMAND_KEY, SUMMARY_NAVBAR_PLACEHOLDER, DEMO_FILE_PATH
 from distutils.version import LooseVersion
 from itertools import chain
 import random
@@ -116,18 +116,27 @@ def check_for_summary(prj):
     return os.path.exists(os.path.join(prj.metadata.output_dir, get_summary_html_name(prj)))
 
 
+def _get_configs_path():
+    """
+    Parses the config file (YAML) provided as an CLI argument or in a environment variable ($CARAVEL)
+    or uses example data if run in the demo mode. The demo is given the priority.
+
+    :return str: path to the caravel config file
+    """
+    if current_app.config.get("demo"):
+        current_app.logger.info("Demo mode, the project configs list is auto-populated with example data")
+        return DEMO_FILE_PATH
+    return current_app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
+
+
 def parse_config_file():
     """
-    Parses the config file (YAML) provided as an CLI argument or in a environment variable ($CARAVEL).
-
-    The CLI argument is given the priority.
     Path to the PEP projects and predefined token are extracted if file is read successfully.
     Additionally, looks for a custom command to execute.
 
     :return (list[str], list[str]): a pair of projects list and list of commands
     """
-
-    project_list_path = current_app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
+    project_list_path = _get_configs_path()
     if project_list_path is None:
         raise ValueError("Please set the environment variable {} or provide a YAML file listing paths to project "
                          "config files".format(CONFIG_ENV_VAR))

@@ -1,0 +1,22 @@
+project_name: example_caravel
+project_description: A collection of very small NGS testing data
+username: mjs5kd
+email: michal@virginia.edu
+metadata:
+    output_dir: ${HOME}/example_caravel
+    sample_annotation: microtest_annotation.csv
+    pipeline_interfaces: ../pipeline_interface.yaml
+
+# Derived columns indicates variables which are to be processed as `data_sources`
+derived_attributes: microtest
+constant_attributes: 
+    sleep: 1
+
+# Data sources are constructed paths to static (input) files
+data_sources:
+    microtest: "../../microtest-master/data/{filename}"
+
+subprojects:
+    atac_only:
+        metadata:
+            sample_annotation: microtest_annotation_atac.csv
