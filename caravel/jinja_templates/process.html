@@ -107,11 +107,11 @@
                   <option value="{{ i }}">{{ i }}</option>
               {% endfor %}
           </select>
-          <a href='#' id=activate_subproject><button id="activate_btn" type="submit" class="btn btn-outline-dark ml-2">ACTIVATE</button></a>
+          <a href="javascript:" id=activate_subproject><button id="activate_btn" type="submit" class="btn btn-outline-dark ml-2">ACTIVATE</button></a>
           {% if selected_subproject is none %}
-            <a href='#' id=deactivate_subproject><button id="deactivate_btn" disabled type="submit" class="btn btn-outline-dark ml-2">DEACTIVATE</button></a>
+            <a href="javascript:" id=deactivate_subproject><button id="deactivate_btn" disabled type="submit" class="btn btn-outline-dark ml-2">DEACTIVATE</button></a>
           {% else %}
-            <a href='#' id=deactivate_subproject><button id="deactivate_btn" type="submit" class="btn btn-outline-dark ml-2">DEACTIVATE</button></a>
+            <a href="javascript:" id=deactivate_subproject><button id="deactivate_btn" type="submit" class="btn btn-outline-dark ml-2">DEACTIVATE</button></a>
           {% endif %}
           <div class="divider-vertical">
             <p id=subproj_txt class="badge badge-primary">Activated subproject: {{ selected_subproject }}</p>
@@ -138,7 +138,7 @@
         After <code>looper run</code> click "CHECK STATUS" to update
       </div>
       <div class="card-footer">
-        <a href='#' id=check_flags><button id="check_btn" type="submit" class="btn btn-outline-dark">CHECK STATUS</button></a>
+        <a href="javascript:" id=check_flags><button id="check_btn" type="submit" class="btn btn-outline-dark">CHECK STATUS</button></a>
       </div>
     </div>
 {% endblock %}
