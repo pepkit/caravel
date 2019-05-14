@@ -380,7 +380,7 @@ def background_check_status():
     if all(not value for value in flags.values()):
         return jsonify(status_table="No samples were processed yet. Use <code>looper run</code> and then check the status")
     else:
-        return jsonify(status_table=create_status_table(globs.p, basic=True) + "<small>To get detailed information about the samples, run <code>looper summarize</code></small>")
+        return jsonify(status_table=create_status_table(globs.p, final=False) + "<small>To get detailed information about the samples, run <code>looper summarize</code></small>")
 
 
 @app.route('/_background_result')
