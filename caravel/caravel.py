@@ -290,8 +290,8 @@ def process():
         subprojects = None
     get_navbar_summary_links()
     globs.reset_btn = True
-    return render_template('process.html', p_info=project_info_dict(globs.p), change=None, selected_subproject=globs.p.subproject,
-                           actions=actions, subprojects=subprojects)
+    return render_template('process.html', p_info=project_info_dict(globs.p), change=None,
+                           selected_subproject=globs.p.subproject, actions=actions, subprojects=subprojects)
 
 
 @app.route('/_background_subproject')
@@ -371,6 +371,16 @@ def action():
     run_looper(prj=globs.p, args=args, act=globs.act, log_path=globs.log_path, logging_lvl=globs.logging_lvl)
     get_navbar_summary_links()
     return render_template("/execute.html")
+
+
+@app.route('/_background_check_status')
+def background_check_status():
+    app.logger.info("checking flags for {} samples".format(len(list(globs.p.sample_names))))
+    flags = get_sample_flags(globs.p, list(globs.p.sample_names))
+    if all(not value for value in flags.values()):
+        return jsonify(status_table="No samples were processed yet. Use <code>looper run</code> and then check the status")
+    else:
+        return jsonify(status_table=create_status_table(globs.p, final=False) + "<small>To get detailed information about the samples, run <code>looper summarize</code></small>")
 
 
 @app.route('/_background_result')
