@@ -42,14 +42,15 @@ local_input_files = ngstk.merge_or_link([args.input, args.input2], raw_folder, a
 cmd, out_fastq_pre, unaligned_fastq = ngstk.input_to_fastq(local_input_files, args.sample_name, args.paired_end,
                                                            fastq_folder)
 size_mb = ngstk.get_file_size(local_input_files)
-pm.report_result("File_mb", size_mb)
-if args.sleep is not None:
-    sleep_val = 60*float(args.sleep)
-    pm.timestamp("### Sleeping: {}s".format(sleep_val))
-    sleep(sleep_val)
+pm.report_result("File size", size_mb)
+sleep_val = 60*float(args.sleep) if args.sleep is not None else 0
+pm.timestamp("### Sleeping: {}s".format(sleep_val))
+pm.run("sleep " + str(sleep_val), shell=True, lock_name="test")
+time_slept = sleep_val if args.sleep is not None else 0
+pm.report_result("Time slept", sleep_val)
 n_input_files = len(list(filter(bool, local_input_files)))
 raw_reads = sum([int(ngstk.count_reads(input_file, args.paired_end)) for input_file in local_input_files])/n_input_files
-pm.report_result("Raw_reads", str(raw_reads))
+pm.report_result("Raw reads", str(raw_reads))
 pm.timestamp("### Saving result")
 outfile = os.path.join(outfolder, args.sample_name + '_results.csv')
 with open(outfile, mode='w') as f:
