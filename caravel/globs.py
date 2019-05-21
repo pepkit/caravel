@@ -19,6 +19,7 @@ def init_globals():
     global currently_selected_package
     global current_subproj
     global summary_requested
+    global run
 
     summarizer = None
     p = None
@@ -34,5 +35,7 @@ def init_globals():
     currently_selected_package = None
     current_subproj = None
     summary_requested = None
+    run = None
+
 
 

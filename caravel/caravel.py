@@ -377,10 +377,13 @@ def action():
 def background_check_status():
     app.logger.info("checking flags for {} samples".format(len(list(globs.p.sample_names))))
     flags = get_sample_flags(globs.p, list(globs.p.sample_names))
-    if all(not value for value in flags.values()):
+    geprint("output dir: " + globs.p.output_dir)
+    if all(not value for value in flags.values()) and not globs.run:
         return jsonify(status_table="No samples were processed yet. Use <code>looper run</code> and then check the status")
-    else:
+    elif not all(not value for value in flags.values()):
         return jsonify(status_table=create_status_table(globs.p, final=False) + "<small>To get detailed information about the samples, run <code>looper summarize</code></small>")
+    else:
+        return jsonify(status_table="<code>looper run</code> was called, but the samples were not processed yet. Submission not successful or jobs might be still in a queue.")
 
 
 @app.route('/_background_result')
@@ -413,7 +416,7 @@ def main():
         globs.logging_lvl = DEFAULT_LOGGING_LVL
         generate_token(token=parse_token_file())
     app.logger.info("Using python {}".format(python_version()))
-    app.run(port=args.port)
+    app.run(port=args.port, host='0.0.0.0')
 
 
 if __name__ == "__main__":

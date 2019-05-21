@@ -400,6 +400,7 @@ def run_looper(prj, args, act, log_path, logging_lvl):
             run = looper.looper.Runner(prj)
             try:
                 run(args, None, rerun=(act == "rerun"))
+                globs.run = True
             except IOError:
                 raise Exception("{} pipelines_dir: '{}'".format(prj.__class__.__name__, prj.metadata.pipelines_dir))
         if act == "destroy":
