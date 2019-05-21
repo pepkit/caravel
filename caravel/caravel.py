@@ -377,7 +377,6 @@ def action():
 def background_check_status():
     app.logger.info("checking flags for {} samples".format(len(list(globs.p.sample_names))))
     flags = get_sample_flags(globs.p, list(globs.p.sample_names))
-    geprint("output dir: " + globs.p.output_dir)
     if all(not value for value in flags.values()) and not globs.run:
         return jsonify(status_table="No samples were processed yet. Use <code>looper run</code> and then check the status")
     elif not all(not value for value in flags.values()):
