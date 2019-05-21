@@ -42,7 +42,7 @@ TOKEN_FILE_NAME = ".caravel_token"
 EXAMPLE_FILENAME = "example_caravel.yaml"
 TOKEN_LEN = 15
 SET_ELSEWHERE = [["--force-yes"], ["--sp"], ["--compute"], ["--env"], ["--help"], ["--version"], ["--selector-attribute"],
-                 ["--selector-exclude"], ["--selector-include"], ['--resources'], ['--compute-packages'], ['']]
+                 ["--selector-exclude"], ["--selector-include"], ['--resources'], ['--compute-package'], ['']]
 LOG_FILENAME = "caravel.log"
 REQUIRED_LOOPER_VERSION = get_req_version("loopercli")["loopercli"]
 REQUIRED_PEPPY_VERSION = get_req_version("peppy")["peppy"]
