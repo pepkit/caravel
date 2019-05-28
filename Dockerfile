@@ -9,6 +9,9 @@ RUN pip install -U pip
 RUN pip install -r /app/caravel/requirements/requirements-all.txt
 # install peppy dev
 RUN pip install https://github.com/pepkit/peppy/archive/dev.zip
+# install looper dev
+RUN pip install https://github.com/pepkit/looper/archive/dev.zip
+
 # Install samtools and pypier, used in the example pipeline
 RUN pip install piper
 WORKDIR /home/src/
