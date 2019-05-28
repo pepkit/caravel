@@ -22,11 +22,8 @@ pip install --user --upgrade caravel
 ```
 ## Hello, world!
 
-From within the root of the cloned repository
-
 ```bash
-caravel -c example_config.yaml
+caravel --demo
 ```
 
-The `example_config.yaml` file is a simple configuration file that points to your PEPs. You can avoid passing the config file with `-c` if you set environment variable `$CARAVEL`, explained in [how to configure caravel](configure-caravel).
-
+Running `caravel` with the `--demo` option loads an example config YAML that specifies one PEP that can be then selected from the dropdown list in the `caravel` landing page.
