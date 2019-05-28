@@ -191,9 +191,9 @@ def gdsv(s):
         value_idx = [x.startswith("value") for x in lst].index(True)
         value_string = lst[value_idx]
         result = value_string.split("=")[1]
-    except:
-        app.logger.warning("could not determine default option for slider out of string: '{}'."
-                           " Returning 'None' instead".format(s))
+    except Exception as e:
+        app.logger.warning("Got '{}'; could not determine default option for slider out of string: '{}'."
+                           " Returning 'None' instead".format(e.__class__.__name__, s))
         result = None
     return result
 
@@ -215,18 +215,12 @@ app.jinja_env.globals['csrf_token'] = generate_csrf_token
 @app.route("/index")
 @token_required
 def index():
-    if globs.p is not None:
-        summary_exists = check_for_summary(globs.p)
-    else:
-        app.logger.debug("No project defined yet, summary links not created")
-        summary_exists = False
     get_navbar_summary_links()
     if request.args.get('reset'):
         globs.init_globals()
         globs.summary_links = SUMMARY_NAVBAR_PLACEHOLDER
         globs.reset_btn = None
         app.logger.info("Project data removed")
-    app.logger.debug("reset button: {}".format(str(globs.reset_btn)))
     projects, globs.command = parse_config_file()
     return render_template('index.html', projects=projects, reset_btn=globs.reset_btn, command_btn=globs.command)
 
@@ -378,11 +372,15 @@ def background_check_status():
     app.logger.info("checking flags for {} samples".format(len(list(globs.p.sample_names))))
     flags = get_sample_flags(globs.p, list(globs.p.sample_names))
     if all(not value for value in flags.values()) and not globs.run:
-        return jsonify(status_table="No samples were processed yet. Use <code>looper run</code> and then check the status")
+        return jsonify(status_table="No samples were processed yet. "
+                                    "Use <code>looper run</code> and then check the status")
     elif not all(not value for value in flags.values()):
-        return jsonify(status_table=create_status_table(globs.p, final=False) + "<small>To get detailed information about the samples, run <code>looper summarize</code></small>")
+        return jsonify(status_table=create_status_table(globs.p, final=False) +
+                                    "<small>To get detailed information about the samples, "
+                                    "run <code>looper summarize</code></small>")
     else:
-        return jsonify(status_table="<code>looper run</code> was called, but the samples were not processed yet. Submission not successful or jobs might be still in a queue.")
+        return jsonify(status_table="<code>looper run</code> was called, but the samples were not processed yet. "
+                                    "Submission not successful or jobs might be still in a queue.")
 
 
 @app.route('/_background_result')

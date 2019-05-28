@@ -12,7 +12,7 @@ RUN pip install https://github.com/pepkit/peppy/archive/dev.zip
 # install looper dev
 RUN pip install https://github.com/pepkit/looper/archive/dev.zip
 
-# Install samtools and pypier, used in the example pipeline
+# Install samtools and pypiper, used in the example pipeline
 RUN pip install piper
 WORKDIR /home/src/
 RUN wget https://github.com/samtools/samtools/releases/download/1.7/samtools-1.7.tar.bz2 && \
