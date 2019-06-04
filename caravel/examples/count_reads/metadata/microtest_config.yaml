@@ -8,9 +8,9 @@ metadata:
     pipeline_interfaces: ../pipeline_interface.yaml
 
 # Derived columns indicates variables which are to be processed as `data_sources`
-derived_attributes: microtest
+derived_attributes: data_source
 constant_attributes: 
-    sleep: 1
+    sleep: 0.1
 
 # Data sources are constructed paths to static (input) files
 data_sources:
