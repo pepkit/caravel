@@ -1,23 +1,18 @@
 """ General-purpose functions """
-
 from __future__ import print_function
-from platform import python_version
-import argparse
+from .const import *
 import globs
-from const import V_BY_NAME, REQUIRED_V_BY_NAME, DEFAULT_PORT, DEFAULT_TERMINAL_WIDTH, TEMPLATES_PATH, CARAVEL_VERSION,\
-    LOOPER_VERSION, CONFIG_ENV_VAR, CONFIG_PRJ_KEY, COMMAND_KEY, SUMMARY_NAVBAR_PLACEHOLDER, DEMO_FILE_PATH
-from distutils.version import LooseVersion
-from itertools import chain
-import random
-import string
-import sys
-import yaml
 import looper
 import peppy
+import argparse
+import random
+import string
+import yaml
 import fcntl
 import termios
 import struct
 import pandas as _pd
+from sys import stderr
 from csv import DictReader
 from flask import render_template, current_app
 from re import sub
@@ -27,6 +22,9 @@ from looper.looper import Summarizer, get_file_for_project, uniqify, run_custom_
 from logmuse import setup_logger
 from ubiquerg import is_collection_like
 from looper.utils import fetch_sample_flags
+from platform import python_version
+from distutils.version import LooseVersion
+from itertools import chain
 
 
 def get_items(i, l):
@@ -44,11 +42,11 @@ def get_navbar_summary_links():
     """
     Set the global variable summary_links to the current links HTML string
 
-    :param bool summary_exists: if summary exist for the current project
     :return str: navbar links HTML
     """
     if globs.p is not None and globs.summary_requested:
-        globs.summary_links = render_navbar_summary_links(globs.p) if check_for_summary(globs.p) else SUMMARY_NAVBAR_PLACEHOLDER
+        globs.summary_links = render_navbar_summary_links(globs.p) if check_for_summary(globs.p) \
+            else SUMMARY_NAVBAR_PLACEHOLDER
     else:
         globs.summary_links = ""
 
@@ -176,8 +174,8 @@ def ensure_version(current=V_BY_NAME, required=REQUIRED_V_BY_NAME):
         "the package names to be checked do not match the required versions dictionary."
     for package in required:
         if LooseVersion(current[package]) < LooseVersion(required[package]):
-            raise ImportError("The version of {name} in use ({in_use}) does not meet the caravel requirement ({req})"
-                            .format(name=package, in_use=current[package], req=required[package]))
+            raise ImportError("The version of {name} in use ({in_use}) does not meet the caravel requirement "
+                              "({req})".format(name=package, in_use=current[package], req=required[package]))
     return True
 
 
@@ -185,7 +183,7 @@ def eprint(*args, **kwargs):
     """
     Print the provided text to stderr.
     """
-    print(*args, file=sys.stderr, **kwargs)
+    print(*args, file=stderr, **kwargs)
 
 
 def expand_path(p, root=""):
@@ -250,7 +248,7 @@ def project_info_dict(p):
     :return dict: dictionary with project information
     """
     return {"name": p.name, "config_file": p.config_file, "sample_count": p.num_samples,
-             "output_dir": p.metadata.output_dir, "subprojects": _get_sp_txt(globs.p)}
+            "output_dir": p.metadata.output_dir, "subprojects": _get_sp_txt(globs.p)}
 
 
 def glob_if_exists(x):
@@ -265,7 +263,7 @@ def glob_if_exists(x):
 
 def random_string(n):
     """
-    Generates a random string of length N (token), prints a message
+    Generates a random string of length N
 
     :param int n: length of the string to be generated
     :return str: a random string
@@ -392,7 +390,7 @@ def run_looper(prj, args, act, log_path, logging_lvl):
     :param str log_path: absolute path to the log file location
     :param int logging_lvl: logging level code
     """
-    setup_logger("looper", level=logging_lvl, stream=sys.stderr, logfile=log_path, plain_format=True)
+    setup_logger("looper", level=logging_lvl, stream=stderr, logfile=log_path, plain_format=True)
     eprint("\nAction: {}\n".format(act))
     # run selected looper action
     with peppy.ProjectContext(prj) as prj:
@@ -487,7 +485,6 @@ def render_navbar_summary_links(prj, context=None):
     E.g. for the OG caravel pages or summary page or summary reports pages
 
     :param looper.Project prj: a project the navbar summary links should be created for
-    :param looper.Summarizer summarizer: an object that runs the summarizers for the project
     :param list[str] context: the context for the links
     :return str: html string with the links
     """
@@ -509,12 +506,12 @@ def get_sample_flags(p, samples):
     """
     Get
     :param looper.Project p: project object
-    :param dict ps: succesfully submitted samples
+    :param dict samples: succesfully submitted samples
     :return dict: a dictionary of sample names and the corresponding flags
     """
     ret = {}
     if samples is None or p is None:
         return None
     for s in samples:
-        ret[s] = fetch_sample_flags(p,s)
+        ret[s] = fetch_sample_flags(p, s)
     return ret

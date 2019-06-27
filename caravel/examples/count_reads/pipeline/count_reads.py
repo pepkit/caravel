@@ -1,19 +1,13 @@
 #!/usr/bin/env python3
 
 """
-Counts reads.
+Example pipepline which counts reads, sleeps and reports the reads count, file size and time slept
 """
-
-__author__ = "Nathan Sheffield"
-__email__ = "nathan@code.databio.org"
-__license__ = "GPL3"
-__version__ = "0.1"
 
 from argparse import ArgumentParser
 import os
 import pypiper
 import csv
-from time import sleep
 
 parser = ArgumentParser(description="A pipeline to count the number of reads and file size. Accepts BAM, fastq, "
                                     "or fastq.gz files.")

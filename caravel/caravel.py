@@ -2,16 +2,14 @@
 
 from functools import wraps
 import getpass
-import logging
 import traceback
 import warnings
-from flask import Blueprint, Flask, render_template, request, jsonify, session, redirect, send_from_directory, url_for,\
+from flask import Flask, render_template, request, jsonify, session, redirect, send_from_directory, url_for,\
     flash
-import yaml
 import globs
-from const import *
-from helpers import *
-from looper_parser import *
+from .const import *
+from .helpers import *
+from .looper_parser import *
 import divvy
 from textile import textile
 from platform import python_version
@@ -203,7 +201,8 @@ def inject_dict_for_all_templates():
     if globs.summary_links is None:
         globs.summary_links = SUMMARY_NAVBAR_PLACEHOLDER
     return dict(caravel_version=CARAVEL_VERSION, looper_version=LOOPER_VERSION, python_version=python_version(),
-                referrer=request.referrer, debug=app.config["DEBUG"], summary_links=globs.summary_links, login=app.config['login'])
+                referrer=request.referrer, debug=app.config["DEBUG"], summary_links=globs.summary_links,
+                login=app.config['login'])
 
 
 app.jinja_env.filters['gdsv'] = gdsv
@@ -253,8 +252,8 @@ def set_comp_env():
         active_settings = globs.compute_config.get_active_package()
         return jsonify(active_settings=render_template('compute_info.html', active_settings=active_settings))
     active_settings = globs.compute_config.get_active_package()
-    notify_not_set = COMPUTE_SETTINGS_VARNAME[0] if globs.compute_config.default_config_file == globs.compute_config.config_file\
-        else None
+    notify_not_set = COMPUTE_SETTINGS_VARNAME[0] if \
+        globs.compute_config.default_config_file == globs.compute_config.config_file else None
     return render_template('set_comp_env.html', env_conf_file=globs.compute_config.config_file,
                            compute_packages=globs.compute_config.list_compute_packages(), active_settings=active_settings,
                            currently_selected_package=globs.currently_selected_package, notify_not_set=notify_not_set)
@@ -376,8 +375,8 @@ def background_check_status():
                                     "Use <code>looper run</code> and then check the status")
     elif not all(not value for value in flags.values()):
         return jsonify(status_table=create_status_table(globs.p, final=False) +
-                                    "<small>To get sample-specific log files, "
-                                    "run <code>looper summarize</code></small>")
+                       "<small>To get sample-specific log files, "
+                       "run <code>looper summarize</code></small>")
     else:
         return jsonify(status_table="<code>looper run</code> was called, but the samples were not processed yet. "
                                     "Submission not successful or jobs might be still in a queue.")
