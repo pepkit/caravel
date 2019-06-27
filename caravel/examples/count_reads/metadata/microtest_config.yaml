@@ -4,7 +4,7 @@ username: mjs5kd
 email: michal@virginia.edu
 metadata:
     output_dir: ${HOME}/example_caravel
-    sample_annotation: microtest_annotation.csv
+    sample_table: microtest_annotation.csv
     pipeline_interfaces: ../pipeline_interface.yaml
 
 # Derived columns indicates variables which are to be processed as `data_sources`
@@ -19,4 +19,4 @@ data_sources:
 subprojects:
     atac_only:
         metadata:
-            sample_annotation: microtest_annotation_atac.csv
+            sample_table: microtest_annotation_atac.csv
