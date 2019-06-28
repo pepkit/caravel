@@ -339,6 +339,11 @@ def serve_static(filename):
 @app.route("/action", methods=['GET', 'POST'])
 @token_required
 def action():
+    if globs.act == "summarize" and not check_if_run(globs.p):
+        msg = "No samples were run yet, there's no point in summarizing"
+        current_app.logger.warning(msg)
+        flash(msg)
+        return redirect(url_for("process"))
     args = argparse.Namespace()
     args_dict = vars(args)
     # Set the arguments from the forms
