@@ -4,8 +4,7 @@ from functools import wraps
 import getpass
 import traceback
 import warnings
-from flask import Flask, render_template, request, jsonify, session, redirect, send_from_directory, url_for,\
-    flash
+from flask import Flask, render_template, request, jsonify, session, redirect, send_from_directory, url_for, flash
 import globs
 from .const import *
 from .helpers import *
@@ -138,7 +137,7 @@ def csrf_protect():
 @app.after_request
 def add_header(r):
     """
-    Add headers to both force the browser not to cache the pages
+    Add headers to force the browser not to cache the pages
 
     This is relevant for serving the summary pages for multiple projects one after another
     """
