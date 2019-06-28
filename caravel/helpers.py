@@ -503,16 +503,24 @@ def render_navbar_summary_links(prj, context=None):
     return links
 
 
-def get_sample_flags(p, samples):
+def get_sample_flags(p, samples=None):
     """
-    Get
+    Get samples status dict for the selected sample names.
+    If no samples are specified, flags for all will be searched for.
+
     :param looper.Project p: project object
-    :param dict samples: succesfully submitted samples
+    :param dict samples: successfully submitted samples
     :return dict: a dictionary of sample names and the corresponding flags
     """
-    ret = {}
-    if samples is None or p is None:
-        return None
-    for s in samples:
-        ret[s] = fetch_sample_flags(p, s)
-    return ret
+    samples = samples or list(p.sample_names)
+    return None if p is None else {s: fetch_sample_flags(p, s) for s in samples}
+
+
+def check_if_run(p):
+    """
+    Check whether the project has been run based on existence of any flag among all samples
+
+    :param looper.Project p: project object
+    :return bool: a logical indicating whether the pipeline was run on any of the samples
+    """
+    return not all(value == [] for value in get_sample_flags(p).values())
