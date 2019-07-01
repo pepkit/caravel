@@ -5,26 +5,28 @@
       $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
   </script>
   <script type=text/javascript>
-    // flags checking
     var poller;
-    var interval = 2000;
+    var interval;
     function start_interval(){
+      // Engage the automatic status checking 
       poller = setInterval(function () {
           check_flags();
       },interval);
       console.log("Automatic status polling engaged, interval = ", interval);
       document.getElementById("auto_off_btn").disabled = false;
       document.getElementById("auto_on_btn").disabled = true;
-    }
+    };
     function check_flags() {
+        // this is called on a page load, "check status" click and automatically every `data.interval` ms when engaged 
         console.log("checking status");
-        $.getJSON($SCRIPT_ROOT + '/_background_check_status',
-        function(data) {
+        $.getJSON($SCRIPT_ROOT + '/_background_check_status', callback_func);
+        function callback_func(data) {
             $("div#status_table").html(data.status_table);
-        });
+            interval = data.interval;
+        };
     };
     $(function() {
-      // The function is triggered on page load and with the a#check_flags click
+      // this is triggered on the page load
       $('a#check_flags').bind('click', check_flags)
       $('a#auto_off').bind('click', stop_interval)
       $('a#auto_on').bind('click', start_interval)
