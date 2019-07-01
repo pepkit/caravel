@@ -6,20 +6,39 @@
   </script>
   <script type=text/javascript>
     // flags checking
+    var poller;
+    var interval = 2000;
+    function start_interval(){
+      poller = setInterval(function () {
+          check_flags();
+      },interval);
+      console.log("Automatic status polling engaged, interval = ", interval);
+      document.getElementById("auto_off_btn").disabled = false;
+      document.getElementById("auto_on_btn").disabled = true;
+    }
     function check_flags() {
-      $("div#status_table").html('CHECKING FOR FLAGS <i class="fa fa-spinner fa-pulse fa-fw"></i>');
-      console.log("checking status");
-      $.getJSON($SCRIPT_ROOT + '/_background_check_status',
-      function(data) {
-          $("div#status_table").html(data.status_table);
-      });
-        $('#check_btn').html('CHECK STATUS');
-      };
+        console.log("checking status");
+        $.getJSON($SCRIPT_ROOT + '/_background_check_status',
+        function(data) {
+            $("div#status_table").html(data.status_table);
+        });
+    };
     $(function() {
       // The function is triggered on page load and with the a#check_flags click
-      check_flags();
       $('a#check_flags').bind('click', check_flags)
+      $('a#auto_off').bind('click', stop_interval)
+      $('a#auto_on').bind('click', start_interval)
+      document.getElementById("auto_off_btn").disabled = true;
+      check_flags();
     });
+    function stop_interval(){
+      // Stop the automatic status polling
+      clearInterval(poller);
+      document.getElementById("auto_off_btn").disabled = true;
+      document.getElementById("auto_on_btn").disabled = false;
+      console.log("Automatic status polling terminated");
+      return false;
+    }
   </script>
   <script type=text/javascript>
     // subproject activation
@@ -139,6 +158,17 @@
       </div>
       <div class="card-footer">
         <a href="javascript:" id=check_flags><button id="check_btn" type="submit" class="btn btn-outline-dark">CHECK STATUS</button></a>
+        <a href="javascript:" id=auto_off><button id="auto_off_btn" type="submit" class="btn btn-outline-dark">AUTO CHECK OFF</button></a>
+        <a href="javascript:" id=auto_on><button id="auto_on_btn" type="submit" class="btn btn-outline-dark">AUTO CHECK ON</button></a>
       </div>
     </div>
 {% endblock %}
+
+
+
+
+
+
+
+
+
