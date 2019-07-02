@@ -258,7 +258,8 @@ def set_comp_env():
 
     return render_template('preferences.html', env_conf_file=globs.compute_config.config_file,
                            compute_packages=globs.compute_config.list_compute_packages(), active_settings=active_settings,
-                           currently_selected_package=globs.currently_selected_package, notify_not_set=notify_not_set)
+                           currently_selected_package=globs.currently_selected_package, notify_not_set=notify_not_set,
+                           default_interval=globs.poll_interval)
 
 
 @app.route("/process", methods=['GET', 'POST'])
@@ -286,7 +287,7 @@ def process():
     get_navbar_summary_links()
     globs.reset_btn = True
     return render_template('process.html', p_info=project_info_dict(globs.p), change=None,
-                           selected_subproject=globs.p.subproject, actions=actions, subprojects=subprojects)
+                           selected_subproject=globs.p.subproject, actions=actions, subprojects=subprojects, interval=globs.poll_interval)
 
 
 @app.route('/_background_subproject')
@@ -417,7 +418,6 @@ def main():
         warnings.warn("You have entered the debug mode. The server-client connection is not secure!")
         globs.logging_lvl = logging.DEBUG
     else:
-        globs.logging_lvl = DEFAULT_LOGGING_LVL
         generate_token(token=parse_token_file())
     app.logger.info("Using python {}".format(python_version()))
     app.run(port=args.port, host='0.0.0.0')

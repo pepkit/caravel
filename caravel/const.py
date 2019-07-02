@@ -56,4 +56,4 @@ TEMPLATES_DIRNAME = "jinja_templates"
 TEMPLATES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), TEMPLATES_DIRNAME)
 DEMO_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), EXAMPLE_FILENAME)
 COMMAND_KEY = "execute"
-POLL_INTERVAL = 3*1000
+POLL_INTERVAL = 3  # in seconds

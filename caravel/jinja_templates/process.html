@@ -27,7 +27,7 @@
         function callback_func(data, status) {
             console.log("status: ", status)
             if (status === 'success') {
-              interval = data.interval;
+              interval = data.interval*1000;
               console.log("got interval value: ", interval);
               $("div#status_table").html(data.status_table);
             } else {
@@ -169,9 +169,12 @@
         After <code>looper run</code> click "CHECK STATUS" to update
       </div>
       <div class="card-footer">
-        <a href="javascript:" id=check_flags><button id="check_btn" type="submit" class="btn btn-outline-dark">CHECK STATUS</button></a>
-        <a href="javascript:" id=auto_off><button id="auto_off_btn" type="submit" class="btn btn-outline-dark">AUTO CHECK OFF</button></a>
-        <a href="javascript:" id=auto_on><button id="auto_on_btn" type="submit" class="btn btn-outline-dark">AUTO CHECK ON</button></a>
+        <a href="javascript:" id=check_flags><button id="check_btn" type="submit" class="btn btn-sm btn-outline-dark">CHECK STATUS</button></a>
+        <div class="btn-group btn-group-sm pull-right" role="group" aria-label="polling">
+          <button type="button" class="btn btn-secondary btn-sm" disabled="true">Auto check ({{ interval }}s)</button>
+          <a href="javascript:" id=auto_off><button id="auto_off_btn" type="button" class="btn btn-sm btn-danger">OFF</button></a>
+          <a href="javascript:" id=auto_on><button id="auto_on_btn" type="button" class="btn btn-sm btn-success">ON</button></a>
+        </div>
       </div>
     </div>
 {% endblock %}

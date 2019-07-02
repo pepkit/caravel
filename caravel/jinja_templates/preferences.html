@@ -27,7 +27,7 @@
 	function show_value(name, value) {
 	  // This function is used in the form in the options.html file
 	  // get the name of the element to control and the value that should be displayed
-	 document.getElementById(name).innerHTML=value;
+	 document.getElementById(name).innerHTML=value + "s";
 	};
 </script>
 {% endblock %}
@@ -90,8 +90,8 @@
 			  <div class="card-header"><b>Status check interval</b></div>
 			  <div class="card-body">
 				<div class="col-2 col-slider">
-				<input type="range" class="custom-range" name="interval" min="1000" max="60000" value="3000" step="1000" oninput="show_value(this.name,this.value)">
-				<button id="interval" class="disp-value" disabled>3000</button>
+				<input type="range" class="custom-range" name="interval" min="1" max="60" value="{{ default_interval }}" step="1" oninput="show_value(this.name,this.value)">
+				<button id="interval" class="disp-value" disabled>{{ default_interval }}s</button>
 				</div>
 			  </div>
 			</div>
