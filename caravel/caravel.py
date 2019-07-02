@@ -240,7 +240,6 @@ def set_comp_env():
         globs.compute_config = divvy.ComputingConfiguration()
     selected_package = request.args.get('compute', type=str)
     selected_interval = request.args.get('interval', type=int) or globs.poll_interval
-    geprint("Selected interval: " + str(selected_interval))
     globs.poll_interval = int(selected_interval)
     if globs.currently_selected_package is None:
         globs.currently_selected_package = "default"
@@ -376,7 +375,6 @@ def action():
 
 @app.route('/_background_check_status')
 def background_check_status():
-    geprint(str(globs.poll_interval))
     app.logger.info("checking flags for {} samples".format(len(list(globs.p.sample_names))))
     flags = get_sample_flags(globs.p, list(globs.p.sample_names))
     if all(not value for value in flags.values()) and not globs.run:
