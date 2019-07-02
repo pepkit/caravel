@@ -1,3 +1,5 @@
+from .const import *
+
 
 def init_globals():
     """
@@ -20,6 +22,7 @@ def init_globals():
     global current_subproj
     global summary_requested
     global run
+    global poll_interval
 
     summarizer = None
     p = None
@@ -36,6 +39,8 @@ def init_globals():
     current_subproj = None
     summary_requested = None
     run = None
-
+    poll_interval = POLL_INTERVAL
+    print("GLOBALS INITIALIZED")
+    print(poll_interval)
 
 

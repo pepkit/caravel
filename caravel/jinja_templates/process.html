@@ -9,20 +9,30 @@
     var interval;
     function start_interval(){
       // Engage the automatic status checking 
-      poller = setInterval(function () {
-          check_flags();
-      },interval);
-      console.log("Automatic status polling engaged, interval = ", interval);
-      document.getElementById("auto_off_btn").disabled = false;
-      document.getElementById("auto_on_btn").disabled = true;
+      if (typeof interval !== 'undefined') {
+        poller = setInterval(function () {
+            check_flags();
+        },interval);
+        console.log("Automatic status polling engaged, interval: ", interval);
+        document.getElementById("auto_off_btn").disabled = false;
+        document.getElementById("auto_on_btn").disabled = true;
+      } else {
+        console.warn("Automatic polling could not be engaged, interval: ", interval);
+      }
     };
     function check_flags() {
         // this is called on a page load, "check status" click and automatically every `data.interval` ms when engaged 
         console.log("checking status");
         $.getJSON($SCRIPT_ROOT + '/_background_check_status', callback_func);
-        function callback_func(data) {
-            $("div#status_table").html(data.status_table);
-            interval = data.interval;
+        function callback_func(data, status) {
+            console.log("status: ", status)
+            if (status === 'success') {
+              interval = data.interval;
+              console.log("got interval value: ", interval);
+              $("div#status_table").html(data.status_table);
+            } else {
+              console.warn("Could not retrieve the JSON object from the server, status: ", status)
+            }
         };
     };
     $(function() {

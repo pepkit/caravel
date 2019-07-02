@@ -232,13 +232,16 @@ def background_exec():
     return jsonify(exec_txt=out)
 
 
-@app.route("/set_comp_env")
+@app.route("/preferences")
 @token_required
 def set_comp_env():
     global active_settings
     if globs.compute_config is None:
         globs.compute_config = divvy.ComputingConfiguration()
     selected_package = request.args.get('compute', type=str)
+    selected_interval = request.args.get('interval', type=int) or globs.poll_interval
+    geprint("Selected interval: " + str(selected_interval))
+    globs.poll_interval = int(selected_interval)
     if globs.currently_selected_package is None:
         globs.currently_selected_package = "default"
     if selected_package is not None:
@@ -253,7 +256,8 @@ def set_comp_env():
     active_settings = globs.compute_config.get_active_package()
     notify_not_set = COMPUTE_SETTINGS_VARNAME[0] if \
         globs.compute_config.default_config_file == globs.compute_config.config_file else None
-    return render_template('set_comp_env.html', env_conf_file=globs.compute_config.config_file,
+
+    return render_template('preferences.html', env_conf_file=globs.compute_config.config_file,
                            compute_packages=globs.compute_config.list_compute_packages(), active_settings=active_settings,
                            currently_selected_package=globs.currently_selected_package, notify_not_set=notify_not_set)
 
@@ -372,19 +376,20 @@ def action():
 
 @app.route('/_background_check_status')
 def background_check_status():
+    geprint(str(globs.poll_interval))
     app.logger.info("checking flags for {} samples".format(len(list(globs.p.sample_names))))
     flags = get_sample_flags(globs.p, list(globs.p.sample_names))
     if all(not value for value in flags.values()) and not globs.run:
         return jsonify(status_table="No samples were processed yet. "
-                                    "Use <code>looper run</code> and then check the status", interval=POLL_INTERVAL)
+                                    "Use <code>looper run</code> and then check the status", interval=globs.poll_interval)
     elif not all(not value for value in flags.values()):
         return jsonify(status_table=create_status_table(globs.p, final=False) +
                        "<small>To get sample-specific log files, "
-                       "run <code>looper summarize</code></small>", interval=POLL_INTERVAL)
+                       "run <code>looper summarize</code></small>", interval=globs.poll_interval)
     else:
         return jsonify(status_table="<code>looper run</code> was called, but the samples were not processed yet. "
                                     "Submission not successful or jobs might be still in a queue.",
-                       interval=POLL_INTERVAL)
+                       interval=globs.poll_interval)
 
 
 @app.route('/_background_result')
