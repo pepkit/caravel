@@ -30,7 +30,7 @@ def init_globals():
     log_path = None
     act = None
     compute_config = None
-    logging_lvl = None
+    logging_lvl = DEFAULT_LOGGING_LVL
     summary_links = None
     dests = None
     reset_btn = None
@@ -40,7 +40,5 @@ def init_globals():
     summary_requested = None
     run = None
     poll_interval = POLL_INTERVAL
-    print("GLOBALS INITIALIZED")
-    print(poll_interval)
 
 

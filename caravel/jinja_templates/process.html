@@ -123,60 +123,72 @@
 {% endblock %}
 {% block title %}Process{% endblock %}
 {% block content %}
-    <div class="card border-light mb-3" style="display:inline-block;">
-      <div class="card-header"><b>Project Metadata</b></div>
-      <div class="card-body">
-        {% for item in p_info %}
-        <p class="card-text"><b>{{ item }}: </b><code id="{{ item }}">{{ p_info[item] }}</code></p>
-        {% endfor %}
-      </div>
-      {% if subprojects is not none %}
-        <div class="card-header">Select subproject</div>
-        <div class="card-body">
-          <select name="subprojects" class="custom-select" style="width:auto;">
-              {% for i in subprojects %}
-                  <option value="{{ i }}">{{ i }}</option>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col">
+          <div class="card border-light mb-3" style="display:inline-block;">
+              <div class="card-header"><b>Project Metadata</b></div>
+              <div class="card-body">
+                {% for item in p_info %}
+                <p class="card-text"><b>{{ item }}: </b><code id="{{ item }}">{{ p_info[item] }}</code></p>
+                {% endfor %}
+              </div>
+              {% if subprojects is not none %}
+                <div class="card-header">Select subproject</div>
+                <div class="card-body">
+                  <select name="subprojects" class="custom-select" style="width:auto;">
+                      {% for i in subprojects %}
+                          <option value="{{ i }}">{{ i }}</option>
+                      {% endfor %}
+                  </select>
+                  <a href="javascript:" id=activate_subproject><button id="activate_btn" type="submit" class="btn btn-outline-dark ml-2 btn-sm">ACTIVATE</button></a>
+                  {% if selected_subproject is none %}
+                    <a href="javascript:" id=deactivate_subproject><button id="deactivate_btn" disabled type="submit" class="btn btn-outline-dark ml-2 btn-sm">DEACTIVATE</button></a>
+                  {% else %}
+                    <a href="javascript:" id=deactivate_subproject><button id="deactivate_btn" type="submit" class="btn btn-outline-dark ml-2 btn-sm">DEACTIVATE</button></a>
+                  {% endif %}
+                  <div class="divider-vertical">
+                    <p id=subproj_txt class="badge badge-primary">Activated subproject: {{ selected_subproject }}</p>
+                  </div>
+                </div>
+            {% endif %}
+            </div>
+        </div>
+        <div class="col">
+          <div class="card border-light mb-3" style="display:inline-block;">
+              <div class="card-header"><b>Status by sample</b></div>
+              <div class="card-body" id="status_table">
+                After <code>looper run</code> click "CHECK STATUS" to update
+              </div>
+              <div class="card-footer">
+                <a href="javascript:" id=check_flags><button id="check_btn" type="submit" class="btn btn-sm btn-outline-dark">CHECK STATUS</button></a>
+                <div class="btn-group btn-group-sm pull-right" role="group" aria-label="polling">
+                  <button type="button" class="btn btn-secondary btn-sm" disabled="true">Auto check ({{ interval }}s)</button>
+                  <a href="javascript:" id=auto_off><button id="auto_off_btn" type="button" class="btn btn-sm btn-danger">OFF</button></a>
+                  <a href="javascript:" id=auto_on><button id="auto_on_btn" type="button" class="btn btn-sm btn-success">ON</button></a>
+                </div>
+              </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <hr>
+<div class="container-fluid">
+    <div class="row">
+        <div class="card border-light mb-3" style="display:inline-block;">
+          <div class="card-header"><b>Perform action on the project:</b></div>
+          <div class="card-body">
+            <select id="show_options" name="actions" class="custom-select" style="width:auto;">
+              {% for i in actions %}
+                <option value="{{ i }}">{{ i|title }}</option>
               {% endfor %}
-          </select>
-          <a href="javascript:" id=activate_subproject><button id="activate_btn" type="submit" class="btn btn-outline-dark ml-2">ACTIVATE</button></a>
-          {% if selected_subproject is none %}
-            <a href="javascript:" id=deactivate_subproject><button id="deactivate_btn" disabled type="submit" class="btn btn-outline-dark ml-2">DEACTIVATE</button></a>
-          {% else %}
-            <a href="javascript:" id=deactivate_subproject><button id="deactivate_btn" type="submit" class="btn btn-outline-dark ml-2">DEACTIVATE</button></a>
-          {% endif %}
-          <div class="divider-vertical">
-            <p id=subproj_txt class="badge badge-primary">Activated subproject: {{ selected_subproject }}</p>
+            </select>
+            <div id="options" class="divider-vertical"></div>
           </div>
         </div>
-    {% endif %}
+        <hr class="col-xs-12">
     </div>
-    <hr class="col-xs-12">
-    <div class="card border-light mb-3" style="display:inline-block;">
-      <div class="card-header"><b>Perform action on the project:</b></div>
-      <div class="card-body">
-        <select id="show_options" name="actions" class="custom-select" style="width:auto;">
-          {% for i in actions %}
-            <option value="{{ i }}">{{ i|title }}</option>
-          {% endfor %}
-        </select>
-        <div id="options" class="divider-vertical"></div>
-      </div>
-    </div>
-    <hr class="col-xs-12">
-    <div class="card border-light mb-3" style="display:inline-block;">
-      <div class="card-header"><b>Status by sample</b></div>
-      <div class="card-body" id="status_table">
-        After <code>looper run</code> click "CHECK STATUS" to update
-      </div>
-      <div class="card-footer">
-        <a href="javascript:" id=check_flags><button id="check_btn" type="submit" class="btn btn-sm btn-outline-dark">CHECK STATUS</button></a>
-        <div class="btn-group btn-group-sm pull-right" role="group" aria-label="polling">
-          <button type="button" class="btn btn-secondary btn-sm" disabled="true">Auto check ({{ interval }}s)</button>
-          <a href="javascript:" id=auto_off><button id="auto_off_btn" type="button" class="btn btn-sm btn-danger">OFF</button></a>
-          <a href="javascript:" id=auto_on><button id="auto_on_btn" type="button" class="btn btn-sm btn-success">ON</button></a>
-        </div>
-      </div>
-    </div>
+</div>
 {% endblock %}
 
 

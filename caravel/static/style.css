@@ -172,3 +172,15 @@ div.col-slider {
 div#navbar_links {
   display: flex;
 }
+
+div#status-table_info {
+  font-size: 0.8rem;
+}
+
+label {
+  font-size: 0.8rem;
+}
+
+div#status-table_paginate {
+  font-size: 0.8rem;
+}

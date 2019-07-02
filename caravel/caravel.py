@@ -383,7 +383,7 @@ def background_check_status():
                                     "Use <code>looper run</code> and then check the status", interval=globs.poll_interval)
     elif not all(not value for value in flags.values()):
         return jsonify(status_table=create_status_table(globs.p, final=False) +
-                       "<small>To get sample-specific log files, "
+                       "<hr><small>To get sample-specific log files, "
                        "run <code>looper summarize</code></small>", interval=globs.poll_interval)
     else:
         return jsonify(status_table="<code>looper run</code> was called, but the samples were not processed yet. "
