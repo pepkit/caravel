@@ -45,9 +45,10 @@ def get_navbar_summary_links():
     :return str: navbar links HTML
     """
     if globs.p is not None and globs.summary_requested:
-        context = ["summary", os.path.basename(get_reports_dir(globs.p))]
-        globs.summary_links = render_navbar_summary_links(globs.p, context=context) if check_for_summary(globs.p) \
-            else SUMMARY_NAVBAR_PLACEHOLDER
+        reports_dir = get_reports_dir(globs.p)
+        context = ["summary", os.path.basename(reports_dir)]
+        globs.summary_links = render_navbar_summary_links(globs.p, wd=reports_dir, context=context) \
+            if check_for_summary(globs.p) else SUMMARY_NAVBAR_PLACEHOLDER
     else:
         globs.summary_links = ""
 
@@ -430,8 +431,8 @@ def _render_summary_pages(prj):
     stats = globs.summarizer.stats
     columns = globs.summarizer.columns
     # create navbar links
-    links_summary = render_navbar_summary_links(prj, [rep_dir])
-    links_reports = render_navbar_summary_links(prj)
+    links_summary = render_navbar_summary_links(prj, wd=html_report_builder.reports_dir, context=[rep_dir])
+    links_reports = render_navbar_summary_links(prj, wd=html_report_builder.reports_dir)
     # create navbars
     navbar_summary = render_jinja_template("navbar.html", j_env, dict(summary_links=links_summary))
     navbar_reports = render_jinja_template("navbar.html", j_env, dict(summary_links=links_reports))
@@ -479,7 +480,7 @@ def use_existing_stats_objs(prj):
     return stats, objs, columns
 
 
-def render_navbar_summary_links(prj, context=None):
+def render_navbar_summary_links(prj, wd, context=None):
     """
     Render the summary-related links for the navbars in a specific context.
     E.g. for the OG caravel pages or summary page or summary reports pages
@@ -497,7 +498,7 @@ def render_navbar_summary_links(prj, context=None):
         globs.summarizer = Summarizer(prj)
         objs = globs.summarizer.objs
         stats = globs.summarizer.stats
-    args = dict(objs=objs, stats=stats, context=context, include_status=False)
+    args = dict(objs=objs, stats=stats, wd=wd, context=context, include_status=False)
     links = html_report_builder.create_navbar_links(**args)
     return links
 
