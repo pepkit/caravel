@@ -498,7 +498,7 @@ def render_navbar_summary_links(prj, context=None):
         globs.summarizer = Summarizer(prj)
         objs = globs.summarizer.objs
         stats = globs.summarizer.stats
-    args = dict(objs=objs, stats=stats, context=context)
+    args = dict(objs=objs, stats=stats, context=context, include_status=False)
     links = html_report_builder.create_navbar_links(**args)
     return links
 
