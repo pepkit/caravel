@@ -248,8 +248,7 @@ def project_info_dict(p):
     :param looper.Project p: project that the info should be based on
     :return dict: dictionary with project information
     """
-    return {"name": p.name, "config_file": p.config_file, "sample_count": p.num_samples,
-            "output_dir": p.metadata.output_dir, "subprojects": _get_sp_txt(globs.p)}
+    return {"name": p.name, "config_file": p.config_file, "output_dir": p.metadata.output_dir}
 
 
 def glob_if_exists(x):
