@@ -524,3 +524,18 @@ def check_if_run(p):
     :return bool: a logical indicating whether the pipeline was run on any of the samples
     """
     return not all(value == [] for value in get_sample_flags(p).values())
+
+
+def sample_info_hint(p):
+    """
+    Based on the summary files existence return the hint how to get the more sample-specific information
+
+    :param looper.Project p: project object
+    :return str: a HTML formatted info
+    """
+    rep_dir = get_reports_dir(p)
+    samples_path = os.path.join(rep_dir, "samples.html")
+    msg = "<hr><small>To get sample-specific log files {}</small>"
+    insert = "see <a href='../summary/{}/samples.html'>samples summary page</a>".format(os.path.basename(rep_dir)) \
+        if (check_for_summary(p) and os.path.isfile(samples_path)) else "run <code>looper summarize</code>"
+    return msg.format(insert)
