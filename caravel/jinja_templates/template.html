@@ -19,22 +19,20 @@
 	<div id="wrap">
 		<div id="main">
 			<body>
-				<div class="divider-15">
-						{% with messages = get_flashed_messages() %}
-						  {% if messages %}
-						    <ul class=flashes>
-						    {% for message in messages %}
-		  						<div class="alert alert-warning col-md-5">
-									<button type="button" class="close" data-dismiss="alert">&times;</button>
-									{{ message }}
-								</div>
-						    {% endfor %}
-						    </ul>
-						  {% endif %}
-						{% endwith %}
-					{% block body %}{% endblock %}
-					{% block content %}{% endblock %}
-				</div>
+					{% with messages = get_flashed_messages() %}
+					  {% if messages %}
+					    <ul class=flashes>
+					    {% for message in messages %}
+	  						<div class="alert alert-warning col-md-5">
+								<button type="button" class="close" data-dismiss="alert">&times;</button>
+								{{ message }}
+							</div>
+					    {% endfor %}
+					    </ul>
+					  {% endif %}
+					{% endwith %}
+				{% block body %}{% endblock %}
+				{% block content %}{% endblock %}
 			</body>
 		</div>
 	</div>

@@ -382,7 +382,7 @@ def background_check_status():
         return jsonify(status_table="No samples were processed yet. "
                                     "Use <code>looper run</code> and then check the status",
                        interval=globs.poll_interval)
-    elif not all(not value for value in flags.values()):
+    elif all(value for value in flags.values()):
         return jsonify(status_table=create_status_table(globs.p, final=False) + sample_info_hint(globs.p),
                        interval=globs.poll_interval)
     else:

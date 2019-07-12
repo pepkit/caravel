@@ -1,200 +1,194 @@
 {% extends "template.html" %}
 {% block head %}
-    {{ super() }}
-    <script type=text/javascript>
-      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-    </script>
-    <script type=text/javascript>
-    var poller;
-    var interval;
-    function start_interval(){
-      // Engage the automatic status checking
-      if (typeof interval !== 'undefined') {
-        poller = setInterval(function () {
-            check_flags();
-        },interval);
-        console.log("Automatic status polling engaged, interval: ", interval);
-        document.getElementById("auto_off_btn").disabled = false;
-        document.getElementById("auto_on_btn").disabled = true;
-      } else {
-        console.warn("Automatic polling could not be engaged, interval: ", interval);
-      }
-    };
-    function check_flags() {
-        // this is called on a page load, "check status" click and automatically every `data.interval` ms when engaged
-        console.log("checking status");
-        $.getJSON($SCRIPT_ROOT + '/_background_check_status', callback_func);
-        function callback_func(data, status) {
-            console.log("status: ", status)
-            if (status === 'success') {
-              interval = data.interval*1000;
-              console.log("got interval value: ", interval);
-              $("div#status_table").html(data.status_table);
-            } else {
-              console.warn("Could not retrieve the JSON object from the server, status: ", status)
-            }
-        };
-    };
-    $(function() {
-      // this is triggered on the page load
-      $('a#check_flags').bind('click', check_flags)
-      $('a#auto_off').bind('click', stop_interval)
-      $('a#auto_on').bind('click', start_interval)
-      document.getElementById("auto_off_btn").disabled = true;
-      check_flags();
-    });
-    function stop_interval(){
-      // Stop the automatic status polling
-      clearInterval(poller);
-      document.getElementById("auto_off_btn").disabled = true;
-      document.getElementById("auto_on_btn").disabled = false;
-      console.log("Automatic status polling terminated");
-      return false;
-    }
-    </script>
-    <script type=text/javascript>
-    // subproject activation
-    $(function() {
-      $('a#activate_subproject').bind('click', function() {
-      $('#activate_btn').html('ACTIVATING <i class="fa fa-spinner fa-pulse fa-fw"></i>');
-        $.getJSON($SCRIPT_ROOT + '/_background_subproject', {
-          sp: $('select[name="subprojects"]').val(),
-        }, function(data) {
-          // iterate over the dictionary sent from the server and update the values in all the fields
-          for(key in data.p_info) {
-            console.log("activation: The value of ", key, " is ", data.p_info[key]);
-            $("#" + key).text(data.p_info[key]);
-          }
-          $("#subproj_txt").text(data.subproj_txt);
-          $("div#navbar_links").html(data.navbar_links);
-          $('#activate_btn').html('ACTIVATE');
-        });
-        document.getElementById("deactivate_btn").disabled = false;
-        render_options();
-        $("div#status_table").html('Subproject was activated, check the status again');
-      });
-    });
-    </script>
-    <script type=text/javascript>
-    // subproject deactivation
-    $(function() {
-      $('a#deactivate_subproject').bind('click', function() {
-        $('#deactivate_btn').html('DEACTIVATING <i class="fa fa-spinner fa-pulse fa-fw"></i>');
-        $.getJSON($SCRIPT_ROOT + '/_background_subproject', {
-          sp: "None",
-        }, function(data) {
-          // iterate over the dictionary sent from the server and update the values in all the fields
-          for(key in data.p_info) {
-            console.log("deactivation: The value of ", key, " is ", data.p_info[key]);
-            $("#" + key).text(data.p_info[key]);
-          }
-          $("#subproj_txt").text(data.subproj_txt);
-          $("div#navbar_links").html(data.navbar_links);
-          $('#deactivate_btn').html('DEACTIVATE');
-        });
-        document.getElementById("deactivate_btn").disabled = true;
-        render_options();
-        $("div#status_table").html('Subproject was deactivated, check the status again');
-      });
-    });
-    </script>
-    <script type=text/javascript>
-    function render_options() {
-            $.getJSON($SCRIPT_ROOT + '/_background_options', {
-          act: $('select[name="actions"]').val(),
-        }, function(data) {
-          $("div#options").html(data.options);
-        });
-        return false;
-    }
-    $(function() {
-      // The function is triggered on page load and with the "select#show_options" change
-      render_options()
-      $('select#show_options').bind('change', render_options);
-    });
-    </script>
-    <script>
-    function show_value(name, value) {
-      // This function is used in the form in the options.html file
-      // get the name of the element to control and the value that should be displayed
-     document.getElementById(name).innerHTML=value;
-    };
-    </script>
-    <script src="https://code.jquery.com/jquery-3.3.1.js" type="text/javascript"></script>
-    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css">
+		{{ super() }}
+		<script type=text/javascript>
+			$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+		</script>
+		<script type=text/javascript>
+		var poller;
+		var interval;
+		function start_interval(){
+			// Engage the automatic status checking
+			if (typeof interval !== 'undefined') {
+				poller = setInterval(function () {
+						check_flags();
+				},interval);
+				console.log("Automatic status polling engaged, interval: ", interval);
+				document.getElementById("auto_off_btn").disabled = false;
+				document.getElementById("auto_on_btn").disabled = true;
+			} else {
+				console.warn("Automatic polling could not be engaged, interval: ", interval);
+			}
+		};
+		function check_flags() {
+				// this is called on a page load, "check status" click and automatically every `data.interval` ms when engaged
+				console.log("checking status");
+				$.getJSON($SCRIPT_ROOT + '/_background_check_status', callback_func);
+				function callback_func(data, status) {
+						console.log("status: ", status)
+						if (status === 'success') {
+							interval = data.interval*1000;
+							console.log("got interval value: ", interval);
+							$("div#status_table").html(data.status_table);
+						} else {
+							console.warn("Could not retrieve the JSON object from the server, status: ", status)
+						}
+				};
+		};
+		$(function() {
+			// this is triggered on the page load
+			$('a#check_flags').bind('click', check_flags)
+			$('a#auto_off').bind('click', stop_interval)
+			$('a#auto_on').bind('click', start_interval)
+			document.getElementById("auto_off_btn").disabled = true;
+			check_flags();
+		});
+		function stop_interval(){
+			// Stop the automatic status polling
+			clearInterval(poller);
+			document.getElementById("auto_off_btn").disabled = true;
+			document.getElementById("auto_on_btn").disabled = false;
+			console.log("Automatic status polling terminated");
+			return false;
+		}
+		</script>
+		<script type=text/javascript>
+		// subproject activation
+		$(function() {
+			$('a#activate_subproject').bind('click', function() {
+			$('#activate_btn').html('ACTIVATING <i class="fa fa-spinner fa-pulse fa-fw"></i>');
+				$.getJSON($SCRIPT_ROOT + '/_background_subproject', {
+					sp: $('select[name="subprojects"]').val(),
+				}, function(data) {
+					// iterate over the dictionary sent from the server and update the values in all the fields
+					for(key in data.p_info) {
+						console.log("activation: The value of ", key, " is ", data.p_info[key]);
+						$("#" + key).text(data.p_info[key]);
+					}
+					$("#subproj_txt").text(data.subproj_txt);
+					$("div#navbar_links").html(data.navbar_links);
+					$('#activate_btn').html('ACTIVATE');
+				});
+				document.getElementById("deactivate_btn").disabled = false;
+				render_options();
+				$("div#status_table").html('Subproject was activated, check the status again');
+			});
+		});
+		</script>
+		<script type=text/javascript>
+		// subproject deactivation
+		$(function() {
+			$('a#deactivate_subproject').bind('click', function() {
+				$('#deactivate_btn').html('DEACTIVATING <i class="fa fa-spinner fa-pulse fa-fw"></i>');
+				$.getJSON($SCRIPT_ROOT + '/_background_subproject', {
+					sp: "None",
+				}, function(data) {
+					// iterate over the dictionary sent from the server and update the values in all the fields
+					for(key in data.p_info) {
+						console.log("deactivation: The value of ", key, " is ", data.p_info[key]);
+						$("#" + key).text(data.p_info[key]);
+					}
+					$("#subproj_txt").text(data.subproj_txt);
+					$("div#navbar_links").html(data.navbar_links);
+					$('#deactivate_btn').html('DEACTIVATE');
+				});
+				document.getElementById("deactivate_btn").disabled = true;
+				render_options();
+				$("div#status_table").html('Subproject was deactivated, check the status again');
+			});
+		});
+		</script>
+		<script type=text/javascript>
+		function render_options() {
+						$.getJSON($SCRIPT_ROOT + '/_background_options', {
+					act: $('select[name="actions"]').val(),
+				}, function(data) {
+					$("div#options").html(data.options);
+				});
+				return false;
+		}
+		$(function() {
+			// The function is triggered on page load and with the "select#show_options" change
+			render_options()
+			$('select#show_options').bind('change', render_options);
+		});
+		</script>
+		<script>
+		function show_value(name, value) {
+			// This function is used in the form in the options.html file
+			// get the name of the element to control and the value that should be displayed
+		 document.getElementById(name).innerHTML=value;
+		};
+		</script>
+		<script src="https://code.jquery.com/jquery-3.3.1.js" type="text/javascript"></script>
+		<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+		<script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css">
+		<link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css">
 {% endblock %}
 {% block title %}Process{% endblock %}
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col">
-          <div class="card border-light mb-3" style="display:inline-block;">
-              <div class="card-header"><b>Project Metadata</b></div>
-              <div class="card-body">
-                {% for item in p_info %}
-                <p class="card-text"><b>{{ item }}: </b><code id="{{ item }}">{{ p_info[item] }}</code></p>
-                {% endfor %}
-              </div>
-              {% if subprojects is not none %}
-                <div class="card-header">Select subproject</div>
-                <div class="card-body">
-                  <select name="subprojects" class="custom-select" style="width:auto;">
-                      {% for i in subprojects %}
-                          <option value="{{ i }}">{{ i }}</option>
-                      {% endfor %}
-                  </select>
-                  <a href="javascript:" id=activate_subproject><button id="activate_btn" type="submit" class="btn btn-outline-dark ml-2 btn-sm">ACTIVATE</button></a>
-                  {% if selected_subproject is none %}
-                    <a href="javascript:" id=deactivate_subproject><button id="deactivate_btn" disabled type="submit" class="btn btn-outline-dark ml-2 btn-sm">DEACTIVATE</button></a>
-                  {% else %}
-                    <a href="javascript:" id=deactivate_subproject><button id="deactivate_btn" type="submit" class="btn btn-outline-dark ml-2 btn-sm">DEACTIVATE</button></a>
-                  {% endif %}
-                  <div class="divider-vertical">
-                    <p id=subproj_txt class="badge badge-primary">Activated subproject: {{ selected_subproject }}</p>
-                  </div>
-                </div>
-            {% endif %}
-            </div>
-        </div>
-        <div class="col">
-          <div class="card border-light mb-3" style="display:inline-block;">
-              <div class="card-header"><b>Status by sample</b></div>
-              <div class="card-body" id="status_table">
-                After <code>looper run</code> click "CHECK STATUS" to update
-              </div>
-              <div class="card-footer">
-                <a href="javascript:" id=check_flags><button id="check_btn" type="submit" class="btn btn-sm btn-outline-dark">CHECK STATUS</button></a>
-                <div class="btn-group btn-group-sm pull-right" role="group" aria-label="polling">
-                  <button type="button" class="btn btn-secondary btn-sm" disabled="true">Auto check ({{ interval }}s)</button>
-                  <a href="javascript:" id=auto_off><button id="auto_off_btn" type="button" class="btn btn-sm btn-danger">OFF</button></a>
-                  <a href="javascript:" id=auto_on><button id="auto_on_btn" type="button" class="btn btn-sm btn-success">ON</button></a>
-                </div>
-              </div>
-            </div>
-        </div>
-    </div>
-</div>
-    <hr>
-<div class="container-fluid">
-    <div class="row">
-        <div class="card border-light mb-3" style="display:inline-block;">
-          <div class="card-header"><b>Perform action on the project:</b></div>
-          <div class="card-body">
-            <select id="show_options" name="actions" class="custom-select" style="width:auto;">
-              {% for i in actions %}
-                <option value="{{ i }}">{{ i|title }}</option>
-              {% endfor %}
-            </select>
-            <div id="options" class="divider-vertical"></div>
-          </div>
-        </div>
-        <hr class="col-xs-12">
-    </div>
-</div>
+	<div class="container px-lg-3 mt-3">
+		<div class="row">
+			<div class="col-lg-12">
+				<div class="card border-light mb-3" style="display:inline-block;">
+					<div class="card-header"><b>Project <code>{{ p_info["name"] }}</code> sample table</b></div>
+					<div class="card-body" id="status_table">
+						After <code>looper run</code> click "CHECK STATUS" to update
+					</div>
+					<div class="card-footer">
+						<a href="javascript:" id=check_flags><button id="check_btn" type="submit" class="btn btn-sm btn-outline-dark">CHECK STATUS</button></a>
+						<div class="btn-group btn-group-sm pull-right" role="group" aria-label="polling">
+							<button type="button" class="btn btn-secondary btn-sm" disabled="true">Auto check ({{ interval }}s)</button>
+							<a href="javascript:" id=auto_off><button id="auto_off_btn" type="button" class="btn btn-sm btn-danger">OFF</button></a>
+							<a href="javascript:" id=auto_on><button id="auto_on_btn" type="button" class="btn btn-sm btn-success">ON</button></a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-5">
+				<div class="card border-light mb-3" style="display:inline-block;">
+					<div class="card-header"><b>Perform action on the project:</b></div>
+					<div class="card-body">
+						<select id="show_options" name="actions" class="custom-select" style="width:auto;">
+							{% for i in actions %}
+								<option value="{{ i }}">{{ i|title }}</option>
+							{% endfor %}
+						</select>
+						<div id="options" class="divider-vertical"></div>
+					</div>
+					{% if subprojects is not none %}
+					<div class="card-header">Select subproject</div>
+					<div class="card-body">
+						<select name="subprojects" class="custom-select" style="width:auto;">
+						{% for i in subprojects %}
+							<option value="{{ i }}">{{ i }}</option>
+						{% endfor %}
+						</select>
+						<a href="javascript:" id=activate_subproject>
+							<button id="activate_btn" type="submit" class="btn btn-outline-dark ml-2 btn-sm">ACTIVATE</button>
+						</a>
+						{% if selected_subproject is none %}
+							<a href="javascript:" id=deactivate_subproject>
+								<button id="deactivate_btn" disabled type="submit" class="btn btn-outline-dark ml-2 btn-sm">DEACTIVATE</button>
+							</a>
+						{% else %}
+							<a href="javascript:" id=deactivate_subproject>
+								<button id="deactivate_btn" type="submit" class="btn btn-outline-dark ml-2 btn-sm">DEACTIVATE</button>
+							</a>
+						{% endif %}
+						<div class="divider-vertical">
+							<p id=subproj_txt class="badge badge-primary">Activated subproject: {{ selected_subproject }}</p>
+						</div>
+				</div>
+				{% endif %}
+			</div>
+		</div>
+	</div>
 {% endblock %}
+<hr class="col-xs-12">
 
 
 
