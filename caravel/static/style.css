@@ -184,3 +184,7 @@ label {
 div#status-table_paginate {
   font-size: 0.8rem;
 }
+
+.container-fluid {
+  padding: 15px;
+}

@@ -128,11 +128,14 @@
 {% endblock %}
 {% block title %}Process{% endblock %}
 {% block content %}
-	<div class="container px-lg-3 mt-3">
+	<div class="container-fluid">
 		<div class="row">
 			<div class="col-lg-12">
 				<div class="card border-light mb-3" style="display:inline-block;">
-					<div class="card-header"><b>Project <code>{{ p_info["name"] }}</code> sample table</b></div>
+					<div class="card-header">
+						<b>Project <code>{{ p_info["name"] }}</code> sample table</b>
+						<span class="badge badge-primary" data-toggle="modal" data-target="#metadataModal" style="cursor: pointer; align-self: right;">Show metadata</span>
+					</div>
 					<div class="card-body" id="status_table">
 						After <code>looper run</code> click "CHECK STATUS" to update
 					</div>
@@ -148,7 +151,7 @@
 			</div>
 		</div>
 		<div class="row">
-			<div class="col-md-5">
+			<div class="col-lg-12">
 				<div class="card border-light mb-3" style="display:inline-block;">
 					<div class="card-header"><b>Perform action on the project:</b></div>
 					<div class="card-body">
@@ -187,6 +190,28 @@
 			</div>
 		</div>
 	</div>
+	<!-- Button trigger modal -->
+<!-- Modal -->
+<div class="modal fade" id="metadataModal" tabindex="-1" role="dialog" aria-labelledby="metadataModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-center"  id="metadataModalLabel">Project metadata</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		{% for item in p_info %}
+			<p><b>{{ item }}: </b><code id="{{ item }}">{{ p_info[item] }}</code></p>
+		{% endfor %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-dark btn-sm" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 <hr class="col-xs-12">
 
