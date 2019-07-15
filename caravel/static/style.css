@@ -188,3 +188,8 @@ div#status-table_paginate {
 .container-fluid {
   padding: 15px;
 }
+
+#status-table tr td {
+    height: 10px;
+    padding: 5px;
+}
