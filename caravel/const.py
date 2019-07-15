@@ -57,3 +57,10 @@ TEMPLATES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), TEMPLA
 DEMO_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), EXAMPLE_FILENAME)
 COMMAND_KEY = "execute"
 POLL_INTERVAL = 3  # in seconds
+MISSING_SAMPLE_DATA_TXT = "<code>looper run</code> was called, but not all the samples were correctly processed. " \
+                            "</br>Possible reasons: <ul style='padding-left: 30px;'>"\
+                            "<li>some jobs are still in a queue</li>" \
+                            "<li>submission was not successful</li>" \
+                            "<li>some sample output directories were deleted</li>" \
+                            "<li>sample names changed</li></ul>"
+

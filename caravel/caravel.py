@@ -379,16 +379,14 @@ def background_check_status():
     app.logger.info("checking flags for {} samples".format(len(list(globs.p.sample_names))))
     flags = get_sample_flags(globs.p, list(globs.p.sample_names))
     if all(not value for value in flags.values()) and not globs.run:
-        return jsonify(status_table="No samples were processed yet. "
+        return jsonify(status_table="No samples were processed yet." \
                                     "Use <code>looper run</code> and then check the status",
                        interval=globs.poll_interval)
     elif all(value for value in flags.values()):
         return jsonify(status_table=create_status_table(globs.p, final=False) + sample_info_hint(globs.p),
                        interval=globs.poll_interval)
     else:
-        return jsonify(status_table="<code>looper run</code> was called, but the samples were not processed yet. "
-                                    "Submission not successful or jobs might be still in a queue.",
-                       interval=globs.poll_interval)
+        return jsonify(status_table=MISSING_SAMPLE_DATA_TXT, interval=globs.poll_interval)
 
 
 @app.route('/_background_result')
