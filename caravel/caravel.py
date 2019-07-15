@@ -298,6 +298,7 @@ def background_subproject():
         globs.p.deactivate_subproject()
     else:
         globs.p.activate_subproject(sp)
+        globs.run = False
     globs.summary_requested = None
     get_navbar_summary_links()
     return jsonify(subproj_txt=output, p_info=project_info_dict(globs.p), navbar_links=globs.summary_links)
@@ -379,10 +380,10 @@ def background_check_status():
     app.logger.info("checking flags for {} samples".format(len(list(globs.p.sample_names))))
     flags = get_sample_flags(globs.p, list(globs.p.sample_names))
     if all(not value for value in flags.values()) and not globs.run:
-        return jsonify(status_table="No samples were processed yet." \
+        return jsonify(status_table="No samples were processed yet. " \
                                     "Use <code>looper run</code> and then check the status",
                        interval=globs.poll_interval)
-    elif all(value for value in flags.values()):
+    elif any(value for value in flags.values()):
         return jsonify(status_table=create_status_table(globs.p, final=False) + sample_info_hint(globs.p),
                        interval=globs.poll_interval)
     else:
