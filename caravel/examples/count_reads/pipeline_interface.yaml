@@ -1,7 +1,7 @@
 protocol_mapping:
-  ATAC-seq: count_reads_quickly
-  ChIPmentation: count_reads_slowly
-  ChIP-seq: count_reads_slowly
+  mammals: count_reads_slowly
+  amphibians: count_reads_quickly
+  aves: count_reads_slowly
 
 pipelines:
   count_reads_quickly:
@@ -12,7 +12,6 @@ pipelines:
     arguments:
       "--sample-name": sample_name
       "--input": data_source
-      "--single-or-paired": read_type
     resources:
       default:
         file_size: "0"
@@ -52,7 +51,6 @@ pipelines:
     arguments:
       "--sample-name": sample_name
       "--input": data_source
-      "--single-or-paired": read_type
     optional_arguments:
       "--sleep": sleep # how long to sleep (in mins)
     resources:

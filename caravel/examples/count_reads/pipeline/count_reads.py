@@ -9,47 +9,57 @@ import os
 import pypiper
 import csv
 
-parser = ArgumentParser(description="A pipeline to count the number of reads and file size. Accepts BAM, fastq, "
-                                    "or fastq.gz files.")
-parser = pypiper.add_pypiper_args(parser, groups=["pypiper", "common", "ngs", "looper"],
-                                    args=["output-parent", "config"],
-                                    required=['sample-name', 'output-parent'])
+parser = ArgumentParser(description="A pipeline to count the number of lines, file sizes and line lengts distribution.")
+parser = pypiper.add_pypiper_args(parser, groups=["pypiper", "common", "looper"], args=["output-parent", "config"],
+                                  required=['sample-name'])
 parser.add_argument("--sleep", dest="sleep", default=None, help="How long to sleep")
 args = parser.parse_args()
 if not args.input or not args.output_parent:
     parser.print_help()
     raise SystemExit
 
-if args.single_or_paired == "paired":
-    args.paired_end = True
-else:
-    args.paired_end = False
-
 outfolder = os.path.abspath(os.path.join(args.output_parent, args.sample_name))
 
-pm = pypiper.PipelineManager(name="count", outfolder=outfolder, args=args)
-ngstk = pypiper.NGSTk(pm=pm)
-raw_folder = os.path.join(outfolder, "raw/")
-fastq_folder = os.path.join(outfolder, "fastq/")
-pm.timestamp("### Merge/link and fastq conversion: ")
-local_input_files = ngstk.merge_or_link([args.input, args.input2], raw_folder, args.sample_name)
-cmd, out_fastq_pre, unaligned_fastq = ngstk.input_to_fastq(local_input_files, args.sample_name, args.paired_end,
-                                                           fastq_folder)
-size_mb = ngstk.get_file_size(local_input_files)
-pm.report_result("File size", size_mb)
+input_file = args.input[0]
+output_plot = os.path.join(outfolder, "line_length_distr_plot.png")
+hist_plotter = "plotHist.R"
+hist_plotter_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), hist_plotter)
 sleep_val = 60*float(args.sleep) if args.sleep is not None else 0
+
+distr_output = os.path.join(outfolder, "line_lengths_distribution.txt")
+pm = pypiper.PipelineManager(name="File stats", outfolder=outfolder, args=args)
+
+pm.timestamp("### File size calculation: ")
+file_size_cmd = "wc -c {} | awk '{{print $1}}'".format(input_file)
+size_kb = int(pm.checkprint(file_size_cmd, shell=True))/1000
+pm.report_result("File size", size_kb)
+
+pm.timestamp("### Lines number calculation: ")
+num_lines_cmd = "wc -l {input} | sed -E 's/^[[:space:]]+//' | cut -f1 -d' '".format(input=input_file)
+num_lines = pm.checkprint(num_lines_cmd, shell=True)
+pm.report_result("Number of lines", num_lines)
+
+pm.timestamp("### Saving CSV with lines count and file sizes")
+outfile = os.path.join(outfolder, args.sample_name + '_results.csv')
+with open(outfile, mode='w') as f:
+    fwriter = csv.writer(f)
+    fwriter.writerow(['lines count', str(num_lines)])
+    fwriter.writerow(['file size', str(size_kb)])
+pm.report_object("results CSV", os.path.basename(outfile), anchor_text="results CSV")
+
 pm.timestamp("### Sleeping: {}s".format(sleep_val))
 pm.run("sleep " + str(sleep_val), shell=True, lock_name="test")
 time_slept = sleep_val if args.sleep is not None else 0
 pm.report_result("Time slept", sleep_val)
-n_input_files = len(list(filter(bool, local_input_files)))
-raw_reads = sum([int(ngstk.count_reads(input_file, args.paired_end)) for input_file in local_input_files])/n_input_files
-pm.report_result("Raw reads", str(raw_reads))
-pm.timestamp("### Saving result")
-outfile = os.path.join(outfolder, args.sample_name + '_results.csv')
-with open(outfile, mode='w') as f:
-    fwriter = csv.writer(f)
-    fwriter.writerow(['raw reads', str(raw_reads)])
-    fwriter.writerow(['file size', str(size_mb)])
-pm.report_object("results CSV", os.path.basename(outfile), anchor_text="results CSV")
+
+pm.timestamp("### Line lengths distribution calculation: ")
+line_length_dist_cmd = "awk '{{print length}}' {input} | uniq > {distr_output}".format(input=input_file,
+                                                                                     distr_output=distr_output)
+pm.run(line_length_dist_cmd, target=distr_output)
+
+pm.timestamp("### Line lengths distribution plotting: ")
+plot_line_dist_cmd = "RScript --vanilla {rscript} {distr_output} {plot_path}".format(rscript=hist_plotter_path, distr_output=distr_output, plot_path=output_plot)
+pm.run(plot_line_dist_cmd, target=output_plot)
+pm.report_object("Line length distribution plot", output_plot)
+
 pm.stop_pipeline()
