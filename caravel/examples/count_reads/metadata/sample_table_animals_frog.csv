@@ -1,0 +1,4 @@
+﻿sample_name,protocol,filename,data_source
+frog1,amphibians,frog1_sounds.txt,path
+frog2,amphibians,frog2_sounds.txt,path
+frog3,amphibians,frog3_sounds.txt,path
