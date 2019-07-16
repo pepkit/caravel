@@ -107,6 +107,15 @@ def get_summary_html_name(prj):
     return fname + "_summary.html"
 
 
+def parse_selected_project(selection_str, sep=";"):
+    """
+    Parse the string returned by the index page form
+    :param str selection_str: a string formatted like: "<project_path>;<project_id>"
+    :return str: separated project and id
+    """
+    return selection_str.split(sep)
+
+
 def check_for_summary(prj):
     """
     Check if the summary page has been produced

@@ -10,6 +10,7 @@ def init_globals():
     global summarizer
     global p
     global selected_project
+    global selected_project_id
     global log_path
     global act
     global compute_config
@@ -27,6 +28,7 @@ def init_globals():
     summarizer = None
     p = None
     selected_project = None
+    selected_project_id = None
     log_path = None
     act = None
     compute_config = None

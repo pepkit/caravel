@@ -220,7 +220,8 @@ def index():
         globs.reset_btn = None
         app.logger.info("Project data removed")
     projects, globs.command = parse_config_file()
-    return render_template('index.html', projects=projects, reset_btn=globs.reset_btn, command_btn=globs.command)
+    return render_template('index.html', projects=projects, reset_btn=globs.reset_btn, command_btn=globs.command,
+                           selected=globs.selected_project, selected_id=globs.selected_project_id)
 
 
 @app.route('/_background_exec')
@@ -276,7 +277,10 @@ def process():
     else:
         new_selected_project = request.form.get('select_project')
         if new_selected_project is not None and globs.selected_project != new_selected_project:
-            globs.selected_project = new_selected_project
+            globs.selected_project = parse_selected_project(new_selected_project)[0]
+            globs.selected_project_id = parse_selected_project(new_selected_project)[1]
+            app.logger.debug("Selected project path: " + globs.selected_project)
+            app.logger.debug("Selected project id: " + globs.selected_project_id)
     config_file = str(os.path.expandvars(os.path.expanduser(globs.selected_project)))
     if globs.p is None:
         globs.p = Project(config_file)
@@ -287,7 +291,8 @@ def process():
     get_navbar_summary_links()
     globs.reset_btn = True
     return render_template('process.html', p_info=project_info_dict(globs.p), change=None,
-                           selected_subproject=globs.p.subproject, actions=actions, subprojects=subprojects, interval=globs.poll_interval)
+                           selected_subproject=globs.p.subproject, actions=actions, subprojects=subprojects,
+                           interval=globs.poll_interval)
 
 
 @app.route('/_background_subproject')

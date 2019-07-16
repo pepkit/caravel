@@ -35,20 +35,29 @@
 					<div class="card-body">
 						<form id="select_project" class="form" method="POST" action="{{ url_for('process') }}">
 							<div class="form-group row">
-								<div class="col-xl-9">
-									<input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
-									<select name="select_project" class="custom-select">
+								<input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
+								<div class="col-xl-12">
+									<div class="list-group">
+										{% if reset_btn is not none %}
+											<div class="alert alert-secondary" role="alert">
+												<button type="button" class="close" data-dismiss="alert">&times;</button>
+												Reset currently activated project to select other ones
+											</div>
+										{% endif %}
+										{% if selected is none %}
+											{% set cls = "list-group-item list-group-item-action" %}
+										{% else %}
+											{% set cls = "list-group-item list-group-item-action disabled" %}
+										{% endif %}
 										{% for p in projects %}
-											<option value="{{ p }}">{{ p }}</option>
+											{% if loop.index == selected_id | int  %}
+												{% set cls = "list-group-item list-group-item-action list-group-item-secondary" %}
+											{% endif %}
+											<button type="submit" name="select_project" class="{{ cls }}" value="{{ p }};{{ loop.index }}">
+												{{ p }}
+											</button>
 										{% endfor %}
-									</select>
-								</div>
-								<div class="col-xl-3">
-									{% if reset_btn is not none %}
-										<button type="button" class="btn btn-outline-dark ml-2 disabled">GO (reset to proceed)</button>
-									{% else %}
-										<button id="gobtn" type="submit" class="btn btn-outline-dark ml-2">GO</button>
-									{% endif %}
+									</div>
 								</div>
 							</div>
 						</form>
