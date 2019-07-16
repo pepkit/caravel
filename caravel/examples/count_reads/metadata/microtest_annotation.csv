@@ -1,9 +1,0 @@
-sample_name,protocol,filename,data_source,read_type
-ATAC-seq_human_PE,ATAC-seq,atac-seq_PE.bam,microtest,paired
-ATAC-seq_human_SE,ATAC-seq,atac-seq_SE.bam,microtest,single
-ChIP-seq_human_CTCF_PE,ChIP-seq,chip-seq_PE.bam,microtest,paired
-ChIP-seq_human_CTCF_SE,ChIP-seq,chip-seq_SE.bam,microtest,single
-ChIP-seq_human_H3K27ac_PE,ChIP-seq,chip-seq_PE.bam,microtest,paired
-ChIP-seq_human_H3K27ac_SE,ChIP-seq,chip-seq_SE.bam,microtest,single
-ChIPmentation_human_CTCF_PE,ChIPmentation,chipmentation_PE.bam,microtest,paired
-ChIPmentation_human_CTCF_SE,ChIPmentation,chipmentation_SE.bam,microtest,single
