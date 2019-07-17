@@ -15,6 +15,6 @@ data_sources:
     path: "../../data/{filename}"
 
 subprojects:
-    atac_only:
+    frog_only:
         metadata:
-            sample_table: microtest_annotation_atac.csv
+            sample_table: sample_table_animals_frog.csv
