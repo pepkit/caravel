@@ -12,6 +12,7 @@ import fcntl
 import termios
 import struct
 import pandas as _pd
+from importlib import import_module
 from sys import stderr
 from csv import DictReader
 from flask import render_template, current_app
@@ -110,11 +111,12 @@ def get_summary_html_name(prj):
 def parse_selected_project(selection_str, sep=";"):
     """
     Parse the string returned by the index page form
+
     :param str selection_str: a string formatted like: "<project_path>;<project_id>"
+    :param str sep: separator string
     :return str: separated project and id
     """
     return selection_str.split(sep)
-
 
 def check_for_summary(prj):
     """
@@ -126,17 +128,18 @@ def check_for_summary(prj):
     return os.path.exists(os.path.join(prj.metadata.output_dir, get_summary_html_name(prj)))
 
 
-def _ensure_pypiper_installed():
+def _ensure_package_installed(name, error_msg_appdx=""):
     """
-    Current demonstrational pipeline requires is a pypiper pipeline.
-    Therefore we need to ensure pypiper can be imported when caravel is launched in the demo mode
+    Current demonstrational pipeline is a pypiper pipeline.
+    Therefore we need to ensure pypiper can be imported when caravel is launched in the demo mode.
+    This function can be used to perform such an assurance
     """
     try:
-        import pypiper
-        current_app.logger.debug("pypiper imported succesfully")
+        import_module(name)
+        current_app.logger.debug("'{}' imported successfully".format(name))
     except ImportError:
-        raise ImportError("Package 'pypiper' could not be imported. The demonstrational pipeline requires this package."
-                          " Install 'pypiper' using: pip install piper")
+        raise ImportError("Package '{}' could not be imported, "
+                          "but is conditionally required. {}".format(name, error_msg_appdx))
 
 
 def _get_configs_path():
@@ -147,7 +150,8 @@ def _get_configs_path():
     :return str: path to the caravel config file
     """
     if current_app.config.get("demo"):
-        _ensure_pypiper_installed()
+        _ensure_package_installed("pypiper", "The demonstrational pipeline requires this package. "
+                                             "Install 'pypiper' using: pip install piper")
         current_app.logger.info("Demo mode, the project configs list is auto-populated with example data")
         return DEMO_FILE_PATH
     return current_app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
