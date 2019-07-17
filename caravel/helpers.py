@@ -118,6 +118,7 @@ def parse_selected_project(selection_str, sep=";"):
     """
     return selection_str.split(sep)
 
+
 def check_for_summary(prj):
     """
     Check if the summary page has been produced
@@ -133,6 +134,10 @@ def _ensure_package_installed(name, error_msg_appdx=""):
     Current demonstrational pipeline is a pypiper pipeline.
     Therefore we need to ensure pypiper can be imported when caravel is launched in the demo mode.
     This function can be used to perform such an assurance
+
+    :param str name: package name to be tested
+    :param str error_msg_appdx: string to be appended to the error message
+        (provides more detail as to why the package is conditionally requred)
     """
     try:
         import_module(name)
