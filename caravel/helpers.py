@@ -413,7 +413,8 @@ def run_looper(prj, args, act, log_path, logging_lvl):
             except IOError:
                 raise Exception("{} pipelines_dir: '{}'".format(prj.__class__.__name__, prj.metadata.pipelines_dir))
         if act == "destroy":
-            looper.looper.Destroyer(prj)(args)
+            globs.run = False
+            return looper.looper.Destroyer(prj)(args, False)
         if act == "summarize":
             globs.summary_requested = True
             run_custom_summarizers(prj)
@@ -422,7 +423,7 @@ def run_looper(prj, args, act, log_path, logging_lvl):
             looper.looper.Checker(prj)(flags=args.flags)
 
         if act == "clean":
-            looper.looper.Cleaner(prj)(args)
+            return looper.looper.Cleaner(prj)(args, False)
 
 
 def _render_summary_pages(prj):
