@@ -58,8 +58,8 @@ line_length_dist_cmd = "awk '{{print length}}' {input} | uniq > {distr_output}".
 pm.run(line_length_dist_cmd, target=distr_output)
 
 pm.timestamp("### Line lengths distribution plotting: ")
-plot_line_dist_cmd = "RScript --vanilla {rscript} {distr_output} {plot_path}".format(rscript=hist_plotter_path, distr_output=distr_output, plot_path=output_plot)
-pm.run(plot_line_dist_cmd, target=output_plot)
+plot_line_dist_cmd = "Rscript {rscript} {distr_output} {plot_path}".format(rscript=hist_plotter_path, distr_output=distr_output, plot_path=output_plot)
+pm.run(plot_line_dist_cmd, target=output_plot, shell=True)
 pm.report_object("Line length distribution plot", output_plot, anchor_image=output_plot)
 
 pm.stop_pipeline()
