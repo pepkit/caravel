@@ -126,6 +126,19 @@ def check_for_summary(prj):
     return os.path.exists(os.path.join(prj.metadata.output_dir, get_summary_html_name(prj)))
 
 
+def _ensure_pypiper_installed():
+    """
+    Current demonstrational pipeline requires is a pypiper pipeline.
+    Therefore we need to ensure pypiper can be imported when caravel is launched in the demo mode
+    """
+    try:
+        import pypiper
+        current_app.logger.debug("pypiper imported succesfully")
+    except ImportError:
+        raise ImportError("Package 'pypiper' could not be imported. The demonstrational pipeline requires this package."
+                          " Install 'pypiper' using: pip install piper")
+
+
 def _get_configs_path():
     """
     Parses the config file (YAML) provided as an CLI argument or in a environment variable ($CARAVEL)
@@ -134,6 +147,7 @@ def _get_configs_path():
     :return str: path to the caravel config file
     """
     if current_app.config.get("demo"):
+        _ensure_pypiper_installed()
         current_app.logger.info("Demo mode, the project configs list is auto-populated with example data")
         return DEMO_FILE_PATH
     return current_app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
