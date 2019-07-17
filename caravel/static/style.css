@@ -138,6 +138,10 @@ div.col-slider {
   color: white;
   }
 
+.nav-link#tab {
+  color: black;
+  }
+
 .left_footer {
   width: 30%;
   text-align: left;

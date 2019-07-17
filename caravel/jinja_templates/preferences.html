@@ -32,75 +32,58 @@
 </script>
 {% endblock %}
 {% block content %}
-	<div class="accordion" id="accordionExample">
-	  <div class="card">
-		<div class="card-header" id="headingOne">
-		  <h2 class="mb-0">
-			<button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-			  Computing environment settings
-			</button>
-		  </h2>
-		</div>
-		<div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
-		  <div class="card-body">
-			<div class="card border-light mb-3" style="display:inline-block;">
-      <div class="card-header"><b>Configure computing environment</b></div>
-      <div class="card-body">
-		<select name="select_compute" class="custom-select" style="width:auto;">
-		{% for item in compute_packages %}
-			{% if item == currently_selected_package %}
-				<option value="{{ item }}" selected="selected">{{ item }}</option>
-			{% else %}
-				<option value="{{ item }}">{{ item }}</option>
-			{% endif %}
-		{% endfor %}
-		</select>
-		<a href='#' id=show_compute><button type="submit" class="btn btn-outline-dark ml-2">Select</button></a>
-      </div>
-	<div class="card-footer text-muted">
-		<small>Compute packages read from: <code>{{ env_conf_file }}</code></small>
-	</div>
-    </div>
+	<ul class="nav nav-tabs">
+		<li class="nav-item">
+			<a data-toggle="tab" class="nav-link active" id="tab" href="#cec"><b>Computing environment configuration</b></a>
+		</li>
+		<li class="nav-item">
+			<a data-toggle="tab" class="nav-link" id="tab" href="#os"><b>Other settings</b></a>
+		</li>
+	</ul>
 
-	<div class="divider-vertical" id="compute_info">
-		{% include "compute_info.html"%}
-	</div>
-
-    {% if notify_not_set is not none %}
-		<hr class="col-xs-12">
-		<h3>Environment variable(s) pointing to the <code>DIVCFG</code> file not found, using default file.</h3>
-		<p>The <code>{{ notify_not_set }}</code> environment variable is not set. Set it with:
-		<code>export {{ notify_not_set }}=path/to/file</code> and run <code>caravel</code> again.</p>
-		<p>Learn more about <a href="http://code.databio.org/divvy/configuration/" target="_blank"><code>DIVCFG</code></a> files concept <a href="http://code.databio.org/divvy/" target="_blank">here</a>.</p>
-	{% endif %}
-		  </div>
-		</div>
-	  </div>
-	  <div class="card">
-		<div class="card-header" id="headingTwo">
-		  <h2 class="mb-0">
-			<button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-			  Other settings
-			</button>
-		  </h2>
-		</div>
-		<div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
-		  <div class="card-body">
-			<div class="card border-light mb-3" style="display:inline-block;">
-			  <div class="card-header"><b>Status check interval</b></div>
-			  <div class="card-body">
-				<div class="col-2 col-slider">
-				<input type="range" class="custom-range" name="interval" min="1" max="60" value="{{ default_interval }}" step="1" oninput="show_value(this.name,this.value)">
-				<button id="interval" class="disp-value" disabled>{{ default_interval }}s</button>
+	<div class="tab-content">
+		<div id="cec" class="tab-pane active">
+			<div class="card border-light m-3" style="display:inline-block;">
+				<div class="card-header"><b>Select a compute package</b></div>
+				<div class="card-body">
+					<select name="select_compute" class="custom-select" style="width:auto;">
+						{% for item in compute_packages %}
+							{% if item == currently_selected_package %}
+								<option value="{{ item }}" selected="selected">{{ item }}</option>
+							{% else %}
+								<option value="{{ item }}">{{ item }}</option>
+							{% endif %}
+						{% endfor %}
+					</select>
+					<a href='#' id=show_compute><button type="submit" class="btn btn-outline-dark ml-2">Select</button></a>
 				</div>
-			  </div>
+				<div class="card-footer text-muted">
+					<small>Compute packages read from: <code>{{ env_conf_file }}</code></small>
+				</div>
 			</div>
-		  </div>
+			<div class="divider-vertical" id="compute_info">
+			{% include "compute_info.html"%}
+			{% if notify_not_set is not none %}
+				<hr class="col-xs-12">
+				<h3>Environment variable(s) pointing to the <code>DIVCFG</code> file not found, using default file.</h3>
+				<p>The <code>{{ notify_not_set }}</code> environment variable is not set. Set it with:
+				<code>export {{ notify_not_set }}=path/to/file</code> and run <code>caravel</code> again.</p>
+				<p>Learn more about <a href="http://code.databio.org/divvy/configuration/" target="_blank"><code>DIVCFG</code></a> files concept <a href="http://code.databio.org/divvy/" target="_blank">here</a>.</p>
+			{% endif %}
+			</div>
 		</div>
-	  </div>
+		<div id="os" class="tab-pane">
+			<div class="card border-light m-3" style="display:inline-block;">
+				<div class="card-header"><b>Status check interval</b></div>
+				<div class="card-body">
+					<div class="col-2 col-slider">
+						<input type="range" class="custom-range" name="interval" min="1" max="60" value="{{ default_interval }}" step="1" oninput="show_value(this.name,this.value)">
+						<button id="interval" class="disp-value" disabled>{{ default_interval }}s</button>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
-	<div class="divider-vertical"></div>
-	<a href="{{ referrer }}" id="set"><button type="submit" class="btn btn-outline-dark ml-2">Set <i class="fa fa-check"></i></button></a>
-	<div class="divider-vertical"></div>
+	<a href="{{ referrer }}" id="set"><button type="submit" class="btn btn-outline-dark m-2">Set <i class="fa fa-check"></i></button></a>
 	{% include 'back_referrer.html' %}
 {% endblock %}

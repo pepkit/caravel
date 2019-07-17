@@ -1,12 +1,12 @@
 {% if active_settings is not none %}
-	<div class="card border-light mb-3" style="display:inline-block;">
-      <div class="card-header"><b>Selected compute package info</b></div>
-      <div class="card-body">
+	<div class="card border-light m-3" style="display:inline-block;">
+		<div class="card-header"><b>Selected compute package info</b></div>
+		<div class="card-body">
 			{% for item in active_settings %} 
 				<p>{{ item }}: <code id="{{ item }}">{{ active_settings[item] }}</code></p>
 			{% endfor %}
-      </div>
-    </div>
+		</div>
+	</div>
 {% else %}
 <p>Warning: <code>{{ msg }}</code></p>
 {% endif %}
