@@ -1,6 +1,0 @@
-args = commandArgs(trailingOnly=TRUE)
-if (length(args)<2) stop("2 arguments must be supplied", call.=FALSE)
-t = read.table(args[1])
-png(args[2])
-hist(t[,1], main='Histogram of line lenghts', xlab='Line length', ylab='Frequency',col='lightcyan2')
-dev.off()
