@@ -1,0 +1,20 @@
+project_name: caravel_demo
+email: michal@virginia.edu
+metadata:
+    output_dir: ${HOME}/caravel_demo
+    sample_table: sample_table_animals.csv
+    pipeline_interfaces: ../pipeline_interface.yaml
+
+# Derived columns indicates variables which are to be processed as `data_sources`
+derived_attributes: data_source
+constant_attributes: 
+    sleep: 0.1
+
+# Data sources are constructed paths to static (input) files
+data_sources:
+    path: "../../data/{filename}"
+
+subprojects:
+    frog_only:
+        metadata:
+            sample_table: sample_table_animals_frog.csv

@@ -40,7 +40,7 @@ CONFIG_ENV_VAR = "CARAVEL"
 CONFIG_PRJ_KEY = "projects"
 CONFIG_TOKEN_KEY = "token"
 TOKEN_FILE_NAME = ".caravel_token"
-EXAMPLE_FILENAME = "example_caravel.yaml"
+EXAMPLE_FILENAME = "caravel_demo.yaml"
 TOKEN_LEN = 15
 SET_ELSEWHERE = [["--force-yes"], ["--sp"], ["--compute"], ["--env"], ["--help"], ["--version"],
                  ["--selector-attribute"], ["--selector-exclude"], ["--selector-include"], ['--resources'],
