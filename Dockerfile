@@ -5,8 +5,6 @@ RUN apt-get update -y
 RUN apt-get install -y python-pip python-dev build-essential
 COPY . /app
 RUN pip install -U pip
-# install looper dev
-RUN pip install https://github.com/pepkit/looper/archive/dev.zip # remove after the release
 # install pypiper, used in the example pipeline
 RUN pip install piper
 # install R, used in the demo pipeline
