@@ -1,19 +1,33 @@
 # Changelog
 
-## [0.13.1] -- (unreleased)
+This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
+
+## [0.13.1] -- unreleased
 
 ### Fixed:
 
+ - problem creating Project metadata regarding defined subprojects when none are defined; [#120](https://github.com/pepkit/caravel/issues/120)
+ - problem with navbar dropdowns not expanding; [#121](https://github.com/pepkit/caravel/issues/121)
+ - error when summarizing a project that has not been run; [#111](https://github.com/pepkit/caravel/issues/111)
 
 ### Changed: 
 
+ - computing configuration page to preferences page
+ - status page produced by `looper summarize` is not included in the navbar anymore
+ - Project metadata is now hidden in a modal
+ - the files to be deleted are not previewed beforehand
+ - switched to list representation of the available projects in the "Home" page
   
 ### Added:
 
- - example data
+ - demonstrational data
  - demo mode when run with `--demo` option
+ - go to the top buttons where relevant
+ - "live" monitoring of the submitted jobs in the sample status table
+ - moved sample status to the "Process" page
+ - "other settings" tab in the preferences page
 
-## [0.13.0] -- (2019-05-02)
+## [0.13.0] -- 2019-05-02
 
 ### Fixed:
 
@@ -30,7 +44,7 @@
   - subproject activation and deactivation updates all the `Project` object attributes in the "Process" page
   - link to the computing configuration settings in the "Home" page
 
-## [0.2.0] -- (2019-04-18)
+## [0.2.0] -- 2019-04-18
 
 ### Changed:
 
@@ -53,7 +67,7 @@
   - The port that the server will be run on can be determined manually from the CLI (`-p` and `--port` options)
   - Seamless integration with `looper` reporting module, the pages are displayed with `caravel`'s navbar and footer
 
-## [0.1.1] -- (2019-01-15)
+## [0.1.1] -- 2019-01-15
 
 ### Changed:
 
@@ -65,7 +79,7 @@
 
   - Allow setting the authentication token in the caravel config file
 
-## [0.1] -- (2018-12-21)
+## [0.1] -- 2018-12-21
 
 ### Added:
 
