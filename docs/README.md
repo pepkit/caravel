@@ -26,4 +26,4 @@ pip install --user --upgrade caravel
 caravel --demo
 ```
 
-Running `caravel` with the `--demo` option loads an example config YAML that specifies one PEP that can be then selected from the dropdown list in the `caravel` landing page.
+Running `caravel` with the `--demo` option loads an example config YAML that specifies one PEP that can be then selected from the list in the `caravel` landing page.
