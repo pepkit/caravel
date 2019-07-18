@@ -2,16 +2,13 @@
 
 from functools import wraps
 import getpass
-import logging
 import traceback
 import warnings
-from flask import Blueprint, Flask, render_template, request, jsonify, session, redirect, send_from_directory, url_for,\
-    flash
-import yaml
+from flask import Flask, render_template, request, jsonify, session, redirect, send_from_directory, url_for, flash
 import globs
-from const import *
-from helpers import *
-from looper_parser import *
+from .const import *
+from .helpers import *
+from .looper_parser import *
 import divvy
 from textile import textile
 from platform import python_version
@@ -140,7 +137,7 @@ def csrf_protect():
 @app.after_request
 def add_header(r):
     """
-    Add headers to both force the browser not to cache the pages
+    Add headers to force the browser not to cache the pages
 
     This is relevant for serving the summary pages for multiple projects one after another
     """
@@ -191,9 +188,9 @@ def gdsv(s):
         value_idx = [x.startswith("value") for x in lst].index(True)
         value_string = lst[value_idx]
         result = value_string.split("=")[1]
-    except:
-        app.logger.warning("could not determine default option for slider out of string: '{}'."
-                           " Returning 'None' instead".format(s))
+    except Exception as e:
+        app.logger.warning("Got '{}'; could not determine default option for slider out of string: '{}'."
+                           " Returning 'None' instead".format(e.__class__.__name__, s))
         result = None
     return result
 
@@ -203,7 +200,8 @@ def inject_dict_for_all_templates():
     if globs.summary_links is None:
         globs.summary_links = SUMMARY_NAVBAR_PLACEHOLDER
     return dict(caravel_version=CARAVEL_VERSION, looper_version=LOOPER_VERSION, python_version=python_version(),
-                referrer=request.referrer, debug=app.config["DEBUG"], summary_links=globs.summary_links, login=app.config['login'])
+                referrer=request.referrer, debug=app.config["DEBUG"], summary_links=globs.summary_links,
+                login=app.config['login'])
 
 
 app.jinja_env.filters['gdsv'] = gdsv
@@ -215,20 +213,15 @@ app.jinja_env.globals['csrf_token'] = generate_csrf_token
 @app.route("/index")
 @token_required
 def index():
-    if globs.p is not None:
-        summary_exists = check_for_summary(globs.p)
-    else:
-        app.logger.debug("No project defined yet, summary links not created")
-        summary_exists = False
     get_navbar_summary_links()
     if request.args.get('reset'):
         globs.init_globals()
         globs.summary_links = SUMMARY_NAVBAR_PLACEHOLDER
         globs.reset_btn = None
         app.logger.info("Project data removed")
-    app.logger.debug("reset button: {}".format(str(globs.reset_btn)))
     projects, globs.command = parse_config_file()
-    return render_template('index.html', projects=projects, reset_btn=globs.reset_btn, command_btn=globs.command)
+    return render_template('index.html', projects=projects, reset_btn=globs.reset_btn, command_btn=globs.command,
+                           selected=globs.selected_project, selected_id=globs.selected_project_id)
 
 
 @app.route('/_background_exec')
@@ -240,13 +233,15 @@ def background_exec():
     return jsonify(exec_txt=out)
 
 
-@app.route("/set_comp_env")
+@app.route("/preferences")
 @token_required
 def set_comp_env():
     global active_settings
     if globs.compute_config is None:
         globs.compute_config = divvy.ComputingConfiguration()
     selected_package = request.args.get('compute', type=str)
+    selected_interval = request.args.get('interval', type=int) or globs.poll_interval
+    globs.poll_interval = int(selected_interval)
     if globs.currently_selected_package is None:
         globs.currently_selected_package = "default"
     if selected_package is not None:
@@ -259,11 +254,13 @@ def set_comp_env():
         active_settings = globs.compute_config.get_active_package()
         return jsonify(active_settings=render_template('compute_info.html', active_settings=active_settings))
     active_settings = globs.compute_config.get_active_package()
-    notify_not_set = COMPUTE_SETTINGS_VARNAME[0] if globs.compute_config.default_config_file == globs.compute_config.config_file\
-        else None
-    return render_template('set_comp_env.html', env_conf_file=globs.compute_config.config_file,
+    notify_not_set = COMPUTE_SETTINGS_VARNAME[0] if \
+        globs.compute_config.default_config_file == globs.compute_config.config_file else None
+
+    return render_template('preferences.html', env_conf_file=globs.compute_config.config_file,
                            compute_packages=globs.compute_config.list_compute_packages(), active_settings=active_settings,
-                           currently_selected_package=globs.currently_selected_package, notify_not_set=notify_not_set)
+                           currently_selected_package=globs.currently_selected_package, notify_not_set=notify_not_set,
+                           default_interval=globs.poll_interval)
 
 
 @app.route("/process", methods=['GET', 'POST'])
@@ -280,26 +277,22 @@ def process():
     else:
         new_selected_project = request.form.get('select_project')
         if new_selected_project is not None and globs.selected_project != new_selected_project:
-            globs.selected_project = new_selected_project
+            globs.selected_project = parse_selected_project(new_selected_project)[0]
+            globs.selected_project_id = parse_selected_project(new_selected_project)[1]
+            app.logger.debug("Selected project path: " + globs.selected_project)
+            app.logger.debug("Selected project id: " + globs.selected_project_id)
     config_file = str(os.path.expandvars(os.path.expanduser(globs.selected_project)))
     if globs.p is None:
         globs.p = Project(config_file)
     try:
-        subprojects = list(globs.p.subprojects.keys())
+        subprojects = globs.p.subprojects.keys()
     except AttributeError:
         subprojects = None
-        # TODO: p_info will be removed altogether in the future version
     get_navbar_summary_links()
-    p_info = {
-        "name": globs.p.name,
-        "config_file": globs.p.config_file,
-        "sample_count": globs.p.num_samples,
-        "output_dir": globs.p.metadata.output_dir,
-        "subprojects": ",".join(subprojects)
-    }
     globs.reset_btn = True
-    return render_template('process.html', p_info=p_info, change=None, selected_subproject=globs.p.subproject,
-                           actions=actions, subprojects=subprojects)
+    return render_template('process.html', p_info=project_info_dict(globs.p), change=None,
+                           selected_subproject=globs.p.subproject, actions=actions, subprojects=subprojects,
+                           interval=globs.poll_interval)
 
 
 @app.route('/_background_subproject')
@@ -310,20 +303,10 @@ def background_subproject():
         globs.p.deactivate_subproject()
     else:
         globs.p.activate_subproject(sp)
+        globs.run = False
     globs.summary_requested = None
     get_navbar_summary_links()
-    try:
-        subprojects = list(globs.p.subprojects.keys())
-    except AttributeError:
-        subprojects = None
-    p_info = {
-        "name": globs.p.name,
-        "config_file": globs.p.config_file,
-        "sample_count": globs.p.num_samples,
-        "output_dir": globs.p.metadata.output_dir,
-        "subprojects": ",".join(subprojects)
-    }
-    return jsonify(subproj_txt=output, p_info=p_info, navbar_links=globs.summary_links)
+    return jsonify(subproj_txt=output, p_info=project_info_dict(globs.p), navbar_links=globs.summary_links)
 
 
 @app.route('/_background_options')
@@ -366,6 +349,11 @@ def serve_static(filename):
 @app.route("/action", methods=['GET', 'POST'])
 @token_required
 def action():
+    if globs.act == "summarize" and not check_if_run(globs.p):
+        msg = "No samples were run yet, there's no point in summarizing"
+        current_app.logger.warning(msg)
+        flash(msg)
+        return redirect(url_for("process"))
     args = argparse.Namespace()
     args_dict = vars(args)
     # Set the arguments from the forms
@@ -392,6 +380,21 @@ def action():
     return render_template("/execute.html")
 
 
+@app.route('/_background_check_status')
+def background_check_status():
+    app.logger.info("checking flags for {} samples".format(len(list(globs.p.sample_names))))
+    flags = get_sample_flags(globs.p, list(globs.p.sample_names))
+    if all(not value for value in flags.values()) and not globs.run:
+        return jsonify(status_table="No samples were processed yet. " \
+                                    "Use <code>looper run</code> and then check the status",
+                       interval=globs.poll_interval)
+    elif any(value for value in flags.values()):
+        return jsonify(status_table=create_status_table(globs.p, final=False) + sample_info_hint(globs.p),
+                       interval=globs.poll_interval)
+    else:
+        return jsonify(status_table=MISSING_SAMPLE_DATA_TXT, interval=globs.poll_interval)
+
+
 @app.route('/_background_result')
 def background_result():
     page = compile_results_content(globs.log_path, globs.act)
@@ -411,6 +414,7 @@ def main():
     app.config["port"] = args.port
     app.config["project_configs"] = args.config
     app.config["DEBUG"] = args.debug
+    app.config["demo"] = args.demo
     app.config['SECRET_KEY'] = 'thisisthesecretkey'
     app.config['login'] = getpass.getuser()
     globs.init_globals()
@@ -418,10 +422,9 @@ def main():
         warnings.warn("You have entered the debug mode. The server-client connection is not secure!")
         globs.logging_lvl = logging.DEBUG
     else:
-        globs.logging_lvl = DEFAULT_LOGGING_LVL
         generate_token(token=parse_token_file())
     app.logger.info("Using python {}".format(python_version()))
-    app.run(port=args.port)
+    app.run(port=args.port, host='0.0.0.0')
 
 
 if __name__ == "__main__":

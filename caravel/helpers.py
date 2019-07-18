@@ -1,23 +1,19 @@
 """ General-purpose functions """
-
 from __future__ import print_function
-from platform import python_version
-import argparse
+from .const import *
 import globs
-from const import V_BY_NAME, REQUIRED_V_BY_NAME, DEFAULT_PORT, DEFAULT_TERMINAL_WIDTH, TEMPLATES_PATH, CARAVEL_VERSION,\
-    LOOPER_VERSION, CONFIG_ENV_VAR, CONFIG_PRJ_KEY, COMMAND_KEY, SUMMARY_NAVBAR_PLACEHOLDER
-from distutils.version import LooseVersion
-from itertools import chain
-import random
-import string
-import sys
-import yaml
 import looper
 import peppy
+import argparse
+import random
+import string
+import yaml
 import fcntl
 import termios
 import struct
 import pandas as _pd
+from importlib import import_module
+from sys import stderr
 from csv import DictReader
 from flask import render_template, current_app
 from re import sub
@@ -26,6 +22,10 @@ from looper.html_reports import *
 from looper.looper import Summarizer, get_file_for_project, uniqify, run_custom_summarizers
 from logmuse import setup_logger
 from ubiquerg import is_collection_like
+from looper.utils import fetch_sample_flags
+from platform import python_version
+from distutils.version import LooseVersion
+from itertools import chain
 
 
 def get_items(i, l):
@@ -43,11 +43,13 @@ def get_navbar_summary_links():
     """
     Set the global variable summary_links to the current links HTML string
 
-    :param bool summary_exists: if summary exist for the current project
     :return str: navbar links HTML
     """
     if globs.p is not None and globs.summary_requested:
-        globs.summary_links = render_navbar_summary_links(globs.p) if check_for_summary(globs.p) else SUMMARY_NAVBAR_PLACEHOLDER
+        reports_dir = get_reports_dir(globs.p)
+        context = ["summary", os.path.basename(reports_dir)]
+        globs.summary_links = render_navbar_summary_links(globs.p, wd=reports_dir, context=context) \
+            if check_for_summary(globs.p) else SUMMARY_NAVBAR_PLACEHOLDER
     else:
         globs.summary_links = ""
 
@@ -106,6 +108,17 @@ def get_summary_html_name(prj):
     return fname + "_summary.html"
 
 
+def parse_selected_project(selection_str, sep=";"):
+    """
+    Parse the string returned by the index page form
+
+    :param str selection_str: a string formatted like: "<project_path>;<project_id>"
+    :param str sep: separator string
+    :return str: separated project and id
+    """
+    return selection_str.split(sep)
+
+
 def check_for_summary(prj):
     """
     Check if the summary page has been produced
@@ -116,18 +129,47 @@ def check_for_summary(prj):
     return os.path.exists(os.path.join(prj.metadata.output_dir, get_summary_html_name(prj)))
 
 
+def _ensure_package_installed(name, error_msg_appdx=""):
+    """
+    Current demonstrational pipeline is a pypiper pipeline.
+    Therefore we need to ensure pypiper can be imported when caravel is launched in the demo mode.
+    This function can be used to perform such an assurance
+
+    :param str name: package name to be tested
+    :param str error_msg_appdx: string to be appended to the error message
+        (provides more detail as to why the package is conditionally requred)
+    """
+    try:
+        import_module(name)
+        current_app.logger.debug("'{}' imported successfully".format(name))
+    except ImportError:
+        raise ImportError("Package '{}' could not be imported, "
+                          "but is conditionally required. {}".format(name, error_msg_appdx))
+
+
+def _get_configs_path():
+    """
+    Parses the config file (YAML) provided as an CLI argument or in a environment variable ($CARAVEL)
+    or uses example data if run in the demo mode. The demo is given the priority.
+
+    :return str: path to the caravel config file
+    """
+    if current_app.config.get("demo"):
+        _ensure_package_installed("pypiper", "The demonstrational pipeline requires this package. "
+                                             "Install 'pypiper' using: pip install piper")
+        current_app.logger.info("Demo mode, the project configs list is auto-populated with example data")
+        return DEMO_FILE_PATH
+    return current_app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
+
+
 def parse_config_file():
     """
-    Parses the config file (YAML) provided as an CLI argument or in a environment variable ($CARAVEL).
-
-    The CLI argument is given the priority.
     Path to the PEP projects and predefined token are extracted if file is read successfully.
     Additionally, looks for a custom command to execute.
 
     :return (list[str], list[str]): a pair of projects list and list of commands
     """
-
-    project_list_path = current_app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
+    project_list_path = _get_configs_path()
     if project_list_path is None:
         raise ValueError("Please set the environment variable {} or provide a YAML file listing paths to project "
                          "config files".format(CONFIG_ENV_VAR))
@@ -166,8 +208,8 @@ def ensure_version(current=V_BY_NAME, required=REQUIRED_V_BY_NAME):
         "the package names to be checked do not match the required versions dictionary."
     for package in required:
         if LooseVersion(current[package]) < LooseVersion(required[package]):
-            raise ImportError("The version of {name} in use ({in_use}) does not meet the caravel requirement ({req})"
-                            .format(name=package, in_use=current[package], req=required[package]))
+            raise ImportError("The version of {name} in use ({in_use}) does not meet the caravel requirement "
+                              "({req})".format(name=package, in_use=current[package], req=required[package]))
     return True
 
 
@@ -175,7 +217,7 @@ def eprint(*args, **kwargs):
     """
     Print the provided text to stderr.
     """
-    print(*args, file=sys.stderr, **kwargs)
+    print(*args, file=stderr, **kwargs)
 
 
 def expand_path(p, root=""):
@@ -219,6 +261,30 @@ def geprint(txt):
     eprint("\033[92m {}\033[00m".format(txt))
 
 
+def _get_sp_txt(p):
+    """
+    Produces a comma separated string of the defined subproject names, if avaialble
+
+    :param looper.Project p: project to search the subprojects in
+    :return str | NoneType: subprojects names
+    """
+    try:
+        sp_names = p.subprojects.keys()
+    except AttributeError:
+        sp_names = None
+    return ",".join(sp_names) if sp_names is not None else sp_names
+
+
+def project_info_dict(p):
+    """
+    Composes a simple dictionary used to display the project information
+    :param looper.Project p: project that the info should be based on
+    :return dict: dictionary with project information
+    """
+    return {"name": p.name, "config_file": p.config_file, "sample_count": p.num_samples,
+             "output_dir": p.metadata.output_dir, "subprojects": _get_sp_txt(globs.p)}
+
+
 def glob_if_exists(x):
     """
     Return all matches in the directory for x and x if nothing matches
@@ -231,7 +297,7 @@ def glob_if_exists(x):
 
 def random_string(n):
     """
-    Generates a random string of length N (token), prints a message
+    Generates a random string of length N
 
     :param int n: length of the string to be generated
     :return str: a random string
@@ -280,6 +346,12 @@ class CaravelParser(argparse.ArgumentParser):
             action="store_true",
             dest="debug",
             help="Use this option if you want to enter the debug mode. Unsecured.")
+
+        self.add_argument(
+            "--demo",
+            action="store_true",
+            dest="demo",
+            help="Run caravel with demo data.")
 
     def format_help(self):
         """ Add version information to help text. """
@@ -352,7 +424,7 @@ def run_looper(prj, args, act, log_path, logging_lvl):
     :param str log_path: absolute path to the log file location
     :param int logging_lvl: logging level code
     """
-    setup_logger("looper", level=logging_lvl, stream=sys.stderr, logfile=log_path, plain_format=True)
+    setup_logger("looper", level=logging_lvl, stream=stderr, logfile=log_path, plain_format=True)
     eprint("\nAction: {}\n".format(act))
     # run selected looper action
     with peppy.ProjectContext(prj) as prj:
@@ -360,11 +432,12 @@ def run_looper(prj, args, act, log_path, logging_lvl):
             run = looper.looper.Runner(prj)
             try:
                 run(args, None, rerun=(act == "rerun"))
+                globs.run = True
             except IOError:
                 raise Exception("{} pipelines_dir: '{}'".format(prj.__class__.__name__, prj.metadata.pipelines_dir))
-
         if act == "destroy":
-            looper.looper.Destroyer(prj)(args)
+            globs.run = False
+            return looper.looper.Destroyer(prj)(args, False)
         if act == "summarize":
             globs.summary_requested = True
             run_custom_summarizers(prj)
@@ -373,7 +446,7 @@ def run_looper(prj, args, act, log_path, logging_lvl):
             looper.looper.Checker(prj)(flags=args.flags)
 
         if act == "clean":
-            looper.looper.Cleaner(prj)(args)
+            return looper.looper.Cleaner(prj)(args, False)
 
 
 def _render_summary_pages(prj):
@@ -392,8 +465,8 @@ def _render_summary_pages(prj):
     stats = globs.summarizer.stats
     columns = globs.summarizer.columns
     # create navbar links
-    links_summary = render_navbar_summary_links(prj, ["summary"])
-    links_reports = render_navbar_summary_links(prj, [rep_dir, "summary"])
+    links_summary = render_navbar_summary_links(prj, wd=html_report_builder.reports_dir, context=[rep_dir])
+    links_reports = render_navbar_summary_links(prj, wd=html_report_builder.reports_dir)
     # create navbars
     navbar_summary = render_jinja_template("navbar.html", j_env, dict(summary_links=links_summary))
     navbar_reports = render_jinja_template("navbar.html", j_env, dict(summary_links=links_reports))
@@ -441,13 +514,12 @@ def use_existing_stats_objs(prj):
     return stats, objs, columns
 
 
-def render_navbar_summary_links(prj, context=None):
+def render_navbar_summary_links(prj, wd, context=None):
     """
     Render the summary-related links for the navbars in a specific context.
     E.g. for the OG caravel pages or summary page or summary reports pages
 
     :param looper.Project prj: a project the navbar summary links should be created for
-    :param looper.Summarizer summarizer: an object that runs the summarizers for the project
     :param list[str] context: the context for the links
     :return str: html string with the links
     """
@@ -460,6 +532,44 @@ def render_navbar_summary_links(prj, context=None):
         globs.summarizer = Summarizer(prj)
         objs = globs.summarizer.objs
         stats = globs.summarizer.stats
-    args = dict(prj=prj, objs=objs, stats=stats, context=context)
+    args = dict(objs=objs, stats=stats, wd=wd, context=context, include_status=False)
     links = html_report_builder.create_navbar_links(**args)
     return links
+
+
+def get_sample_flags(p, samples=None):
+    """
+    Get samples status dict for the selected sample names.
+    If no samples are specified, flags for all will be searched for.
+
+    :param looper.Project p: project object
+    :param dict samples: successfully submitted samples
+    :return dict: a dictionary of sample names and the corresponding flags
+    """
+    samples = samples or list(p.sample_names)
+    return None if p is None else {s: fetch_sample_flags(p, s) for s in samples}
+
+
+def check_if_run(p):
+    """
+    Check whether the project has been run based on existence of any flag among all samples
+
+    :param looper.Project p: project object
+    :return bool: a logical indicating whether the pipeline was run on any of the samples
+    """
+    return not all(value == [] for value in get_sample_flags(p).values())
+
+
+def sample_info_hint(p):
+    """
+    Based on the summary files existence return the hint how to get the more sample-specific information
+
+    :param looper.Project p: project object
+    :return str: a HTML formatted info
+    """
+    rep_dir = get_reports_dir(p)
+    samples_path = os.path.join(rep_dir, "samples.html")
+    msg = "<hr><small>To get sample-specific log files {}</small>"
+    insert = "see <a href='../summary/{}/samples.html'>samples summary page</a>".format(os.path.basename(rep_dir)) \
+        if (check_for_summary(p) and os.path.isfile(samples_path)) else "run <code>looper summarize</code>"
+    return msg.format(insert)

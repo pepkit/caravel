@@ -15,10 +15,11 @@ You can also use wildcards (`*`)  to add projects according to a pattern:
 ```yaml
 projects:
   - "path/to/project1_config.yaml"
-  - "folder/where/I/store/PEPs/*/*_config.yaml"
+  - "path/to/project2_config.yaml"  
+  - "other/path/to/PEPs/*/*_config.yaml"  # adds all matched projects
 ```
 
-The paths in the file should be either absolute or *relative to the location of the caravel configuration file*.
+Paths should be either absolute or *relative to the caravel configuration file*.
 
 ## The `$CARAVEL` environment variable
 

@@ -27,45 +27,55 @@
 {% endblock %}
 {% block title %}Index{% endblock %}
 {% block content %}
-<h3>Select the input project:</h3>
-<form id="select_project" class="form-inline" method="POST" action="{{ url_for('process') }}">
-	<input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
-	<select name="select_project" class="custom-select" style="width:auto;">
-		{% for p in projects %}
-			<option value="{{ p }}">{{ p }}</option>
-		{% endfor %}
-	</select>
-	{% if reset_btn is not none %}
-		<button type="button" class="btn btn-outline-dark ml-2 disabled">GO (reset to proceed)</button>
-	{% else %}
-		<button id="gobtn" type="submit" class="btn btn-outline-dark ml-2">GO</button>
-	{% endif %}
-</form>
-{% if reset_btn is not none %}
-	<div class="divider-vertical">
-		<a href="{{ url_for('index', reset=True) }}">
-			<button class="btn btn-outline-danger">RESET PROJECT <i class="fa fa-undo"></i></button>
-		</a>
+	<div class="container px-lg-3 mt-3">
+		<div class="row">
+			<div class="col">
+				<div class="card">
+					<div class="card-header"><b>Select a project</b></div>
+					<div class="card-body">
+						<form id="select_project" class="form" method="POST" action="{{ url_for('process') }}">
+							<div class="form-group row">
+								<input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
+								<div class="col-xl-12">
+									<div class="list-group">
+										{% if reset_btn is not none %}
+											<div class="alert alert-secondary" role="alert">
+												<button type="button" class="close" data-dismiss="alert">&times;</button>
+												Reset currently activated project to select other ones
+											</div>
+										{% endif %}
+										{% if selected is none %}
+											{% set cls = "list-group-item list-group-item-action" %}
+										{% else %}
+											{% set cls = "list-group-item list-group-item-action disabled" %}
+										{% endif %}
+										{% for p in projects %}
+											{% if loop.index == selected_id | int  %}
+												{% set cls = "list-group-item list-group-item-action list-group-item-secondary" %}
+											{% endif %}
+											<button type="submit" name="select_project" class="{{ cls }}" value="{{ p }};{{ loop.index }}">
+												{{ p }}
+											</button>
+										{% endfor %}
+									</div>
+								</div>
+							</div>
+						</form>
+					</div>
+					<div class="card-footer text-muted">
+					{% if reset_btn is not none %}
+						<a href="{{ url_for('index', reset=True) }}" class="btn btn-outline-danger" role="button" aria-disabled="false">
+							RESET PROJECT <i class="fa fa-undo"></i>
+						</a>
+					{% else %}
+						<a href="{{ url_for('index', reset=True) }}" class="btn btn-outline-danger disabled" role="button" aria-disabled="true">
+							RESET PROJECT <i class="fa fa-undo"></i>
+						</a>
+					{% endif %}
+					<a href="/preferences" role="button" class="btn btn-outline-dark ml-2">PREFERENCES <i class="fa fa-cog"></i></a>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
-{% endif %}
-<div class="divider-vertical">
-	<a href="/set_comp_env"><button class="btn btn-outline-dark">COMPUTING ENV SETTINGS <i class="fa fa-cog"></i></button></a>
-</div>
-<div class="divider-vertical">
-{% if command_btn is not none %}
-	{% if command_btn|length > 1 %}
-		<select name="command" class="custom-select" style="width:auto;">
-		{% for cmd in command_btn %}
-			<option value="{{ cmd }}"><code>{{ cmd }}</code></option>
-		{% endfor %}
-		</select>
-	{% else %}
-		<code>{{ command_btn }}</code>
-	{% endif %}
-	<a href='#' id=exec>
-		<button class="btn btn-outline-dark ml-2">Execute</button>
-	</a>
-    Exit code: <p id=exec_txt class="badge badge-primary">None</p>
-{% endif %}
-</div>	
 {% endblock %}

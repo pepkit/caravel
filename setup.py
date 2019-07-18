@@ -36,7 +36,9 @@ setup(
     name=PACKAGE,
     packages=[PACKAGE],
     version=version,
-    description="A ",
+    description="Caravel provides aweb interface to interact with your "
+    " PEP-formatted projects. Caravel lets you submit jobs to any cluster resource manager,"
+    " monitor jobs, summarize results, and browse project summary web pages.",
     long_description=long_description,
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -47,7 +49,7 @@ setup(
         "Topic :: Scientific/Engineering :: Bio-Informatics"
     ],
     keywords="project, bioinformatics, sequencing, ngs, workflow, GUI",
-    url="https://github.com/pepkit/{}/".format(PACKAGE),
+    url="https://{}.databio.org/".format(PACKAGE),
     author=u"Nathan Sheffield, Vince Reuter, Michal Stolarczyk",
     license="BSD2",
     entry_points={
