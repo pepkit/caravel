@@ -220,7 +220,9 @@ def index():
         globs.reset_btn = None
         app.logger.info("Project data removed")
     projects, missing_projects = parse_config_file()
-    app.logger.warning("{} projects configs are missing: {}".format(len(missing_projects), ", ".join(missing_projects)))
+    if missing_projects:
+        app.logger.warning("{} projects configs are missing: {}".format(len(missing_projects),
+                                                                        ", ".join(missing_projects)))
     return render_template('index.html', projects=projects, selected_id=globs.selected_project_id,
                            missing_projects=(missing_projects or None),
                            reset_btn=globs.reset_btn, selected=globs.selected_project)
