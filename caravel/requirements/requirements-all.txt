@@ -5,3 +5,4 @@ peppy>=0.21.0
 textile
 logmuse
 ubiquerg>=0.0.3
+yacman

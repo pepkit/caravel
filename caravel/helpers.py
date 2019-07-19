@@ -1,7 +1,8 @@
 """ General-purpose functions """
 from __future__ import print_function
-from .const import *
 import globs
+from const import *
+from .caravel_conf import *
 import looper
 import peppy
 import argparse
@@ -21,7 +22,6 @@ from functools import partial
 from looper.html_reports import *
 from looper.looper import Summarizer, get_file_for_project, uniqify, run_custom_summarizers
 from logmuse import setup_logger
-from ubiquerg import is_collection_like
 from looper.utils import fetch_sample_flags
 from platform import python_version
 from distutils.version import LooseVersion
@@ -176,22 +176,11 @@ def parse_config_file():
     project_list_path = os.path.normpath(os.path.join(os.getcwd(), os.path.expanduser(project_list_path)))
     if not os.path.isfile(project_list_path):
         raise ValueError("Project configs list isn't a file: {}".format(project_list_path))
-    with open(project_list_path, 'r') as stream:
-        pl = yaml.safe_load(stream)
-        assert CONFIG_PRJ_KEY in pl, \
-            "'{}' key not in the projects list file.".format(CONFIG_PRJ_KEY)
-        projects = pl[CONFIG_PRJ_KEY]
-        # for each project use the dirname of the yaml file to establish the paths to the project itself,
-        # additionally expand the environment variables and the user
-        projects = sorted(flatten([glob_if_exists(os.path.join(
-            os.path.dirname(project_list_path), os.path.expanduser(os.path.expandvars(prj)))) for prj in projects]))
-        # check if the custom command/script is listed in the config and return it
-        try:
-            command = pl[COMMAND_KEY]
-        except KeyError:
-            current_app.logger.debug("No custom command found in config")
-            command = None
-    return projects, command
+
+    cc = CaravelConf(project_list_path)
+    projects = cc[CFG_PROJECTS_KEY].keys()
+
+    return projects
 
 
 def ensure_version(current=V_BY_NAME, required=REQUIRED_V_BY_NAME):
@@ -284,15 +273,15 @@ def project_info_dict(p):
     return {"name": p.name, "config_file": p.config_file, "sample_count": p.num_samples,
              "output_dir": p.metadata.output_dir, "subprojects": _get_sp_txt(globs.p)}
 
-
-def glob_if_exists(x):
-    """
-    Return all matches in the directory for x and x if nothing matches
-
-    :param x: a string with path containing globs
-    :return list[str]: a list of paths
-    """
-    return [glob.glob(e) or e for e in x] if is_collection_like(x) else (glob.glob(x) or [x])
+#
+# def glob_if_exists(x):
+#     """
+#     Return all matches in the directory for x and x if nothing matches
+#
+#     :param x: a string with path containing globs
+#     :return list[str]: a list of paths
+#     """
+#     return [glob.glob(e) or e for e in x] if is_collection_like(x) else (glob.glob(x) or [x])
 
 
 def random_string(n):

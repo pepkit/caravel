@@ -6,9 +6,9 @@ import traceback
 import warnings
 from flask import Flask, render_template, request, jsonify, session, redirect, send_from_directory, url_for, flash
 import globs
-from .const import *
-from .helpers import *
-from .looper_parser import *
+from const import *
+from helpers import *
+from looper_parser import *
 import divvy
 from textile import textile
 from platform import python_version
@@ -219,9 +219,9 @@ def index():
         globs.summary_links = SUMMARY_NAVBAR_PLACEHOLDER
         globs.reset_btn = None
         app.logger.info("Project data removed")
-    projects, globs.command = parse_config_file()
-    return render_template('index.html', projects=projects, reset_btn=globs.reset_btn, command_btn=globs.command,
-                           selected=globs.selected_project, selected_id=globs.selected_project_id)
+    projects = parse_config_file()
+    return render_template('index.html', projects=projects, reset_btn=globs.reset_btn, selected=globs.selected_project,
+                           selected_id=globs.selected_project_id)
 
 
 @app.route('/_background_exec')
