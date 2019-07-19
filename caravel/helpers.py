@@ -176,11 +176,10 @@ def parse_config_file():
     project_list_path = os.path.normpath(os.path.join(os.getcwd(), os.path.expanduser(project_list_path)))
     if not os.path.isfile(project_list_path):
         raise ValueError("Project configs list isn't a file: {}".format(project_list_path))
-
     cc = CaravelConf(project_list_path)
     projects = cc[CFG_PROJECTS_KEY].keys()
-
-    return projects
+    missing_projects = _missing_project_list(projects)
+    return list(set(projects) - set(missing_projects)), missing_projects
 
 
 def ensure_version(current=V_BY_NAME, required=REQUIRED_V_BY_NAME):
@@ -200,6 +199,16 @@ def ensure_version(current=V_BY_NAME, required=REQUIRED_V_BY_NAME):
             raise ImportError("The version of {name} in use ({in_use}) does not meet the caravel requirement "
                               "({req})".format(name=package, in_use=current[package], req=required[package]))
     return True
+
+
+def _missing_project_list(projects):
+    """
+    Get the list of non-existent project configs
+
+    :param list projects: project configs to be checked
+    :return list: missing project configs
+    """
+    return [project for project in projects if not os.path.exists(project)]
 
 
 def eprint(*args, **kwargs):

@@ -27,6 +27,17 @@
 {% endblock %}
 {% block title %}Index{% endblock %}
 {% block content %}
+	{% if missing_projects is not none %}
+		<div class="alert alert-warning" role="alert">
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+			The following <b>{{ missing_projects|length }}</b> files are missing and not listed below:
+			<ul style="padding-left: 30px">
+				{% for mp in missing_projects %}
+					<li><code>{{ mp }}</code></li>
+				{% endfor %}
+			</ul>
+		</div>
+	{% endif %}
 	<div class="container px-lg-3 mt-3">
 		<div class="row">
 			<div class="col">

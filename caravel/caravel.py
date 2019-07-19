@@ -219,9 +219,11 @@ def index():
         globs.summary_links = SUMMARY_NAVBAR_PLACEHOLDER
         globs.reset_btn = None
         app.logger.info("Project data removed")
-    projects = parse_config_file()
-    return render_template('index.html', projects=projects, reset_btn=globs.reset_btn, selected=globs.selected_project,
-                           selected_id=globs.selected_project_id)
+    projects, missing_projects = parse_config_file()
+    app.logger.warning("{} projects configs are missing: {}".format(len(missing_projects), ", ".join(missing_projects)))
+    return render_template('index.html', projects=projects, selected_id=globs.selected_project_id,
+                           missing_projects=(missing_projects or None),
+                           reset_btn=globs.reset_btn, selected=globs.selected_project)
 
 
 @app.route('/_background_exec')
