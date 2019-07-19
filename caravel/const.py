@@ -3,7 +3,7 @@ import os
 from divvy.const import COMPUTE_SETTINGS_VARNAME
 from looper import __version__ as LOOPER_VERSION
 from peppy import __version__ as PEPPY_VERSION
-from ._version import __version__ as CARAVEL_VERSION
+from _version import __version__ as CARAVEL_VERSION
 
 
 def get_req_version(module=None):
@@ -61,4 +61,27 @@ MISSING_SAMPLE_DATA_TXT = "<code>looper run</code> was called, but not all the s
                             "</br>Possible reasons: <ul style='padding-left: 30px;'>"\
                             "<li>all jobs are still in a queue</li>" \
                             "<li>submission was not successful</li></ul>"
+REQ_CFG_VERSION = 0.2
+"""
+Config file structure determination 
+"""
+# config file structure related consts
 
+CFG_NAME = "caravel configuration"
+CFG_ENV_VARS = ["CARAVEL"]
+
+CFG_VERSION_KEY = "config_version"
+CFG_PROJECTS_KEY = "projects"  # maybe PEPs?
+CFG_PROJECT_NAME_KEY = "name"
+CFG_PROJECT_DESC_KEY = "project_description"
+
+CFG_EXAMPLE = """
+# example {cfg_name} structure
+{version}: 0.2
+
+{projects}:
+  /home/johndoe/projects/config_rnaseq.yaml:
+    {name}: rnaseq_february
+    {desc}: Processes a set of RNA-seq samples 
+""".format(cfg_name=CFG_NAME, version=CFG_VERSION_KEY, projects=CFG_PROJECTS_KEY,
+           name=CFG_PROJECT_NAME_KEY, desc=CFG_PROJECT_DESC_KEY)
