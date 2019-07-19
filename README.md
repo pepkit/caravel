@@ -1,4 +1,4 @@
-# <img src="caravel/static/caravel.svg" alt="caravel logo" height="70" align="left"/> caravel
+# <img src="caravel/static/caravel.svg" alt="caravel logo" height="70" align="left"/> <img src="https://travis-ci.org/pepkit/caravel.svg?branch=master" alt="Travis-CI logo" align="left" />caravel
 
 [![PEP compatible](http://pepkit.github.io/img/PEP-compatible-green.svg)](http://pepkit.github.io)
 
