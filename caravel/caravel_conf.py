@@ -25,7 +25,9 @@ class CaravelConf(yacman.YacAttMap):
         projects = self.setdefault(CFG_PROJECTS_KEY, dict())
         if not isinstance(projects, dict):
             if projects:
-                _LOGGER.warning("'{k}' value is a {t_old}, not a {t_new}".format(k=CFG_PROJECTS_KEY, t_old=type(projects).__name__, t_new=dict.__name__))
+                _LOGGER.warning("'{k}' value is a {t_old}, "
+                                "not a {t_new}".format(k=CFG_PROJECTS_KEY, t_old=type(projects).__name__,
+                                                       t_new=dict.__name__))
                 # handle old caravel config format; reformat
                 if isinstance(projects, list):
                     _LOGGER.info("Reformatting to the new config format: v{}".format(REQ_CFG_VERSION))
@@ -76,6 +78,45 @@ class CaravelConf(yacman.YacAttMap):
                 self[CFG_PROJECTS_KEY][project].update(data)
         return self
 
+    def remove_project(self, path):
+        """
+        Removes project by path
+
+        :param str path: path of the project to be deleted
+        :return CaravelConf: updated object
+        """
+        if path in self[CFG_PROJECTS_KEY]:
+            del self[CFG_PROJECTS_KEY][path]
+        else:
+            _LOGGER.info("{} not found".format(path))
+        return self
+
+    def filter_missing(self):
+        """
+        Filters out projects that are missing
+
+        :return CaravelConf: updated object
+        """
+        for p in self.list_missing_projects():
+            self.remove_project(p)
+        return self
+
+    def list_projects(self):
+        """
+        Lists projects config paths
+
+        :return list[str]: projects config paths
+        """
+        return self[CFG_PROJECTS_KEY].keys()
+
+    def list_missing_projects(self):
+        """
+        Get the list of non-existent project configs
+
+        :return list[str]: missing project configs
+        """
+        return [project for project in self.list_projects() if not os.path.exists(project)]
+
 
 def _check_insert_data(obj, datatype, name):
     """ Checks validity of an object """
@@ -87,6 +128,7 @@ def _check_insert_data(obj, datatype, name):
 
 
 def _process_project_path(path, rel):
+    """ Expand path and make it relative to the config file """
     relative = os.path.join(os.path.dirname(rel), os.path.expanduser(os.path.expandvars(path)))
     matched = glob.glob(relative) or relative
     return matched if isinstance(matched, list) else [matched]
