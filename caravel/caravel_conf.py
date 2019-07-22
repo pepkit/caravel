@@ -1,11 +1,14 @@
 import yacman
 import glob
+from peppy import Project
 from collections import Mapping
 from .exceptions import *
 import logging
 from .const import *
 
+logging.basicConfig(level=logging.INFO, format='%(levelname)s in CaravelConf: %(message)s')
 _LOGGER = logging.getLogger(__name__)
+_LOGGER.setLevel(logging.INFO)
 
 
 class CaravelConf(yacman.YacAttMap):
@@ -57,6 +60,7 @@ class CaravelConf(yacman.YacAttMap):
                     raise ConfigNotCompliantError(msg)
                 else:
                     _LOGGER.debug("Config version is compliant: {}".format(version))
+        self.populate_project_names().write()
 
     def __bool__(self):
         minkeys = set(self.keys()) == {CFG_PROJECTS_KEY}
@@ -116,6 +120,21 @@ class CaravelConf(yacman.YacAttMap):
         :return list[str]: missing project configs
         """
         return [project for project in self.list_projects() if not os.path.exists(project)]
+
+    def populate_project_names(self):
+        """
+        Populate project names for for every entry in CaravelConf.projects
+
+        :return CaravelConf: object with populated project names
+        """
+        for path in self[CFG_PROJECTS_KEY].keys():
+            try:
+                self.update_projects(path, {CFG_PROJECT_NAME_KEY: Project(path).name})
+            except Exception as e:
+                _LOGGER.warning("Encountered '{}'\nCould not update name attr for '{}'".format(e.__class__.__name__,
+                                                                                               path))
+                self.update_projects(path, {CFG_PROJECT_NAME_KEY: None})
+        return self
 
 
 def _check_insert_data(obj, datatype, name):
