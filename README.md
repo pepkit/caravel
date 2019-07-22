@@ -6,3 +6,18 @@
 
 Documentation is hosted at [caravel.databio.org](http://caravel.databio.org) (source in the [/docs](/docs) folder).
 
+## docker
+
+[![Build Status](https://travis-ci.org/pepkit/caravel.svg?branch=master)](https://travis-ci.org/pepkit/caravel)
+
+A docker image for running caravel is available through the dockerfile in this repository. To build the image:
+
+```
+docker build -t caravel_demo .
+```
+
+Run the container with `caravel --demo`:
+
+```
+docker run -p 5000:5000 caravel_demo caravel --demo
+```
