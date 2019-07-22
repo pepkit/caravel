@@ -24,6 +24,7 @@ def init_globals():
     global summary_requested
     global run
     global poll_interval
+    global cc
 
     summarizer = None
     p = None
@@ -42,5 +43,6 @@ def init_globals():
     summary_requested = None
     run = None
     poll_interval = POLL_INTERVAL
+    cc = None
 
 

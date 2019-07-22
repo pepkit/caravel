@@ -6,9 +6,7 @@ from .exceptions import *
 import logging
 from .const import *
 
-logging.basicConfig(level=logging.INFO, format='%(levelname)s in CaravelConf: %(message)s')
 _LOGGER = logging.getLogger(__name__)
-_LOGGER.setLevel(logging.INFO)
 
 
 class CaravelConf(yacman.YacAttMap):
@@ -128,6 +126,7 @@ class CaravelConf(yacman.YacAttMap):
     def populate_project_names(self, paths=None):
         """
         Populate project names for for every entry in CaravelConf.projects.
+        If the paths argument is not provided or it's an empty list, all the list projects names will be updated.
 
         :param list[str] paths: list of paths to the project config files which names should be updated
         :return CaravelConf: object with populated project names attributes

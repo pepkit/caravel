@@ -176,9 +176,7 @@ def parse_config_file():
     project_list_path = os.path.normpath(os.path.join(os.getcwd(), os.path.expanduser(project_list_path)))
     if not os.path.isfile(project_list_path):
         raise ValueError("Project configs list isn't a file: {}".format(project_list_path))
-    cc = CaravelConf(project_list_path)
-    return cc.filter_missing().list_projects(), cc.list_missing_projects()
-
+    return CaravelConf(project_list_path)
 
 def ensure_version(current=V_BY_NAME, required=REQUIRED_V_BY_NAME):
     """
