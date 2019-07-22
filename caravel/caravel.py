@@ -220,6 +220,7 @@ def index():
         globs.reset_btn = None
         app.logger.info("Project data removed")
     globs.cc = parse_config_file()
+    update_preferences()
     missing_projs = globs.cc.list_missing_projects() or None
     if missing_projs:
         app.logger.warning("{} projects configs not found: {}".format(len(missing_projs), ", ".join(missing_projs)))
@@ -244,8 +245,8 @@ def set_comp_env():
     if globs.compute_config is None:
         globs.compute_config = divvy.ComputingConfiguration()
     selected_package = request.args.get('compute', type=str)
-    selected_interval = request.args.get('interval', type=int) or globs.poll_interval
-    globs.poll_interval = int(selected_interval)
+    selected_interval = request.args.get('interval', type=int) or globs.status_check_interval
+    globs.status_check_interval = int(selected_interval)
     if globs.currently_selected_package is None:
         globs.currently_selected_package = "default"
     if selected_package is not None:
@@ -264,7 +265,7 @@ def set_comp_env():
     return render_template('preferences.html', env_conf_file=globs.compute_config.config_file,
                            compute_packages=globs.compute_config.list_compute_packages(), active_settings=active_settings,
                            currently_selected_package=globs.currently_selected_package, notify_not_set=notify_not_set,
-                           default_interval=globs.poll_interval)
+                           default_interval=globs.status_check_interval)
 
 
 @app.route("/process", methods=['GET', 'POST'])
@@ -296,7 +297,7 @@ def process():
     globs.reset_btn = True
     return render_template('process.html', p_info=project_info_dict(globs.p), change=None,
                            selected_subproject=globs.p.subproject, actions=actions, subprojects=subprojects,
-                           interval=globs.poll_interval)
+                           interval=globs.status_check_interval)
 
 
 @app.route('/_background_subproject')
@@ -391,12 +392,12 @@ def background_check_status():
     if all(not value for value in flags.values()) and not globs.run:
         return jsonify(status_table="No samples were processed yet. " \
                                     "Use <code>looper run</code> and then check the status",
-                       interval=globs.poll_interval)
+                       interval=globs.status_check_interval)
     elif any(value for value in flags.values()):
         return jsonify(status_table=create_status_table(globs.p, final=False) + sample_info_hint(globs.p),
-                       interval=globs.poll_interval)
+                       interval=globs.status_check_interval)
     else:
-        return jsonify(status_table=MISSING_SAMPLE_DATA_TXT, interval=globs.poll_interval)
+        return jsonify(status_table=MISSING_SAMPLE_DATA_TXT, interval=globs.status_check_interval)
 
 
 @app.route('/_background_result')

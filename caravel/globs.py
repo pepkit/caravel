@@ -23,7 +23,7 @@ def init_globals():
     global current_subproj
     global summary_requested
     global run
-    global poll_interval
+    global status_check_interval
     global cc
 
     summarizer = None
@@ -42,7 +42,7 @@ def init_globals():
     current_subproj = None
     summary_requested = None
     run = None
-    poll_interval = POLL_INTERVAL
+    status_check_interval = None
     cc = None
 
 

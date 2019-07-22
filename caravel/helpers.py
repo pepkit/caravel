@@ -167,7 +167,7 @@ def parse_config_file():
     Path to the PEP projects and predefined token are extracted if file is read successfully.
     Additionally, looks for a custom command to execute.
 
-    :return (list[str], list[str]): a pair of projects list and list of commands
+    :return CaravelConf: a configuration object
     """
     project_list_path = _get_configs_path()
     if project_list_path is None:
@@ -177,6 +177,32 @@ def parse_config_file():
     if not os.path.isfile(project_list_path):
         raise ValueError("Project configs list isn't a file: {}".format(project_list_path))
     return CaravelConf(project_list_path)
+
+
+def update_preferences():
+    """
+    Update preferences. If an appropriate key under preferences key is found, the type of the value
+    associated with the key is checked and the particular setting was not set manually -- the global setting is updated.
+    If the criteria are not met, the settings will be disregarded.
+    """
+
+    def _check_apply_pref(cc, name, value_type):
+        """
+        Check the preference update possibility and perform it
+
+        :param CaravelConf cc: caravel preferences object
+        :param str name: name of the preference to be updated
+        :param value_type: class of the value to be set
+        """
+        if getattr(globs, name, False) is None and hasattr(cc[CFG_PREFERENCES_KEY], name) and \
+                check_insert_data(cc[CFG_PREFERENCES_KEY][name], value_type, name):
+            setattr(globs, name, cc[CFG_PREFERENCES_KEY][name])
+            current_app.logger.debug("'{}' set to {}".format(name, cc[CFG_PREFERENCES_KEY][name]))
+
+    if hasattr(globs.cc, CFG_PREFERENCES_KEY):
+        for pref_name, val_type in PREFERENCES_NAMES_TYPES.iteritems():
+            _check_apply_pref(globs.cc, pref_name, val_type)
+
 
 def ensure_version(current=V_BY_NAME, required=REQUIRED_V_BY_NAME):
     """
@@ -267,16 +293,6 @@ def project_info_dict(p):
     """
     return {"name": p.name, "config_file": p.config_file, "sample_count": p.num_samples,
              "output_dir": p.metadata.output_dir, "subprojects": _get_sp_txt(globs.p)}
-
-#
-# def glob_if_exists(x):
-#     """
-#     Return all matches in the directory for x and x if nothing matches
-#
-#     :param x: a string with path containing globs
-#     :return list[str]: a list of paths
-#     """
-#     return [glob.glob(e) or e for e in x] if is_collection_like(x) else (glob.glob(x) or [x])
 
 
 def random_string(n):

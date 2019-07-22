@@ -62,6 +62,9 @@ MISSING_SAMPLE_DATA_TXT = "<code>looper run</code> was called, but not all the s
                             "<li>all jobs are still in a queue</li>" \
                             "<li>submission was not successful</li></ul>"
 REQ_CFG_VERSION = 0.2
+# this preferences/types can be set in the config file under "preferences" key
+PREFERENCES_NAMES_TYPES = {"status_check_interval": int,
+                           "test": int}
 """
 Config file structure determination 
 """
@@ -72,16 +75,19 @@ CFG_ENV_VARS = ["CARAVEL"]
 
 CFG_VERSION_KEY = "config_version"
 CFG_PROJECTS_KEY = "projects"  # maybe PEPs?
+CFG_PREFERENCES_KEY = "preferences"
 CFG_PROJECT_NAME_KEY = "name"
 CFG_PROJECT_DESC_KEY = "project_description"
 
 CFG_EXAMPLE = """
 # example {cfg_name} structure
 {version}: 0.2
+{preferences}:
+  status_check_interval: 2
 
 {projects}:
   /home/johndoe/projects/config_rnaseq.yaml:
     {name}: rnaseq_february
     {desc}: Processes a set of RNA-seq samples 
-""".format(cfg_name=CFG_NAME, version=CFG_VERSION_KEY, projects=CFG_PROJECTS_KEY,
+""".format(cfg_name=CFG_NAME, version=CFG_VERSION_KEY, projects=CFG_PROJECTS_KEY, preferences=CFG_PREFERENCES_KEY,
            name=CFG_PROJECT_NAME_KEY, desc=CFG_PROJECT_DESC_KEY)
