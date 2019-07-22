@@ -12,10 +12,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
     - `config_version` entry
     - a possibility to add project-level attributes (like `name`) 
 - removed custom command feature
+- list of projects in the index page to a table representation
   
 ### Added:
 
 - `CaravelConf` class for caravel config file management
+- the possibility to set preferences in the config file
 
 
 ## [0.13.1] -- 2019-07-18

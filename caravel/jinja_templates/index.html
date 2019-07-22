@@ -48,27 +48,45 @@
 							<div class="form-group row">
 								<input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
 								<div class="col">
-									<div class="list-group">
-										{% if reset_btn is not none %}
-											<div class="alert alert-secondary" role="alert">
-												<button type="button" class="close" data-dismiss="alert">&times;</button>
-												Reset currently activated project to select other ones
-											</div>
-										{% endif %}
-										{% if selected is none %}
-											{% set cls = "list-group-item list-group-item-action" %}
-										{% else %}
-											{% set cls = "list-group-item list-group-item-action disabled" %}
-										{% endif %}
-										{% for p in cc.projects.keys() %}
-											{% if loop.index == selected_id | int  %}
-												{% set cls = "list-group-item list-group-item-action list-group-item-secondary" %}
+									{% if reset_btn is not none %}
+										<div class="alert alert-secondary" role="alert">
+											<button type="button" class="close" data-dismiss="alert">&times;</button>
+											Reset currently activated project to select other ones
+										</div>
+									{% endif %}
+									<table id="projects-table" class="table table-striped table-bordered" style="font-size:13px; width:100%;">
+									<thead>
+										<tr>
+											<th>Project name</th>
+											<th>Config path</th>
+										</tr>
+									</thead>
+										<tbody>
+											{% if selected is none %}
+												{% set cls = "btn btn-secondary btn-sm" %}
+												{% set disabled = "" %}
+											{% else %}
+												{% set cls = "btn btn-secondary btn-sm disabled" %}
+												{% set disabled = "disabled" %}
 											{% endif %}
-											<button type="submit" name="select_project" class="{{ cls }}" value="{{ p }};{{ loop.index }}">
-												{{ cc.projects[p].name }}
-											</button>
-										{% endfor %}
-									</div>
+											{% for p in cc.projects.keys() %}
+												{% if loop.index == selected_id | int  %}
+													{% set cls = "btn btn-secondary btn-sm" %}
+													{% set disabled = "" %}
+												{% endif %}
+												<tr>
+													<td>
+														<button type="submit" {{ disabled }} class="{{ cls }}" name="select_project" value="{{ p }};{{ loop.index }}">
+															{{ cc.projects[p].name }}
+														</button>
+													</td>
+													<td>
+														<code>{{ p }}</code>
+													</td>
+												</tr>
+											{% endfor %}
+										</tbody>
+									</table>
 								</div>
 							</div>
 						</form>
