@@ -63,8 +63,7 @@ MISSING_SAMPLE_DATA_TXT = "<code>looper run</code> was called, but not all the s
                             "<li>submission was not successful</li></ul>"
 REQ_CFG_VERSION = 0.2
 # this preferences/types can be set in the config file under "preferences" key
-PREFERENCES_NAMES_TYPES = {"status_check_interval": int,
-                           "test": int}
+PREFERENCES_NAMES_TYPES = {"status_check_interval": int}
 """
 Config file structure determination 
 """
