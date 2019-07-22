@@ -60,7 +60,11 @@ class CaravelConf(yacman.YacAttMap):
                     raise ConfigNotCompliantError(msg)
                 else:
                     _LOGGER.debug("Config version is compliant: {}".format(version))
-        self.populate_project_names().write()
+
+        missing_names = [p for p in self[CFG_PROJECTS_KEY].keys()
+                         if not hasattr(self[CFG_PROJECTS_KEY][p], CFG_PROJECT_NAME_KEY)]
+        _LOGGER.debug("Missing project names list: {}".format(str(missing_names)))
+        self.populate_project_names(missing_names).write()
 
     def __bool__(self):
         minkeys = set(self.keys()) == {CFG_PROJECTS_KEY}
@@ -121,18 +125,22 @@ class CaravelConf(yacman.YacAttMap):
         """
         return [project for project in self.list_projects() if not os.path.exists(project)]
 
-    def populate_project_names(self):
+    def populate_project_names(self, paths=None):
         """
-        Populate project names for for every entry in CaravelConf.projects
+        Populate project names for for every entry in CaravelConf.projects.
 
-        :return CaravelConf: object with populated project names
+        :param list[str] paths: list of paths to the project config files which names should be updated
+        :return CaravelConf: object with populated project names attributes
         """
-        for path in self[CFG_PROJECTS_KEY].keys():
+        if not isinstance(paths, (list, type(None))):
+            raise TypeError("paths argument has to be a list, got {}".format(type(paths).__name__))
+        paths = paths if paths is not None else self[CFG_PROJECTS_KEY].keys()
+        for path in paths:
             try:
                 self.update_projects(path, {CFG_PROJECT_NAME_KEY: Project(path).name})
             except Exception as e:
-                _LOGGER.warning("Encountered '{}'\nCould not update name attr for '{}'".format(e.__class__.__name__,
-                                                                                               path))
+                _LOGGER.warning("Encountered '{}' -- Could not update name attr for '{}'".format(e.__class__.__name__,
+                                                                                                 path))
                 self.update_projects(path, {CFG_PROJECT_NAME_KEY: None})
         return self
 
