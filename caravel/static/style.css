@@ -189,6 +189,15 @@ div#status-table_paginate {
   font-size: 0.8rem;
 }
 
+div#projects-table_info {
+  font-size: 0.8rem;
+}
+
+
+div#projects-table_paginate {
+  font-size: 0.8rem;
+}
+
 .container-fluid {
   padding: 15px;
 }
