@@ -1,10 +1,14 @@
 import yacman
 import glob
+import datetime
 from peppy import Project
 from flask import current_app
 from collections import Mapping
 from .exceptions import *
 from .const import *
+
+# import logging
+# _LOGGER = logging.getLogger(__name__)
 
 
 class CaravelConf(yacman.YacAttMap):
@@ -73,7 +77,7 @@ class CaravelConf(yacman.YacAttMap):
         Populate project metadata attributes for every entry in CaravelConf.projects.
         If the paths argument is not provided or it's an empty list, all the list projects names will be updated.
 
-        :param attr_func: a Mapping of metadata attribute and corresponding lambda expression to extract
+        :param Mapping[str,(p:Any) -> Any] attr_func: a Mapping of metadata attribute and corresponding lambda expression to extract
             it from a peppy.Project object
         :param list[str] paths: list of paths to the project config files which names should be updated
         :return: CaravelConf: object with populated project attributes
@@ -87,9 +91,13 @@ class CaravelConf(yacman.YacAttMap):
                     self.update_projects(path, {attr: fun(Project(path))})
                 except Exception as e:
                     current_app.logger.warning("Encountered '{}' -- Could not update '{}' attr for '{}'"
-                                               .format(attr, e.__class__.__name__, path))
+                                               .format(e.__class__.__name__, attr, path))
                     self.update_projects(path, {attr: None})
         return self
+
+    def project_date(self, paths):
+        self.populate_project_metadata(
+            {"last_modified": lambda p: datetime.datetime.now().strftime("%Y-%m-%d %H:%M")}, paths).write()
 
     def update_projects(self, project, data=None):
         """
@@ -143,26 +151,6 @@ class CaravelConf(yacman.YacAttMap):
         :return list[str]: missing project configs
         """
         return [project for project in self.list_projects() if not os.path.exists(project)]
-
-    def populate_project_names(self, paths=None):
-        """
-        Populate project names for for every entry in CaravelConf.projects.
-        If the paths argument is not provided or it's an empty list, all the list projects names will be updated.
-
-        :param list[str] paths: list of paths to the project config files which names should be updated
-        :return CaravelConf: object with populated project names attributes
-        """
-        if not isinstance(paths, (list, type(None))):
-            raise TypeError("paths argument has to be a list, got {}".format(type(paths).__name__))
-        paths = paths if paths is not None else self[CFG_PROJECTS_KEY].keys()
-        for path in paths:
-            try:
-                self.update_projects(path, {CFG_PROJECT_NAME_KEY: Project(path).name})
-            except Exception as e:
-                current_app.logger.warning("Encountered '{}' -- Could not update name attr for '{}'".
-                                format(e.__class__.__name__, path))
-                self.update_projects(path, {CFG_PROJECT_NAME_KEY: None})
-        return self
 
 
 def check_insert_data(obj, datatype, name):

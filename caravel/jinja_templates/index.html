@@ -81,6 +81,9 @@
 									</a>
 								{% endif %}
 								<a href="/preferences" role="button" class="btn btn-outline-dark btn-sm mr-2 pull-right">PREFERENCES <i class="fa fa-cog"></i></a>
+								<a href="{{ url_for('index', populate=True) }}" class="btn btn-outline-dark btn-sm mr-2 pull-right" role="button" aria-disabled="false">
+									POPULATE
+								</a>
 							</div>
 						</div>
 					</div>
@@ -89,7 +92,9 @@
 							<thead>
 								<tr>
 									<th>Project name</th>
-									<th>Config path</th>
+									<th>Sample count</th>
+									<th>Subproject count</th>
+									<th>Last modified</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -114,7 +119,13 @@
 											</button>
 										</td>
 										<td>
-											<code>{{ p }}</code>
+											{{ cc.projects[p].num_samples }}
+										</td>
+										<td>
+											{{ cc.projects[p].num_sp}}
+										</td>
+										<td>
+											<small>{{ cc.projects[p].last_modified }}</small>
 										</td>
 									</tr>
 								{% endfor %}

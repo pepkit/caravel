@@ -222,6 +222,8 @@ def index():
     globs.cc = parse_config_file()
     update_preferences()
     missing_projs = globs.cc.list_missing_projects() or None
+    if request.args.get('populate'):
+        globs.cc.populate_project_metadata()
     if missing_projs:
         app.logger.warning("{} projects configs not found: {}".format(len(missing_projs), ", ".join(missing_projs)))
     return render_template('index.html', missing_projects=missing_projs, cc=globs.cc.filter_missing(),
@@ -290,6 +292,7 @@ def process():
         subprojects = globs.p.subprojects.keys()
     except AttributeError:
         subprojects = None
+    globs.cc.project_date([globs.selected_project])
     get_navbar_summary_links()
     globs.reset_btn = True
     return render_template('process.html', p_info=project_info_dict(globs.p), change=None,
