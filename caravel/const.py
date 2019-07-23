@@ -3,7 +3,7 @@ import os
 from divvy.const import COMPUTE_SETTINGS_VARNAME
 from looper import __version__ as LOOPER_VERSION
 from peppy import __version__ as PEPPY_VERSION
-from _version import __version__ as CARAVEL_VERSION
+from ._version import __version__ as CARAVEL_VERSION
 
 
 def get_req_version(module=None):
@@ -64,6 +64,12 @@ REQ_CFG_VERSION = 0.2
 # this preferences/types can be set in the config file under "preferences" key
 PREFERENCES_NAMES_TYPES = {"status_check_interval": int,
                            "compute_package": str}
+# mapping of peppu.Project metadata names of interest and lamdda expressions extracting them
+PROJECT_MDATA_FUN = {"name": lambda p: p.name,
+                     "sp_names": lambda p: ", ".join(p.subprojects.keys()),
+                     "num_sp": lambda p: len(p.subprojects.keys()),
+                     "num_samples": lambda p: p.num_samples,
+                     "protocols": lambda p: ", ".join(p.protocols)}
 """
 Config file structure determination 
 """
