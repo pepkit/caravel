@@ -247,15 +247,15 @@ def set_comp_env():
     selected_package = request.args.get('compute', type=str)
     selected_interval = request.args.get('interval', type=int) or globs.status_check_interval
     globs.status_check_interval = int(selected_interval)
-    if globs.currently_selected_package is None:
-        globs.currently_selected_package = "default"
+    if globs.compute_package is None:
+        globs.compute_package = "default"
     if selected_package is not None:
         success = globs.compute_config.clean_start(selected_package)
         if not success:
             msg = "Compute package '{}' cannot be activated".format(selected_package)
             app.logger.warning(msg)
             return jsonify(active_settings=render_template('compute_info.html', active_settings=None, msg=msg))
-        globs.currently_selected_package = selected_package
+        globs.compute_package = selected_package
         active_settings = globs.compute_config.get_active_package()
         return jsonify(active_settings=render_template('compute_info.html', active_settings=active_settings))
     active_settings = globs.compute_config.get_active_package()
@@ -264,7 +264,7 @@ def set_comp_env():
 
     return render_template('preferences.html', env_conf_file=globs.compute_config.config_file,
                            compute_packages=globs.compute_config.list_compute_packages(), active_settings=active_settings,
-                           currently_selected_package=globs.currently_selected_package, notify_not_set=notify_not_set,
+                           compute_package=globs.compute_package, notify_not_set=notify_not_set,
                            default_interval=globs.status_check_interval)
 
 
@@ -375,7 +375,7 @@ def action():
     # establish the looper log path
     # set the selected computing environment in the Project object
     try:
-        globs.p.dcc.activate_package(globs.currently_selected_package)
+        globs.p.dcc.activate_package(globs.compute_package)
     except NameError:
         app.logger.info("The compute package was not selected, using 'default'.")
         globs.p.dcc.activate_package("default")

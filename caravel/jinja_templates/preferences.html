@@ -48,7 +48,7 @@
 				<div class="card-body">
 					<select name="select_compute" class="custom-select" style="width:auto;">
 						{% for item in compute_packages %}
-							{% if item == currently_selected_package %}
+							{% if item == compute_package %}
 								<option value="{{ item }}" selected="selected">{{ item }}</option>
 							{% else %}
 								<option value="{{ item }}">{{ item }}</option>

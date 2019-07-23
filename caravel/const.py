@@ -42,9 +42,8 @@ CONFIG_TOKEN_KEY = "token"
 TOKEN_FILE_NAME = ".caravel_token"
 EXAMPLE_FILENAME = "caravel_demo.yaml"
 TOKEN_LEN = 15
-SET_ELSEWHERE = [["--force-yes"], ["--sp"], ["--compute"], ["--env"], ["--help"], ["--version"],
-                 ["--selector-attribute"], ["--selector-exclude"], ["--selector-include"], ['--resources'],
-                 ['--compute-package'], ['']]
+SET_ELSEWHERE = [["--force-yes"], ["--sp"], ["--env"], ["--help"], ["--version"], ["--selector-attribute"],
+                 ["--selector-exclude"], ["--selector-include"], ['--resources'], ['--compute-package'], ['']]
 LOG_FILENAME = "caravel.log"
 REQUIRED_LOOPER_VERSION = get_req_version("loopercli")["loopercli"]
 REQUIRED_PEPPY_VERSION = get_req_version("peppy")["peppy"]
@@ -63,7 +62,8 @@ MISSING_SAMPLE_DATA_TXT = "<code>looper run</code> was called, but not all the s
                             "<li>submission was not successful</li></ul>"
 REQ_CFG_VERSION = 0.2
 # this preferences/types can be set in the config file under "preferences" key
-PREFERENCES_NAMES_TYPES = {"status_check_interval": int}
+PREFERENCES_NAMES_TYPES = {"status_check_interval": int,
+                           "compute_package": str}
 """
 Config file structure determination 
 """

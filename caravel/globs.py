@@ -1,6 +1,3 @@
-from const import *
-
-
 def init_globals():
     """
     This function initializes global variables, which then can be used in the whole app
@@ -19,7 +16,7 @@ def init_globals():
     global dests
     global reset_btn
     global command
-    global currently_selected_package
+    global compute_package
     global current_subproj
     global summary_requested
     global run
@@ -33,12 +30,12 @@ def init_globals():
     log_path = None
     act = None
     compute_config = None
-    logging_lvl = DEFAULT_LOGGING_LVL
+    logging_lvl = None
     summary_links = None
     dests = None
     reset_btn = None
     command = None
-    currently_selected_package = None
+    compute_package = None
     current_subproj = None
     summary_requested = None
     run = None
