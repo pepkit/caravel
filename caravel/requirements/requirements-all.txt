@@ -4,5 +4,5 @@ loopercli>=0.12.4
 peppy>=0.21.0
 textile
 logmuse
-ubiquerg>=0.0.3
+ubiquerg>=0.4.6
 yacman

@@ -94,6 +94,7 @@
 									<th>Project name</th>
 									<th>Sample count</th>
 									<th>Subproject count</th>
+									<th>Protocols</th>
 									<th>Last modified</th>
 								</tr>
 							</thead>
@@ -122,10 +123,13 @@
 											{{ cc.projects[p].num_samples }}
 										</td>
 										<td>
-											{{ cc.projects[p].num_sp}}
+											{{ cc.projects[p].num_sp }}
 										</td>
 										<td>
-											<small>{{ cc.projects[p].last_modified }}</small>
+											{{ cc.projects[p].protocols}}
+										</td>
+										<td>
+											{{ cc.projects[p].last_modified }}
 										</td>
 									</tr>
 								{% endfor %}
