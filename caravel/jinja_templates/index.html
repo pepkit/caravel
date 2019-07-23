@@ -38,73 +38,67 @@
 			</ul>
 		</div>
 	{% endif %}
-	<div class="container px-lg-3 mt-3">
+	<div class="container">
 		<div class="row">
-			<div class="col">
-				<div class="card">
-					<div class="card-header"><b>Select a project</b></div>
-					<div class="card-body">
-						<form id="select_project" class="form" method="POST" action="{{ url_for('process') }}">
-							<div class="form-group row">
-								<input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
-								<div class="col">
-									{% if reset_btn is not none %}
-										<div class="alert alert-secondary" role="alert">
-											<button type="button" class="close" data-dismiss="alert">&times;</button>
-											Reset currently activated project to select other ones
-										</div>
-									{% endif %}
-									<table id="projects-table" class="table table-striped table-bordered" style="font-size:13px; width:100%;">
-									<thead>
-										<tr>
-											<th>Project name</th>
-											<th>Config path</th>
-										</tr>
-									</thead>
-										<tbody>
-											{% if selected is none %}
-												{% set state = "" %}
-												{% set class = "btn btn-secondary btn-sm" %}
-											{% else %}
-												{% set state = "disabled" %}
-												{% set class = "btn btn-secondary btn-sm disabled" %}
-											{% endif %}
-											{% for p in cc.projects.keys() %}
-												{% if loop.index == selected_id | int  %}
-													{% set state = "" %}
-													{% set class = "btn btn-secondary btn-sm" %}
-												{% endif %}
-												<tr>
-													<td>
-														<button type="submit" class="{{ class }}" {{ state }} name="select_project" value="{{ p }};{{ loop.index }}">
-															{{ cc.projects[p].name }}
-														</button>
-													</td>
-													<td>
-														<code>{{ p }}</code>
-													</td>
-												</tr>
-											{% endfor %}
-										</tbody>
-									</table>
-								</div>
-							</div>
-						</form>
+			<div class="table-responsive-lg">
+				<form id="select_project" class="form" method="POST" action="{{ url_for('process') }}">
+				<input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
+				{% if reset_btn is not none %}
+					<div class="alert alert-secondary" role="alert">
+						<button type="button" class="close" data-dismiss="alert">&times;</button>
+						Reset currently activated project to select other ones
 					</div>
-					<div class="card-footer text-muted">
-					{% if reset_btn is not none %}
-						<a href="{{ url_for('index', reset=True) }}" class="btn btn-outline-danger" role="button" aria-disabled="false">
-							RESET PROJECT <i class="fa fa-undo"></i>
-						</a>
-					{% else %}
-						<a href="{{ url_for('index', reset=True) }}" class="btn btn-outline-danger disabled" role="button" aria-disabled="true">
-							RESET PROJECT <i class="fa fa-undo"></i>
-						</a>
-					{% endif %}
-					<a href="/preferences" role="button" class="btn btn-outline-dark ml-2">PREFERENCES <i class="fa fa-cog"></i></a>
-					</div>
-				</div>
+				{% endif %}
+				<h3>Select a project</h3>
+				<table id="projects-table" class="table table-bordered table-hover table-sm" style="font-size:13px; width:100%;">
+					<thead>
+						<tr>
+							<th>Project name</th>
+							<th>Config path</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% if selected is none %}
+							{% set state = "" %}
+							{% set class = "btn btn-secondary btn-sm" %}
+						{% else %}
+							{% set state = "disabled" %}
+							{% set class = "btn btn-secondary btn-sm disabled" %}
+						{% endif %}
+						{% for p in cc.projects.keys() %}
+							{% set row_class = "" %}
+							{% if loop.index == selected_id | int  %}
+								{% set state = "" %}
+								{% set class = "btn btn-secondary btn-sm" %}
+								{% set row_class = "table-active" %}
+							{% endif %}
+							<tr class="{{ row_class }}">
+								<td>
+									<button type="submit" class="{{ class }}" {{ state }} name="select_project" value="{{ p }};{{ loop.index }}">
+										{{ cc.projects[p].name }}
+									</button>
+								</td>
+								<td>
+									<code>{{ p }}</code>
+								</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+				</form>
 			</div>
+		</div>
+		<div class="row">
+		{% if reset_btn is not none %}
+			<a href="{{ url_for('index', reset=True) }}" class="btn btn-outline-danger" role="button" aria-disabled="false">
+				RESET PROJECT <i class="fa fa-undo"></i>
+			</a>
+		{% else %}
+			<a href="{{ url_for('index', reset=True) }}" class="btn btn-outline-danger disabled" role="button" aria-disabled="true">
+				RESET PROJECT <i class="fa fa-undo"></i>
+			</a>
+		{% endif %}
+		<a href="/preferences" role="button" class="btn btn-outline-dark ml-2">PREFERENCES <i class="fa fa-cog"></i></a>
 		</div>
 	</div>
 {% endblock %}
