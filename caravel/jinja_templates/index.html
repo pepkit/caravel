@@ -49,56 +49,66 @@
 						Reset currently activated project to select other ones
 					</div>
 				{% endif %}
-				<h3>Select a project</h3>
-				<table id="projects-table" class="table table-bordered table-hover table-sm" style="font-size:13px; width:100%;">
-					<thead>
-						<tr>
-							<th>Project name</th>
-							<th>Config path</th>
-						</tr>
-					</thead>
-					<tbody>
-						{% if selected is none %}
-							{% set state = "" %}
-							{% set class = "btn btn-secondary btn-sm" %}
-						{% else %}
-							{% set state = "disabled" %}
-							{% set class = "btn btn-secondary btn-sm disabled" %}
-						{% endif %}
-						{% for p in cc.projects.keys() %}
-							{% set row_class = "" %}
-							{% if loop.index == selected_id | int  %}
-								{% set state = "" %}
-								{% set class = "btn btn-secondary btn-sm" %}
-								{% set row_class = "table-active" %}
-							{% endif %}
-							<tr class="{{ row_class }}">
-								<td>
-									<button type="submit" class="{{ class }}" {{ state }} name="select_project" value="{{ p }};{{ loop.index }}">
-										{{ cc.projects[p].name }}
-									</button>
-								</td>
-								<td>
-									<code>{{ p }}</code>
-								</td>
-							</tr>
-						{% endfor %}
-					</tbody>
-				</table>
+				<div class="card">
+					<div class="card-header">
+						<div class="row mt-1">
+							<div class="col-3">
+								<b>Select a project</b>
+							</div>
+							<div class="col-9">
+								{% if reset_btn is not none %}
+									<a href="{{ url_for('index', reset=True) }}" class="btn btn-outline-danger btn-sm pull-right" role="button" aria-disabled="false">
+										RESET PROJECT <i class="fa fa-undo"></i>
+									</a>
+								{% else %}
+									<a href="{{ url_for('index', reset=True) }}" class="btn btn-outline-danger btn-sm pull-right disabled" role="button" aria-disabled="true">
+										RESET PROJECT <i class="fa fa-undo"></i>
+									</a>
+								{% endif %}
+								<a href="/preferences" role="button" class="btn btn-outline-dark btn-sm mr-2 pull-right">PREFERENCES <i class="fa fa-cog"></i></a>
+							</div>
+						</div>
+					</div>
+					<div class="card-body">
+						<table id="projects-table" class="table table-bordered table-hover table-sm mb-0" style="font-size:13px; width:100%;">
+							<thead>
+								<tr>
+									<th>Project name</th>
+									<th>Config path</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% if selected is none %}
+									{% set state = "" %}
+									{% set class = "btn btn-secondary btn-sm" %}
+								{% else %}
+									{% set state = "disabled" %}
+									{% set class = "btn btn-secondary btn-sm disabled" %}
+								{% endif %}
+								{% for p in cc.projects.keys() %}
+									{% set row_class = "" %}
+									{% if loop.index == selected_id | int  %}
+										{% set state = "" %}
+										{% set class = "btn btn-secondary btn-sm" %}
+										{% set row_class = "table-active" %}
+									{% endif %}
+									<tr class="{{ row_class }}">
+										<td>
+											<button type="submit" class="{{ class }}" {{ state }} name="select_project" value="{{ p }};{{ loop.index }}">
+												{{ cc.projects[p].name }}
+											</button>
+										</td>
+										<td>
+											<code>{{ p }}</code>
+										</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
 				</form>
 			</div>
-		</div>
-		<div class="row">
-		{% if reset_btn is not none %}
-			<a href="{{ url_for('index', reset=True) }}" class="btn btn-outline-danger" role="button" aria-disabled="false">
-				RESET PROJECT <i class="fa fa-undo"></i>
-			</a>
-		{% else %}
-			<a href="{{ url_for('index', reset=True) }}" class="btn btn-outline-danger disabled" role="button" aria-disabled="true">
-				RESET PROJECT <i class="fa fa-undo"></i>
-			</a>
-		{% endif %}
-		<a href="/preferences" role="button" class="btn btn-outline-dark ml-2">PREFERENCES <i class="fa fa-cog"></i></a>
 		</div>
 	</div>
 {% endblock %}
