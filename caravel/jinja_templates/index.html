@@ -63,20 +63,20 @@
 									</thead>
 										<tbody>
 											{% if selected is none %}
-												{% set cls = "btn btn-secondary btn-sm" %}
-												{% set disabled = "" %}
+												{% set state = "" %}
+												{% set class = "btn btn-secondary btn-sm" %}
 											{% else %}
-												{% set cls = "btn btn-secondary btn-sm disabled" %}
-												{% set disabled = "disabled" %}
+												{% set state = "disabled" %}
+												{% set class = "btn btn-secondary btn-sm disabled" %}
 											{% endif %}
 											{% for p in cc.projects.keys() %}
 												{% if loop.index == selected_id | int  %}
-													{% set cls = "btn btn-secondary btn-sm" %}
-													{% set disabled = "" %}
+													{% set state = "" %}
+													{% set class = "btn btn-secondary btn-sm" %}
 												{% endif %}
 												<tr>
 													<td>
-														<button type="submit" {{ disabled }} class="{{ cls }}" name="select_project" value="{{ p }};{{ loop.index }}">
+														<button type="submit" class="{{ class }}" {{ state }} name="select_project" value="{{ p }};{{ loop.index }}">
 															{{ cc.projects[p].name }}
 														</button>
 													</td>
