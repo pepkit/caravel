@@ -77,7 +77,7 @@ class CaravelConf(yacman.YacAttMap):
         Populate project metadata attributes for every entry in CaravelConf.projects.
         If the paths argument is not provided or it's an empty list, all the list projects names will be updated.
 
-        :param Mapping[str,(p:Any) -> Any] attr_func: a Mapping of metadata attribute and corresponding lambda expression to extract
+        :param Mapping[str,function(looper.Project) -> Any] attr_func: a Mapping of metadata attribute and corresponding lambda expression to extract
             it from a peppy.Project object
         :param list[str] paths: list of paths to the project config files which names should be updated
         :return: CaravelConf: object with populated project attributes

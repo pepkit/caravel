@@ -65,7 +65,7 @@ REQ_CFG_VERSION = 0.2
 # this preferences/types can be set in the config file under "preferences" key
 PREFERENCES_NAMES_TYPES = {"status_check_interval": int,
                            "compute_package": str}
-# mapping of peppu.Project metadata names of interest and lamdda expressions extracting them
+# mapping of looper.Project metadata of interest and lambda expressions extracting them
 PROJECT_MDATA_FUN = {"name": lambda p: p.name,
                      "names_sp": lambda p: ", ".join(p.subprojects.keys()),
                      "num_sp": lambda p: len(p.subprojects.keys()),
