@@ -247,8 +247,9 @@ def set_comp_env():
     if globs.compute_config is None:
         globs.compute_config = divvy.ComputingConfiguration()
     selected_package = request.args.get('compute', type=str)
-    selected_interval = request.args.get('interval', type=int) or globs.status_check_interval
-    globs.status_check_interval = int(selected_interval)
+    globs.status_check_interval = int(request.args.get('interval', type=int)
+                                      or globs.status_check_interval
+                                      or POLL_INTERVAL)
     if globs.compute_package is None:
         globs.compute_package = "default"
     if selected_package is not None:
