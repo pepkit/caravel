@@ -98,18 +98,18 @@
 						</div>
 					</div>
 					<div class="card-body">
-						<table id="projects-table" class="table table-bordered table-hover table-sm mb-0" style="font-size:13px; width:100%;">
+						<table id="projects-table" class="table table-bordered table-hover table-sm mb-0 btn-table" style="font-size:13px; width:100%;">
 							<thead>
 								<tr>
-									<th>Project name</th>
-									<th>Sample count</th>
-									<th>Subproject count</th>
-									<th>Protocols</th>
-                                    <th>Inputs size</th>
-									<th>Last modified</th>
-									<th>
-										<a href="{{ url_for('index', populate=True) }}" class="btn btn-outline-dark btn-sm" role="button" aria-disabled="false">
-											Update all
+									<th class="text-nowrap text-center">Project name</th>
+									<th class="text-nowrap text-center">Sample count</th>
+									<th class="text-nowrap text-center">Subproject count</th>
+									<th class="text-nowrap text-center">Protocols</th>
+                                    <th class="text-nowrap text-center">Inputs size</th>
+									<th class="text-nowrap text-center">Last modified</th>
+									<th class="text-nowrap text-center">
+										<a href="{{ url_for('index', populate=True) }}">
+											Update metadata
 										</a>
 									</th>
 								</tr>
@@ -130,28 +130,28 @@
 										{% set row_class = "table-active" %}
 									{% endif %}
 									<tr class="{{ row_class }}" valign="middle">
-										<td>
-											<button type="submit" class="{{ class }}" {{ state }} name="select_project" value="{{ p }};{{ loop.index }}">
+										<td class="text-nowrap text-center">
+											<button type="submit" class="{{ class }}" name="select_project" value="{{ p }};{{ loop.index }}">
 												{{ cc.projects[p].name }}
 											</button>
 										</td>
-										<td>
+										<td class="text-nowrap text-center">
 											{{ cc.projects[p].num_samples }}
 										</td>
-										<td>
+										<td class="text-nowrap text-center">
 											{{ cc.projects[p].num_sp }}
 										</td>
-										<td>
+										<td class="text-nowrap text-center">
 											{{ cc.projects[p].protocols }}
 										</td>
-										<td>
+										<td class="text-nowrap text-center">
 											{{ cc.projects[p].inputs_size }}
 										</td>
-										<td>
+										<td class="text-nowrap text-center">
 											{{ cc.projects[p].last_modified }}
 										</td>
-										<td>
-											<a href="{{ url_for('index', populate=True, path=p) }}" class="btn btn-outline-dark btn-sm" role="button" aria-disabled="false">
+										<td class="text-nowrap text-center">
+											<a href="{{ url_for('index', populate=True, path=p) }}" class="btn btn-outline-dark btn-sm {{ state }}" role="button">
 												Update
 											</a>
 										</td>

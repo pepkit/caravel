@@ -79,7 +79,7 @@ class CaravelConf(yacman.YacAttMap):
 
         :param Mapping[str,function(looper.Project) -> Any] attr_func: a Mapping of metadata attribute and corresponding lambda expression to extract
             it from a peppy.Project object
-        :param list[str] paths: list of paths to the project config files which names should be updated
+        :param list[str] | str paths: list of paths to the project config files which names should be updated
         :return: CaravelConf: object with populated project attributes
         """
         if isinstance(paths, str) and os.path.isfile(paths):

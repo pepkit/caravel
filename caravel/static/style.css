@@ -206,3 +206,6 @@ div#projects-table_paginate {
     height: 10px;
     padding: 5px;
 }
+#projects-table th tr td {
+    text-align:center
+}
