@@ -4,6 +4,7 @@ from divvy.const import COMPUTE_SETTINGS_VARNAME
 from looper import __version__ as LOOPER_VERSION
 from peppy import __version__ as PEPPY_VERSION
 from ._version import __version__ as CARAVEL_VERSION
+import ubiquerg
 
 
 def get_req_version(module=None):
@@ -69,7 +70,9 @@ PROJECT_MDATA_FUN = {"name": lambda p: p.name,
                      "names_sp": lambda p: ", ".join(p.subprojects.keys()),
                      "num_sp": lambda p: len(p.subprojects.keys()),
                      "num_samples": lambda p: p.num_samples,
-                     "protocols": lambda p: ", ".join(p.protocols)}
+                     "protocols": lambda p: ", ".join(p.protocols),
+                     "inputs_size": lambda p: ubiquerg.filesize_to_str(sum([ubiquerg.size(iput, False)
+                                                                           for iput in p.get_inputs()]))}
 """
 Config file structure determination 
 """

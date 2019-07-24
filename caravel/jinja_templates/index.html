@@ -95,6 +95,7 @@
 									<th>Sample count</th>
 									<th>Subproject count</th>
 									<th>Protocols</th>
+                                    <th>Inputs size</th>
 									<th>Last modified</th>
 								</tr>
 							</thead>
@@ -127,6 +128,9 @@
 										</td>
 										<td>
 											{{ cc.projects[p].protocols}}
+										</td>
+										<td>
+											{{ cc.projects[p].inputs_size}}
 										</td>
 										<td>
 											{{ cc.projects[p].last_modified }}

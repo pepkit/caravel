@@ -1,7 +1,7 @@
 import yacman
 import glob
 import datetime
-from peppy import Project
+from looper import Project
 from flask import current_app
 from collections import Mapping
 from .exceptions import *
