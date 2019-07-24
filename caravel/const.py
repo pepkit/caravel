@@ -70,7 +70,7 @@ PROJECT_MDATA_FUN = {"name": lambda p: p.name,
                      "names_sp": lambda p: ", ".join(p.subprojects.keys()),
                      "num_sp": lambda p: len(p.subprojects.keys()),
                      "num_samples": lambda p: p.num_samples,
-                     "protocols": lambda p: ", ".join(p.protocols),
+                     "protocols": lambda p: ", ".join(sorted(p.protocols)),
                      "inputs_size": lambda p: ubiquerg.filesize_to_str(sum([ubiquerg.size(iput, False)
                                                                            for iput in p.get_inputs()]))}
 """

@@ -379,7 +379,7 @@ def _print_terminal_width(txt=None, char="-"):
     spaced_txt = txt.center(len(txt)+2) if txt is not None else ""
     fill_width = int(0.5 * (_terminal_width() - len(spaced_txt)))
     filler = char * fill_width
-    print(filler + spaced_txt + filler)
+    eprint(filler + spaced_txt + filler)
 
 
 def _terminal_width():

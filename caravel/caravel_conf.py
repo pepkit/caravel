@@ -82,6 +82,8 @@ class CaravelConf(yacman.YacAttMap):
         :param list[str] paths: list of paths to the project config files which names should be updated
         :return: CaravelConf: object with populated project attributes
         """
+        if isinstance(paths, str) and os.path.isfile(paths):
+            paths = [paths]
         if not isinstance(paths, (list, type(None))):
             raise TypeError("paths argument has to be a list, got {}".format(type(paths).__name__))
         paths = paths if paths is not None else self[CFG_PROJECTS_KEY].keys()

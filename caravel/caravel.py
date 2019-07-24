@@ -219,13 +219,14 @@ def index():
         globs.summary_links = SUMMARY_NAVBAR_PLACEHOLDER
         globs.reset_btn = None
         app.logger.info("Project data removed")
-    globs.cc = parse_config_file()
+    globs.cc = globs.cc or parse_config_file()
     update_preferences()
     missing_projs = globs.cc.list_missing_projects() or None
     if request.args.get('populate'):
-        globs.cc.populate_project_metadata()
+        globs.cc.populate_project_metadata(paths=request.args.get('path'))
     if missing_projs:
         app.logger.warning("{} projects configs not found: {}".format(len(missing_projs), ", ".join(missing_projs)))
+    app.logger.debug(globs.cc)
     return render_template('index.html', missing_projects=missing_projs, cc=globs.cc.filter_missing(),
                            reset_btn=globs.reset_btn, selected=globs.selected_project,
                            selected_id=globs.selected_project_id)
@@ -293,7 +294,7 @@ def process():
         subprojects = globs.p.subprojects.keys()
     except AttributeError:
         subprojects = None
-    globs.cc.project_date([globs.selected_project])
+    globs.cc.project_date(globs.selected_project)
     get_navbar_summary_links()
     globs.reset_btn = True
     return render_template('process.html', p_info=project_info_dict(globs.p), change=None,

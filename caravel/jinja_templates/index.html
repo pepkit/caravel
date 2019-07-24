@@ -35,7 +35,17 @@
             console.log("window loaded");
             $('#projects-table').DataTable({
                 "pageLength": -1,
-                "lengthMenu": [ [5, 10, 25, -1], [5, 10, 25, "All"] ]
+                "lengthMenu": [ [5, 10, 25, -1], [5, 10, 25, "All"] ],
+				"aoColumns": [
+					{ "bSortable": true },
+					{ "bSortable": true },
+					{ "bSortable": true },
+					{ "bSortable": true },
+					{ "bSortable": true },
+					{ "bSortable": true },
+					{ "bSortable": false }
+				],
+
             });
         } );
     </script>
@@ -55,7 +65,7 @@
 	{% endif %}
 	<div class="container">
 		<div class="row">
-			<div class="table-responsive-lg">
+			<div class="table-responsive-lg" style="min-width: 900px;">
 				<form id="select_project" class="form" method="POST" action="{{ url_for('process') }}">
 				<input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
 				{% if reset_btn is not none %}
@@ -97,6 +107,11 @@
 									<th>Protocols</th>
                                     <th>Inputs size</th>
 									<th>Last modified</th>
+									<th>
+										<a href="{{ url_for('index', populate=True) }}" class="btn btn-outline-dark btn-sm" role="button" aria-disabled="false">
+											Update all
+										</a>
+									</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -114,7 +129,7 @@
 										{% set class = "btn btn-secondary btn-sm" %}
 										{% set row_class = "table-active" %}
 									{% endif %}
-									<tr class="{{ row_class }}">
+									<tr class="{{ row_class }}" valign="middle">
 										<td>
 											<button type="submit" class="{{ class }}" {{ state }} name="select_project" value="{{ p }};{{ loop.index }}">
 												{{ cc.projects[p].name }}
@@ -127,13 +142,18 @@
 											{{ cc.projects[p].num_sp }}
 										</td>
 										<td>
-											{{ cc.projects[p].protocols}}
+											{{ cc.projects[p].protocols }}
 										</td>
 										<td>
-											{{ cc.projects[p].inputs_size}}
+											{{ cc.projects[p].inputs_size }}
 										</td>
 										<td>
 											{{ cc.projects[p].last_modified }}
+										</td>
+										<td>
+											<a href="{{ url_for('index', populate=True, path=p) }}" class="btn btn-outline-dark btn-sm" role="button" aria-disabled="false">
+												Update
+											</a>
 										</td>
 									</tr>
 								{% endfor %}
