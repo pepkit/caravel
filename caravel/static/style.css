@@ -194,10 +194,6 @@ div#projects-table_info {
 }
 
 
-div#projects-table_paginate {
-  font-size: 0.8rem;
-}
-
 .container-fluid {
   padding: 15px;
 }
@@ -206,6 +202,7 @@ div#projects-table_paginate {
     height: 10px;
     padding: 5px;
 }
-#projects-table th tr td {
-    text-align:center
+
+#projects-table td {
+    font-size:0.8rem;
 }

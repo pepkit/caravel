@@ -76,12 +76,11 @@
 						</div>
 					</div>
 					<div class="card-body">
-						<table id="projects-table" data-pagination="true" data-toggle="table" data-search="true" data-show-columns="true" class="table table-bordered table-sm mb-0 btn-table" style="font-size:13px; width:100%;">
-							<thead>
+						<table id="projects-table" data-height="400" data-toggle="table" class="table-sm table-bordered mb-0">
+							<thead class="thead-light">
 								<tr>
-									<th></th>
-									<th class="text-nowrap text-center">Project name</th>
-									<th class="text-nowrap text-center">Subproject count</th>
+									<th data-field="name" class="text-nowrap text-center">Project name</th>
+									<th data-field="sp_count" class="text-nowrap text-center">Subproject count</th>
 									<th class="text-nowrap text-center">Sample count</th>
 									<th class="text-nowrap text-center">Protocols</th>
                                     <th class="text-nowrap text-center">Inputs size</th>
@@ -109,16 +108,38 @@
 										{% set row_class = "table-active" %}
 									{% endif %}
 									<tr class="{{ row_class }}" valign="middle">
-										<td>
-											<i class="fa fa-caret-right fa-2x" aria-hidden="true"></i>
-										</td>
 										<td class="text-nowrap text-center">
 											<button type="submit" class="{{ class }}" name="select_project" value="{{ p }};{{ loop.index }}">
 												{{ cc.projects[p].name }}
 											</button>
 										</td>
-										<td class="text-nowrap text-center">
+										<td data-toggle="collapse" data-target="#sp{{ loop.index }}" class="accordion-toggle text-nowrap text-center">
 											{{ cc.projects[p].num_sp }}
+										</td>
+										<td class="text-nowrap text-center">
+											{{ cc.projects[p].num_samples }}
+										</td>
+										<td class="text-center">
+											{{ cc.projects[p].protocols }}
+										</td>
+										<td class="text-nowrap text-center">
+											{{ cc.projects[p].inputs_size }}
+										</td>
+										<td class="text-nowrap text-center">
+											{{ cc.projects[p].last_modified }}
+										</td>
+										<td class="text-nowrap text-center">
+											<a href="{{ url_for('index', populate=True, path=p) }}" class="btn btn-outline-dark btn-sm {{ state }}" role="button">
+												Update
+											</a>
+										</td>
+									</tr>
+									<tr id="sp{{ loop.index }}" class="accordian-body collapse show">
+										<td class="text-nowrap text-center" data-toggle="collapse"  data-target="#sp{{ loop.index }}" class="accordion-toggle text-nowrap text-center">
+											<i class="fa fa-chevron-right" aria-hidden="true"></i>
+										</td>
+										<td>
+											{{ cc.projects[p].names_sp }}
 										</td>
 										<td class="text-nowrap text-center">
 											{{ cc.projects[p].num_samples }}
