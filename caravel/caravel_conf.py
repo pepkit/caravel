@@ -2,6 +2,7 @@ import yacman
 import glob
 import datetime
 from looper import Project
+from peppy.exceptions import MissingSubprojectError
 from flask import current_app
 from collections import Mapping
 from .exceptions import *
@@ -72,7 +73,7 @@ class CaravelConf(yacman.YacAttMap):
 
     __nonzero__ = __bool__
 
-    def populate_project_metadata(self, attr_func=PROJECT_MDATA_FUN, paths=None):
+    def populate_project_metadata(self, attr_func=PROJECT_MDATA_FUN, paths=None, subprojects=None):
         """
         Populate project metadata attributes for every entry in CaravelConf.projects.
         If the paths argument is not provided or it's an empty list, all the list projects names will be updated.
@@ -80,39 +81,66 @@ class CaravelConf(yacman.YacAttMap):
         :param Mapping[str,function(looper.Project) -> Any] attr_func: a Mapping of metadata attribute and corresponding lambda expression to extract
             it from a peppy.Project object
         :param list[str] | str paths: list of paths to the project config files which names should be updated
+        :param list[str] | str subprojects: name of the subproject to populate the data for
         :return: CaravelConf: object with populated project attributes
         """
         if isinstance(paths, str) and os.path.isfile(paths):
             paths = [paths]
+        if isinstance(subprojects, str):
+            subprojects = [subprojects]
         if not isinstance(paths, (list, type(None))):
             raise TypeError("paths argument has to be a list, got {}".format(type(paths).__name__))
+        if not isinstance(subprojects, (list, type(None))):
+            raise TypeError("subprojects argument has to be a list, got {}".format(type(subprojects).__name__))
         paths = paths if paths is not None else self[CFG_PROJECTS_KEY].keys()
         for path in paths:
             for attr, fun in attr_func.items():
+                p = Project(path)
                 try:
-                    self.update_projects(path, {attr: fun(Project(path))})
+                    self.update_projects(project=path, data={attr: fun(p)})
                 except Exception as e:
                     current_app.logger.warning("Encountered '{}' -- Could not update '{}' attr for '{}'"
-                                               .format(e.__class__.__name__, attr, path))
-                    self.update_projects(path, {attr: None})
+                                    .format(e.__class__.__name__, attr, path))
+                    self.update_projects(project=path, data={attr: None})
+                subprojects = subprojects if subprojects is not None else p.subprojects.keys()
+                for sp in subprojects:
+                    try:
+                        p_sub = Project(path, subproject=sp)
+                    except MissingSubprojectError:
+                        current_app.logger.warning("Nonexistent project:subproject combination '{}:{}'. Skipping".format(path, sp))
+                        continue
+                    try:
+                        self.update_projects(project=path, sp=sp, data={attr: fun(p_sub)})
+                    except Exception as e:
+                        current_app.logger.warning("Encountered '{}' -- Could not update '{}' attr for '{}'"
+                                                   .format(e.__class__.__name__, attr, path))
+                        self.update_projects(project=path, data={attr: None})
         return self
 
     def project_date(self, paths):
         self.populate_project_metadata(
             {"last_modified": lambda p: datetime.datetime.now().strftime("%Y-%m-%d %H:%M")}, paths).write()
 
-    def update_projects(self, project, data=None):
+    def update_projects(self, project, sp=None, data=None):
         """
         Updates the project in CaravelConf object at any level. If the requested project is missing, it will be added
 
         :param str project: project to be added/updated
+        :param str sp: subproject to be added/updated
         :param Mapping data: data to be added/updated
         :return CaravelConf: updated object
         """
         if check_insert_data(project, str, "project"):
             self[CFG_PROJECTS_KEY].setdefault(project, dict())
-            if check_insert_data(data, Mapping, "data"):
-                self[CFG_PROJECTS_KEY][project].update(data)
+            if sp:
+                check_insert_data(sp, str, "sp")
+                self[CFG_PROJECTS_KEY][project].setdefault(CFG_SUBPROJECTS_KEY, dict())
+                self[CFG_PROJECTS_KEY][project][CFG_SUBPROJECTS_KEY].setdefault(sp, dict())
+                if check_insert_data(data, Mapping, "data"):
+                    self[CFG_PROJECTS_KEY][project][CFG_SUBPROJECTS_KEY][sp].update(data)
+            else:
+                if check_insert_data(data, Mapping, "data"):
+                    self[CFG_PROJECTS_KEY][project].update(data)
         return self
 
     def remove_project(self, path):

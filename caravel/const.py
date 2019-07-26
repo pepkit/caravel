@@ -82,7 +82,8 @@ CFG_NAME = "caravel configuration"
 CFG_ENV_VARS = ["CARAVEL"]
 
 CFG_VERSION_KEY = "config_version"
-CFG_PROJECTS_KEY = "projects"  # maybe PEPs?
+CFG_PROJECTS_KEY = "projects"
+CFG_SUBPROJECTS_KEY = "subprojects"
 CFG_PREFERENCES_KEY = "preferences"
 CFG_PROJECT_NAME_KEY = "name"
 CFG_PROJECT_DESC_KEY = "project_description"
