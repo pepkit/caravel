@@ -110,13 +110,16 @@ def get_summary_html_name(prj):
 
 def parse_selected_project(selection_str, sep=";"):
     """
-    Parse the string returned by the index page form
+    Parse the string returned by the index page form. Three strings separated by a semicolon are expected by default.
+    If the last one (subproject in our use case) is missing, a None is appended to the returned list,
+    which is subsequently disregarded by looper.Project.__init__ and no subproject is activated
 
-    :param str selection_str: a string formatted like: "<project_path>;<project_id>"
+    :param str selection_str: a string formatted like: "<project_path>;<project_id>;<subproject_name>"
     :param str sep: separator string
     :return str: separated project and id
     """
-    return selection_str.split(sep)
+    seletion_list = selection_str.split(sep)
+    return seletion_list if len(seletion_list) > 2 else seletion_list + [None]
 
 
 def check_for_summary(prj):

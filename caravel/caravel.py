@@ -290,10 +290,11 @@ def process():
     else:
         new_selected_project = request.form.get('select_project')
         if new_selected_project is not None and globs.selected_project != new_selected_project:
-            globs.selected_project, globs.selected_project_id = parse_selected_project(new_selected_project)
+            globs.selected_project, globs.selected_project_id, globs.current_subproj = \
+                parse_selected_project(new_selected_project)
     config_file = str(os.path.expandvars(os.path.expanduser(globs.selected_project)))
     if globs.p is None:
-        globs.p = Project(config_file)
+        globs.p = Project(config_file, subproject=globs.current_subproj)
     try:
         subprojects = globs.p.subprojects.keys()
     except AttributeError:

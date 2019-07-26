@@ -142,7 +142,9 @@
 												<i class="fa fa-chevron-right" aria-hidden="true"></i>
 											</td>
 											<td>
-												{{ sp }}
+												<button type="submit" class="{{ class }}" name="select_project" value="{{ p }};{{ outer_loop.index }};{{ sp }}">
+													{{ sp }}
+												</button>
 											</td>
 											<td class="text-nowrap text-center">
 												{{ cc.projects[p].subprojects[sp].num_samples }}
