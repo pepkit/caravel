@@ -107,13 +107,14 @@
 										{% set class = "btn btn-secondary btn-sm" %}
 										{% set row_class = "table-active" %}
 									{% endif %}
+									{% set outer_loop = loop %}
 									<tr class="{{ row_class }}" valign="middle">
 										<td class="text-nowrap text-center">
-											<button type="submit" class="{{ class }}" name="select_project" value="{{ p }};{{ loop.index }}">
+											<button type="submit" class="{{ class }}" name="select_project" value="{{ p }};{{ outer_loop.index }}">
 												{{ cc.projects[p].name }}
 											</button>
 										</td>
-										<td data-toggle="collapse" data-target="#sp{{ loop.index }}" class="accordion-toggle text-nowrap text-center">
+										<td class="text-nowrap text-center">
 											{{ cc.projects[p].num_sp }}
 										</td>
 										<td class="text-nowrap text-center">
@@ -134,32 +135,36 @@
 											</a>
 										</td>
 									</tr>
-									<tr id="sp{{ loop.index }}" class="accordian-body collapse show">
-										<td class="text-nowrap text-center" data-toggle="collapse"  data-target="#sp{{ loop.index }}" class="accordion-toggle text-nowrap text-center">
-											<i class="fa fa-chevron-right" aria-hidden="true"></i>
-										</td>
-										<td>
-											{{ cc.projects[p].names_sp }}
-										</td>
-										<td class="text-nowrap text-center">
-											{{ cc.projects[p].num_samples }}
-										</td>
-										<td class="text-nowrap text-center">
-											{{ cc.projects[p].protocols }}
-										</td>
-										<td class="text-nowrap text-center">
-											{{ cc.projects[p].inputs_size }}
-										</td>
-										<td class="text-nowrap text-center">
-											{{ cc.projects[p].last_modified }}
-										</td>
-										<td class="text-nowrap text-center">
-											<a href="{{ url_for('index', populate=True, path=p) }}" class="btn btn-outline-dark btn-sm {{ state }}" role="button">
-												Update
-											</a>
-										</td>
-									</tr>
-								{% endfor %}
+									{% if cc.projects[p].subprojects is defined %}
+										{% for sp in cc.projects[p].subprojects.keys() %}
+										<tr id="sp{{ outer_loop.index }}" class="accordian-body collapse show">
+											<td class="text-nowrap text-center" data-toggle="collapse"  data-target="#sp{{ outer_loop.index }}" class="accordion-toggle text-nowrap text-center">
+												<i class="fa fa-chevron-right" aria-hidden="true"></i>
+											</td>
+											<td>
+												{{ cc.projects[p].subprojects[sp].name }}
+											</td>
+											<td class="text-nowrap text-center">
+												{{ cc.projects[p].subprojects[sp].num_samples }}
+											</td>
+											<td class="text-nowrap text-center">
+												{{ cc.projects[p].subprojects[sp].protocols }}
+											</td>
+											<td class="text-nowrap text-center">
+												{{ cc.projects[p].subprojects[sp].inputs_size }}
+											</td>
+											<td class="text-nowrap text-center">
+												{{ cc.projects[p].subprojects[sp].last_modified }}
+											</td>
+											<td class="text-nowrap text-center">
+												<a href="{{ url_for('index', populate=True, path=p, sp=sp) }}" class="btn btn-outline-dark btn-sm {{ state }}" role="button">
+													Update
+												</a>
+											</td>
+										</tr>
+										{% endfor %}
+									{% endif %}
+							{% endfor %}
 							</tbody>
 						</table>
 					</div>
