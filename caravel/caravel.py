@@ -289,13 +289,18 @@ def process():
         return redirect(url_for('index'))
     else:
         new_selected_project = request.form.get('select_project')
-        if new_selected_project is not None and globs.selected_project != new_selected_project:
-            globs.selected_project, globs.selected_project_id, globs.current_subproj = \
-                parse_selected_project(new_selected_project)
+        if None not in (new_selected_project, globs.selected_project) and globs.selected_project != new_selected_project:
+            globs.purge_project_data()
+            globs.summary_links = SUMMARY_NAVBAR_PLACEHOLDER
+            globs.reset_btn = None
+            app.logger.info("Project data removed")
+    globs.selected_project, globs.selected_project_id, globs.current_subproj = \
+        parse_selected_project(new_selected_project)
     config_file = str(os.path.expandvars(os.path.expanduser(globs.selected_project)))
     if globs.p is None:
         globs.p = Project(config_file, subproject=globs.current_subproj)
     try:
+        # subproject related logic can be removed with the introduction of direct subproject selection in the index
         subprojects = globs.p.subprojects.keys()
     except AttributeError:
         subprojects = None
