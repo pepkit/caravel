@@ -59,18 +59,9 @@
 								<b>Select a project</b>
 							</div>
 							<div class="col-9">
-								{% if reset_btn is not none %}
-									<a href="{{ url_for('index', reset=True) }}" class="btn btn-outline-danger btn-sm pull-right" role="button" aria-disabled="false">
-										RESET PROJECT <i class="fa fa-undo"></i>
-									</a>
-								{% else %}
-									<a href="{{ url_for('index', reset=True) }}" class="btn btn-outline-danger btn-sm pull-right disabled" role="button" aria-disabled="true">
-										RESET PROJECT <i class="fa fa-undo"></i>
-									</a>
-								{% endif %}
 								<a href="/preferences" role="button" class="btn btn-outline-dark btn-sm mr-2 pull-right">PREFERENCES <i class="fa fa-cog"></i></a>
 								<a href="{{ url_for('index', populate=True) }}" class="btn btn-outline-dark btn-sm mr-2 pull-right" role="button" aria-disabled="false">
-									POPULATE
+									POPULATE ALL
 								</a>
 							</div>
 						</div>
@@ -115,7 +106,7 @@
 											</button>
 										</td>
 										<td class="text-nowrap text-center">
-											{{ cc.projects[p].num_sp }}
+											<a href="JavaScript:void(0);" data-toggle="collapse"  data-target="#sp{{ outer_loop.index }}" class="accordion-toggle">{{ cc.projects[p].num_sp }}</a>
 										</td>
 										<td class="text-nowrap text-center">
 											{{ cc.projects[p].num_samples }}

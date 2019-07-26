@@ -14,7 +14,6 @@ def init_globals():
     global logging_lvl
     global summary_links
     global dests
-    global reset_btn
     global command
     global compute_package
     global current_subproj
@@ -33,7 +32,6 @@ def init_globals():
     logging_lvl = None
     summary_links = None
     dests = None
-    reset_btn = None
     command = None
     compute_package = None
     current_subproj = None
@@ -56,7 +54,6 @@ def purge_project_data():
     global act
     global summary_links
     global dests
-    global reset_btn
     global command
     global current_subproj
     global summary_requested
@@ -70,7 +67,6 @@ def purge_project_data():
     act = None
     summary_links = None
     dests = None
-    reset_btn = None
     command = None
     current_subproj = None
     summary_requested = None

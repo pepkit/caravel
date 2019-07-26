@@ -217,7 +217,6 @@ def index():
     if request.args.get('reset'):
         globs.init_globals()
         globs.summary_links = SUMMARY_NAVBAR_PLACEHOLDER
-        globs.reset_btn = None
         app.logger.info("Project data removed")
     globs.cc = globs.cc or parse_config_file()
     update_preferences()
@@ -232,8 +231,7 @@ def index():
         app.logger.warning("{} projects configs not found: {}".format(len(missing_projs), ", ".join(missing_projs)))
     app.logger.debug(globs.cc)
     return render_template('index.html', missing_projects=missing_projs, cc=globs.cc.filter_missing(),
-                           reset_btn=globs.reset_btn, selected=globs.selected_project,
-                           selected_id=globs.selected_project_id)
+                           selected=globs.selected_project, selected_id=globs.selected_project_id)
 
 
 @app.route('/_background_exec')
@@ -292,7 +290,6 @@ def process():
         if None not in (new_selected_project, globs.selected_project) and globs.selected_project != new_selected_project:
             globs.purge_project_data()
             globs.summary_links = SUMMARY_NAVBAR_PLACEHOLDER
-            globs.reset_btn = None
             app.logger.info("Project data removed")
     globs.selected_project, globs.selected_project_id, globs.current_subproj = \
         parse_selected_project(new_selected_project)
@@ -306,7 +303,6 @@ def process():
         subprojects = None
     globs.cc.project_date(globs.selected_project)
     get_navbar_summary_links()
-    globs.reset_btn = True
     return render_template('process.html', p_info=project_info_dict(globs.p), change=None,
                            selected_subproject=globs.p.subproject, actions=actions, subprojects=subprojects,
                            interval=globs.status_check_interval)
