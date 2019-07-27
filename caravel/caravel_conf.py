@@ -117,9 +117,14 @@ class CaravelConf(yacman.YacAttMap):
                         self.update_projects(project=path, data={attr: None})
         return self
 
-    def project_date(self, paths):
-        self.populate_project_metadata(
-            {"last_modified": lambda p: datetime.datetime.now().strftime("%Y-%m-%d %H:%M")}, paths).write()
+    def project_date(self, paths, sp=None):
+        """
+        Add current date and time to the selected project/subproject section of the caravel config file
+        :param list[str] | str paths: path to the project config of interest
+        :param str sp: name of the subproject
+        """
+        self.populate_project_metadata({"last_modified": lambda p: datetime.datetime.now().strftime("%Y-%m-%d %H:%M")},
+                                       paths, subprojects=sp).write()
 
     def update_projects(self, project, sp=None, data=None):
         """

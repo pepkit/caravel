@@ -109,7 +109,7 @@
 									</tr>
 									{% if cc.projects[p].subprojects is defined %}
 										{% for sp in cc.projects[p].subprojects.keys() %}
-										<tr id="sp{{ outer_loop.index }}" class="accordian-body collapse">
+										<tr id="sp{{ outer_loop.index }}" class="accordian-body collapse show">
 											<td class="text-nowrap text-center" data-toggle="collapse"  data-target="#sp{{ outer_loop.index }}" class="accordion-toggle text-nowrap text-center">
 												<i class="fa fa-chevron-right" aria-hidden="true"></i>
 											</td>

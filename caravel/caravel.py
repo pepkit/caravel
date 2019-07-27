@@ -301,7 +301,7 @@ def process():
         subprojects = globs.p.subprojects.keys()
     except AttributeError:
         subprojects = None
-    globs.cc.project_date(globs.selected_project)
+    globs.cc.project_date(globs.selected_project, globs.current_subproj)
     get_navbar_summary_links()
     return render_template('process.html', p_info=project_info_dict(globs.p), change=None,
                            selected_subproject=globs.p.subproject, actions=actions, subprojects=subprojects,
