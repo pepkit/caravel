@@ -46,12 +46,6 @@
 			<div class="table-responsive-lg" style="min-width: 900px;">
 				<form id="select_project" class="form" method="POST" action="{{ url_for('process') }}">
 				<input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
-				{% if reset_btn is not none %}
-					<div class="alert alert-secondary" role="alert">
-						<button type="button" class="close" data-dismiss="alert">&times;</button>
-						Reset currently activated project to select other ones
-					</div>
-				{% endif %}
 				<div class="card">
 					<div class="card-header">
 						<div class="row">
