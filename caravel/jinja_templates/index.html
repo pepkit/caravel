@@ -78,24 +78,11 @@
 								</tr>
 							</thead>
 							<tbody>
-								{% if selected is none %}
-									{% set state = "" %}
-									{% set class = "btn btn-secondary btn-sm" %}
-								{% else %}
-									{% set state = "disabled" %}
-									{% set class = "btn btn-secondary btn-sm disabled" %}
-								{% endif %}
 								{% for p in cc.projects.keys() %}
-									{% set row_class = "" %}
-									{% if loop.index == selected_id | int  %}
-										{% set state = "" %}
-										{% set class = "btn btn-secondary btn-sm" %}
-										{% set row_class = "table-active" %}
-									{% endif %}
 									{% set outer_loop = loop %}
-									<tr class="{{ row_class }}" valign="middle">
+									<tr valign="middle">
 										<td class="text-nowrap text-center">
-											<button type="submit" class="{{ class }}" name="select_project" value="{{ p }};{{ outer_loop.index }}">
+											<button type="submit" class="btn btn-secondary btn-sm" name="select_project" value="{{ p }};{{ outer_loop.index }}">
 												{{ cc.projects[p].name }}
 											</button>
 										</td>
@@ -115,19 +102,19 @@
 											{{ cc.projects[p].last_modified }}
 										</td>
 										<td class="text-nowrap text-center">
-											<a href="{{ url_for('index', populate=True, path=p) }}" class="btn btn-outline-dark btn-sm {{ state }}" role="button">
+											<a href="{{ url_for('index', populate=True, path=p) }}" class="btn btn-outline-dark btn-sm" role="button">
 												Update
 											</a>
 										</td>
 									</tr>
 									{% if cc.projects[p].subprojects is defined %}
 										{% for sp in cc.projects[p].subprojects.keys() %}
-										<tr id="sp{{ outer_loop.index }}" class="accordian-body collapse show">
+										<tr id="sp{{ outer_loop.index }}" class="accordian-body collapse">
 											<td class="text-nowrap text-center" data-toggle="collapse"  data-target="#sp{{ outer_loop.index }}" class="accordion-toggle text-nowrap text-center">
 												<i class="fa fa-chevron-right" aria-hidden="true"></i>
 											</td>
 											<td>
-												<button type="submit" class="{{ class }}" name="select_project" value="{{ p }};{{ outer_loop.index }};{{ sp }}">
+												<button type="submit" class="btn btn-secondary btn-sm" name="select_project" value="{{ p }};{{ outer_loop.index }};{{ sp }}">
 													{{ sp }}
 												</button>
 											</td>
@@ -144,7 +131,7 @@
 												{{ cc.projects[p].subprojects[sp].last_modified }}
 											</td>
 											<td class="text-nowrap text-center">
-												<a href="{{ url_for('index', populate=True, path=p, sp=sp) }}" class="btn btn-outline-dark btn-sm {{ state }}" role="button">
+												<a href="{{ url_for('index', populate=True, path=p, sp=sp) }}" class="btn btn-outline-dark btn-sm" role="button">
 													Update
 												</a>
 											</td>
