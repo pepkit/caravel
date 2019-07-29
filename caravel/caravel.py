@@ -317,6 +317,8 @@ def background_subproject():
     else:
         globs.p.activate_subproject(sp)
         globs.run = False
+        globs.current_subproj = sp
+        globs.cc.project_date(globs.selected_project, globs.current_subproj)
     globs.summary_requested = None
     get_navbar_summary_links()
     return jsonify(subproj_txt=output, p_info=project_info_dict(globs.p), navbar_links=globs.summary_links)
