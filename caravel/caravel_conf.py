@@ -99,7 +99,7 @@ class CaravelConf(yacman.YacAttMap):
                 try:
                     self.update_projects(project=path, data={attr: fun(p)})
                 except Exception as e:
-                    current_app.logger.warning("Encountered '{}' -- Could not update '{}' attr for '{}'"
+                    current_app.logger.debug("Encountered '{}' -- Could not update '{}' attr for '{}'"
                                     .format(e.__class__.__name__, attr, path))
                     self.update_projects(project=path, data={attr: None})
                 try:
