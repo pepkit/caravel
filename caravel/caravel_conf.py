@@ -8,8 +8,8 @@ from collections import Mapping
 from .exceptions import *
 from .const import *
 
-import logging
-_LOGGER = logging.getLogger(__name__)
+# import logging
+# _LOGGER = logging.getLogger(__name__)
 
 
 class CaravelConf(yacman.YacAttMap):
@@ -29,30 +29,30 @@ class CaravelConf(yacman.YacAttMap):
         projects = self.setdefault(CFG_PROJECTS_KEY, dict())
         if not isinstance(projects, dict):
             if projects:
-                _LOGGER.warning("'{k}' value is a {t_old}, "
+                current_app.logger.warning("'{k}' value is a {t_old}, "
                                            "not a {t_new}".format(k=CFG_PROJECTS_KEY, t_old=type(projects).__name__,
                                                                   t_new=dict.__name__))
                 # handle old caravel config format; reformat
                 if isinstance(projects, list):
-                    _LOGGER.info("Reformatting to the new config format: v{}".format(REQ_CFG_VERSION))
+                    current_app.logger.info("Reformatting to the new config format: v{}".format(REQ_CFG_VERSION))
                     new_projects = dict()
                     for x in self[CFG_PROJECTS_KEY]:
                         new_projects.update({p: dict() for p in _process_project_path(x, config_path)})
                     self[CFG_PROJECTS_KEY] = new_projects
                 else:
-                    _LOGGER.info("Setting to empty {}".format(dict.__name__))
+                    current_app.logger.info("Setting to empty {}".format(dict.__name__))
                     self[CFG_PROJECTS_KEY] = dict()
         try:
             version = self[CFG_VERSION_KEY]
         except KeyError:
-            _LOGGER.warning("Config lacks '{}' key".format(CFG_VERSION_KEY))
-            _LOGGER.info("Adding '{}' entry: {}".format(CFG_VERSION_KEY, REQ_CFG_VERSION))
+            current_app.logger.warning("Config lacks '{}' key".format(CFG_VERSION_KEY))
+            current_app.logger.info("Adding '{}' entry: {}".format(CFG_VERSION_KEY, REQ_CFG_VERSION))
             self[CFG_VERSION_KEY] = REQ_CFG_VERSION
         else:
             try:
                 version = float(version)
             except ValueError:
-                _LOGGER.warning("Cannot parse as numeric: {}".format(version))
+                current_app.logger.warning("Cannot parse as numeric: {}".format(version))
             else:
                 if version < REQ_CFG_VERSION:
                     msg = "This caravel config (v{}) is not compliant with v{} standards. " \
@@ -60,11 +60,11 @@ class CaravelConf(yacman.YacAttMap):
                           "'pip install caravel==0.13.1'.".format(self[CFG_VERSION_KEY], str(REQ_CFG_VERSION))
                     raise ConfigNotCompliantError(msg)
                 else:
-                    _LOGGER.debug("Config version is compliant: {}".format(version))
+                    current_app.logger.debug("Config version is compliant: {}".format(version))
 
         missing_names = [p for p in self[CFG_PROJECTS_KEY].keys()
                          if not hasattr(self[CFG_PROJECTS_KEY][p], CFG_PROJECT_NAME_KEY)]
-        _LOGGER.debug("Missing project names list: {}".format(str(missing_names)))
+        current_app.logger.debug("Missing project names list: {}".format(str(missing_names)))
         self.populate_project_metadata({"name": lambda p: p.name}, missing_names).write()
 
     def __bool__(self):
@@ -102,24 +102,24 @@ class CaravelConf(yacman.YacAttMap):
                 try:
                     self.update_projects(project=path, data={attr: fun(p)})
                 except Exception as e:
-                    _LOGGER.debug("Encountered '{}' -- Could not update '{}' attr for '{}'"
+                    current_app.logger.debug("Encountered '{}' -- Could not update '{}' attr for '{}'"
                                     .format(e.__class__.__name__, attr, path))
                     self.update_projects(project=path, data={attr: None})
                 try:
                     subprojects = subprojects if subprojects is not None else p.subprojects.keys()
                 except AttributeError:
-                    _LOGGER.debug("No subprojects defined for: {}".format(path))
+                    current_app.logger.debug("No subprojects defined for: {}".format(path))
                     continue
                 for sp in subprojects:
                     try:
                         p_sub = Project(path, subproject=sp)
                     except MissingSubprojectError:
-                        _LOGGER.warning("Nonexistent project:subproject combination '{}:{}'. Skipping".format(path, sp))
+                        current_app.logger.warning("Nonexistent project:subproject combination '{}:{}'. Skipping".format(path, sp))
                         continue
                     try:
                         self.update_projects(project=path, sp=sp, data={attr: fun(p_sub)})
                     except Exception as e:
-                        _LOGGER.warning("Encountered '{}' -- Could not update '{}' attr for '{}'"
+                        current_app.logger.warning("Encountered '{}' -- Could not update '{}' attr for '{}'"
                                                    .format(e.__class__.__name__, attr, path))
                         self.update_projects(project=path, data={attr: None})
         return self
@@ -176,7 +176,7 @@ class CaravelConf(yacman.YacAttMap):
         if path in self[CFG_PROJECTS_KEY]:
             del self[CFG_PROJECTS_KEY][path]
         else:
-            _LOGGER.info("{} not found".format(path))
+            current_app.logger.info("{} not found".format(path))
         return self
 
     def filter_missing(self):
