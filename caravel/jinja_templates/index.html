@@ -87,7 +87,11 @@
 											</button>
 										</td>
 										<td class="text-nowrap text-center">
-											<a href="JavaScript:void(0);" data-toggle="collapse"  data-target="#sp{{ outer_loop.index }}" class="accordion-toggle">{{ cc.projects[p].num_sp }}</a>
+											{% if cc.projects[p].num_sp is none %}
+												{{ cc.projects[p].num_sp }}
+											{% else %}
+												<a href="JavaScript:void(0);" data-toggle="collapse"  data-target="#sp{{ outer_loop.index }}" class="accordion-toggle">{{ cc.projects[p].num_sp }}</a>
+											{% endif %}
 										</td>
 										<td class="text-nowrap text-center">
 											{{ cc.projects[p].num_samples }}

@@ -102,7 +102,11 @@ class CaravelConf(yacman.YacAttMap):
                     current_app.logger.warning("Encountered '{}' -- Could not update '{}' attr for '{}'"
                                     .format(e.__class__.__name__, attr, path))
                     self.update_projects(project=path, data={attr: None})
-                subprojects = subprojects if subprojects is not None else p.subprojects.keys()
+                try:
+                    subprojects = subprojects if subprojects is not None else p.subprojects.keys()
+                except AttributeError:
+                    current_app.logger.debug("No subprojects defined for: {}".format(path))
+                    continue
                 for sp in subprojects:
                     try:
                         p_sub = Project(path, subproject=sp)
