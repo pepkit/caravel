@@ -28,20 +28,19 @@ class CaravelConf(yacman.YacAttMap):
         config_path = entries if isinstance(entries, str) else ""
         projects = self.setdefault(CFG_PROJECTS_KEY, dict())
         if not isinstance(projects, dict):
-            if projects:
-                current_app.logger.warning("'{k}' value is a {t_old}, "
-                                           "not a {t_new}".format(k=CFG_PROJECTS_KEY, t_old=type(projects).__name__,
-                                                                  t_new=dict.__name__))
-                # handle old caravel config format; reformat
-                if isinstance(projects, list):
-                    current_app.logger.info("Reformatting to the new config format: v{}".format(REQ_CFG_VERSION))
-                    new_projects = dict()
-                    for x in self[CFG_PROJECTS_KEY]:
-                        new_projects.update({p: dict() for p in _process_project_path(x, config_path)})
-                    self[CFG_PROJECTS_KEY] = new_projects
-                else:
-                    current_app.logger.info("Setting to empty {}".format(dict.__name__))
-                    self[CFG_PROJECTS_KEY] = dict()
+            current_app.logger.warning("'{k}' value is a {t_old}, "
+                                       "not a {t_new}".format(k=CFG_PROJECTS_KEY, t_old=type(projects).__name__,
+                                                              t_new=dict.__name__))
+            # handle old caravel config format; reformat
+            if isinstance(projects, list):
+                current_app.logger.info("Reformatting to the new config format: v{}".format(REQ_CFG_VERSION))
+                new_projects = dict()
+                for x in self[CFG_PROJECTS_KEY]:
+                    new_projects.update({p: dict() for p in _process_project_path(x, config_path)})
+                self[CFG_PROJECTS_KEY] = new_projects
+            else:
+                current_app.logger.info("Setting '{}' to empty {}".format(CFG_PROJECTS_KEY, dict.__name__))
+                self[CFG_PROJECTS_KEY] = dict()
         try:
             version = self[CFG_VERSION_KEY]
         except KeyError:
@@ -94,6 +93,9 @@ class CaravelConf(yacman.YacAttMap):
             raise TypeError("subprojects argument has to be a list, got {}".format(type(subprojects).__name__))
         paths = paths if paths is not None else self[CFG_PROJECTS_KEY].keys()
         for path in paths:
+            if not os.path.exists(path):
+                current_app.logger.debug("path '{}' does not exist, skipping metadata update".format(path))
+                continue
             if remove:
                 self.update_projects(project=path, remove=True)
                 continue

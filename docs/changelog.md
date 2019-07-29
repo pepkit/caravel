@@ -18,6 +18,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - `CaravelConf` class for caravel config file management
 - the possibility to set preferences in the config file
+- direct subproject activation from the index page
 
 
 ## [0.13.1] -- 2019-07-18

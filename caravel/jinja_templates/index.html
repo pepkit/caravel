@@ -33,7 +33,7 @@
 	{% if missing_projects is not none %}
 		<div class="alert alert-warning" role="alert">
 			<button type="button" class="close" data-dismiss="alert">&times;</button>
-			<b>{{ missing_projects|length }}</b> files are missing and are not listed below:
+			<b>{{ missing_projects|length }}</b> files are missing. Corresponding projects are not listed below:
 			<ul style="padding-left: 30px">
 				{% for mp in missing_projects %}
 					<li><code>{{ mp }}</code></li>
