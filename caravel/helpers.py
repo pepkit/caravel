@@ -179,9 +179,7 @@ def select_project(proj_selection_str):
     """
 
     if globs.selected_project is None and proj_selection_str is None:
-        current_app.logger.info("The project is not selected, redirecting to the index page.")
-        flash("No project was selected, choose one from the list below.")
-        return redirect(url_for('index'))
+        raise TypeError("No selection provided")
     else:
         if None not in (proj_selection_str, globs.selected_project) and globs.selected_project != proj_selection_str:
             globs.purge_project_data()

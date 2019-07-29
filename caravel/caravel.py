@@ -282,8 +282,13 @@ def set_comp_env():
 def process():
     from looper import build_parser as blp
     actions = get_positional_args(blp(), sort=True)
-    globs.selected_project, globs.selected_project_id, globs.current_subproj = \
-        select_project(request.form.get('select_project'))
+    try:
+        globs.selected_project, globs.selected_project_id, globs.current_subproj = \
+            select_project(request.form.get('select_project'))
+    except TypeError:
+        app.logger.info("No project selected, redirecting to the index page.")
+        flash("No project was selected, choose one from the list below.")
+        return redirect(url_for('index'))
     config_file = str(os.path.expandvars(os.path.expanduser(globs.selected_project)))
     if globs.p is None:
         globs.p = Project(config_file, subproject=globs.current_subproj)
