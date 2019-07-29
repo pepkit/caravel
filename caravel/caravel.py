@@ -105,9 +105,9 @@ def generate_csrf_token(n=100):
     """
     if '_csrf_token' not in session:
         session['_csrf_token'] = random_string(n)
-        app.logger.info("CSRF token generated")
+        app.logger.debug("CSRF token generated")
     else:
-        app.logger.info("CSRF token retrieved from the session")
+        app.logger.debug("CSRF token retrieved from the session")
     return session['_csrf_token']
 
 
@@ -279,20 +279,8 @@ def set_comp_env():
 def process():
     from looper import build_parser as blp
     actions = get_positional_args(blp(), sort=True)
-    # this try-except block is used to determine whether the user should be redirected to the index page
-    # to select the project when they land on the process subpage from the set_comp_env subpage
-    if globs.selected_project is None and request.form.get('select_project') is None:
-        app.logger.info("The project is not selected, redirecting to the index page.")
-        flash("No project was selected, choose one from the list below.")
-        return redirect(url_for('index'))
-    else:
-        new_selected_project = request.form.get('select_project')
-        if None not in (new_selected_project, globs.selected_project) and globs.selected_project != new_selected_project:
-            globs.purge_project_data()
-            globs.summary_links = SUMMARY_NAVBAR_PLACEHOLDER
-            app.logger.info("Project data removed")
     globs.selected_project, globs.selected_project_id, globs.current_subproj = \
-        parse_selected_project(new_selected_project)
+        select_project(request.form.get('select_project'))
     config_file = str(os.path.expandvars(os.path.expanduser(globs.selected_project)))
     if globs.p is None:
         globs.p = Project(config_file, subproject=globs.current_subproj)

@@ -16,7 +16,7 @@ import pandas as _pd
 from importlib import import_module
 from sys import stderr
 from csv import DictReader
-from flask import render_template, current_app
+from flask import current_app, render_template, redirect, url_for, flash
 from re import sub
 from functools import partial
 from looper.html_reports import *
@@ -108,20 +108,6 @@ def get_summary_html_name(prj):
     return fname + "_summary.html"
 
 
-def parse_selected_project(selection_str, sep=";"):
-    """
-    Parse the string returned by the index page form. Three strings separated by a semicolon are expected by default.
-    If the last one (subproject in our use case) is missing, an empty list is appended to the returned list,
-    which is subsequently disregarded by looper.Project.__init__ and no subproject is activated
-
-    :param str selection_str: a string formatted like: "<project_path>;<project_id>;<subproject_name>"
-    :param str sep: separator string
-    :return str: separated project and id
-    """
-    seletion_list = selection_str.split(sep)
-    return seletion_list if len(seletion_list) > 2 else seletion_list + [list()]
-
-
 def check_for_summary(prj):
     """
     Check if the summary page has been produced
@@ -180,6 +166,33 @@ def parse_config_file():
     if not os.path.isfile(project_list_path):
         raise ValueError("Project configs list isn't a file: {}".format(project_list_path))
     return CaravelConf(project_list_path)
+
+
+def select_project(proj_selection_str):
+    """
+    Parse the string returned by the index page form. Three strings separated by a semicolon are expected by default.
+    If the last one (subproject in our use case) is missing, an empty list is appended to the returned list,
+    which is subsequently disregarded by looper.Project.__init__ and no subproject is activated
+
+    :param str proj_selection_str: a string formatted like: "<project_path>;<project_id>;<subproject_name>"
+    :return list[str]: separated project, ID and subproject name
+    """
+
+    if globs.selected_project is None and proj_selection_str is None:
+        current_app.logger.info("The project is not selected, redirecting to the index page.")
+        flash("No project was selected, choose one from the list below.")
+        return redirect(url_for('index'))
+    else:
+        if None not in (proj_selection_str, globs.selected_project) and globs.selected_project != proj_selection_str:
+            globs.purge_project_data()
+            globs.summary_links = SUMMARY_NAVBAR_PLACEHOLDER
+            current_app.logger.info("Project data removed")
+    try:
+        seletion_list = proj_selection_str.split(";")
+        return seletion_list if len(seletion_list) > 2 else seletion_list + [list()]
+    except AttributeError:
+        current_app.logger.debug("The project was not selected, recovering previous one")
+        return globs.selected_project, globs.selected_project_id, globs.current_subproj
 
 
 def update_preferences():
