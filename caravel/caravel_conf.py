@@ -8,8 +8,8 @@ from collections import Mapping
 from .exceptions import *
 from .const import *
 
-# import logging
-# _LOGGER = logging.getLogger(__name__)
+import logging
+_LOGGER = logging.getLogger(__name__)
 
 
 class CaravelConf(yacman.YacAttMap):
@@ -29,30 +29,30 @@ class CaravelConf(yacman.YacAttMap):
         projects = self.setdefault(CFG_PROJECTS_KEY, dict())
         if not isinstance(projects, dict):
             if projects:
-                current_app.logger.warning("'{k}' value is a {t_old}, "
+                _LOGGER.warning("'{k}' value is a {t_old}, "
                                            "not a {t_new}".format(k=CFG_PROJECTS_KEY, t_old=type(projects).__name__,
                                                                   t_new=dict.__name__))
                 # handle old caravel config format; reformat
                 if isinstance(projects, list):
-                    current_app.logger.info("Reformatting to the new config format: v{}".format(REQ_CFG_VERSION))
+                    _LOGGER.info("Reformatting to the new config format: v{}".format(REQ_CFG_VERSION))
                     new_projects = dict()
                     for x in self[CFG_PROJECTS_KEY]:
                         new_projects.update({p: dict() for p in _process_project_path(x, config_path)})
                     self[CFG_PROJECTS_KEY] = new_projects
                 else:
-                    current_app.logger.info("Setting to empty {}".format(dict.__name__))
+                    _LOGGER.info("Setting to empty {}".format(dict.__name__))
                     self[CFG_PROJECTS_KEY] = dict()
         try:
             version = self[CFG_VERSION_KEY]
         except KeyError:
-            current_app.logger.warning("Config lacks '{}' key".format(CFG_VERSION_KEY))
-            current_app.logger.info("Adding '{}' entry: {}".format(CFG_VERSION_KEY, REQ_CFG_VERSION))
+            _LOGGER.warning("Config lacks '{}' key".format(CFG_VERSION_KEY))
+            _LOGGER.info("Adding '{}' entry: {}".format(CFG_VERSION_KEY, REQ_CFG_VERSION))
             self[CFG_VERSION_KEY] = REQ_CFG_VERSION
         else:
             try:
                 version = float(version)
             except ValueError:
-                current_app.logger.warning("Cannot parse as numeric: {}".format(version))
+                _LOGGER.warning("Cannot parse as numeric: {}".format(version))
             else:
                 if version < REQ_CFG_VERSION:
                     msg = "This caravel config (v{}) is not compliant with v{} standards. " \
@@ -60,11 +60,11 @@ class CaravelConf(yacman.YacAttMap):
                           "'pip install caravel==0.13.1'.".format(self[CFG_VERSION_KEY], str(REQ_CFG_VERSION))
                     raise ConfigNotCompliantError(msg)
                 else:
-                    current_app.logger.debug("Config version is compliant: {}".format(version))
+                    _LOGGER.debug("Config version is compliant: {}".format(version))
 
         missing_names = [p for p in self[CFG_PROJECTS_KEY].keys()
                          if not hasattr(self[CFG_PROJECTS_KEY][p], CFG_PROJECT_NAME_KEY)]
-        current_app.logger.debug("Missing project names list: {}".format(str(missing_names)))
+        _LOGGER.debug("Missing project names list: {}".format(str(missing_names)))
         self.populate_project_metadata({"name": lambda p: p.name}, missing_names).write()
 
     def __bool__(self):
@@ -73,7 +73,7 @@ class CaravelConf(yacman.YacAttMap):
 
     __nonzero__ = __bool__
 
-    def populate_project_metadata(self, attr_func=PROJECT_MDATA_FUN, paths=None, subprojects=None):
+    def populate_project_metadata(self, attr_func=PROJECT_MDATA_FUN, paths=None, subprojects=None, remove=False):
         """
         Populate project metadata attributes for every entry in CaravelConf.projects.
         If the paths argument is not provided or it's an empty list, all the list projects names will be updated.
@@ -94,29 +94,32 @@ class CaravelConf(yacman.YacAttMap):
             raise TypeError("subprojects argument has to be a list, got {}".format(type(subprojects).__name__))
         paths = paths if paths is not None else self[CFG_PROJECTS_KEY].keys()
         for path in paths:
+            if remove:
+                self.update_projects(project=path, remove=True)
+                continue
             for attr, fun in attr_func.items():
                 p = Project(path)
                 try:
                     self.update_projects(project=path, data={attr: fun(p)})
                 except Exception as e:
-                    current_app.logger.debug("Encountered '{}' -- Could not update '{}' attr for '{}'"
+                    _LOGGER.debug("Encountered '{}' -- Could not update '{}' attr for '{}'"
                                     .format(e.__class__.__name__, attr, path))
                     self.update_projects(project=path, data={attr: None})
                 try:
                     subprojects = subprojects if subprojects is not None else p.subprojects.keys()
                 except AttributeError:
-                    current_app.logger.debug("No subprojects defined for: {}".format(path))
+                    _LOGGER.debug("No subprojects defined for: {}".format(path))
                     continue
                 for sp in subprojects:
                     try:
                         p_sub = Project(path, subproject=sp)
                     except MissingSubprojectError:
-                        current_app.logger.warning("Nonexistent project:subproject combination '{}:{}'. Skipping".format(path, sp))
+                        _LOGGER.warning("Nonexistent project:subproject combination '{}:{}'. Skipping".format(path, sp))
                         continue
                     try:
                         self.update_projects(project=path, sp=sp, data={attr: fun(p_sub)})
                     except Exception as e:
-                        current_app.logger.warning("Encountered '{}' -- Could not update '{}' attr for '{}'"
+                        _LOGGER.warning("Encountered '{}' -- Could not update '{}' attr for '{}'"
                                                    .format(e.__class__.__name__, attr, path))
                         self.update_projects(project=path, data={attr: None})
         return self
@@ -130,15 +133,22 @@ class CaravelConf(yacman.YacAttMap):
         self.populate_project_metadata({"last_modified": lambda p: datetime.datetime.now().strftime("%Y-%m-%d %H:%M")},
                                        paths, subprojects=sp).write()
 
-    def update_projects(self, project, sp=None, data=None):
+    def update_projects(self, project, sp=None, data=None, remove=False):
         """
-        Updates the project in CaravelConf object at any level. If the requested project is missing, it will be added
+        Updates the project in CaravelConf object at any level. If the requested project is missing, it will be added.
+        Set the remove arg to True to remove all the metadata for the selected project
 
         :param str project: project to be added/updated
         :param str sp: subproject to be added/updated
         :param Mapping data: data to be added/updated
+        :param bool remove: whether the keys for the selected project:subproject combination should be removed
         :return CaravelConf: updated object
         """
+        def _remove_keys_but_name(mapping):
+            """ removes all the keys from the mapping but the 'name' key """
+            for k in mapping.keys():
+                if k in mapping and k != "name":
+                    del mapping[k]
         if check_insert_data(project, str, "project"):
             self[CFG_PROJECTS_KEY].setdefault(project, dict())
             if sp:
@@ -147,9 +157,13 @@ class CaravelConf(yacman.YacAttMap):
                 self[CFG_PROJECTS_KEY][project][CFG_SUBPROJECTS_KEY].setdefault(sp, dict())
                 if check_insert_data(data, Mapping, "data"):
                     self[CFG_PROJECTS_KEY][project][CFG_SUBPROJECTS_KEY][sp].update(data)
+                elif remove:
+                    _remove_keys_but_name(self[CFG_PROJECTS_KEY][project][CFG_SUBPROJECTS_KEY][sp])
             else:
                 if check_insert_data(data, Mapping, "data"):
                     self[CFG_PROJECTS_KEY][project].update(data)
+                elif remove:
+                    _remove_keys_but_name(self[CFG_PROJECTS_KEY][project])
         return self
 
     def remove_project(self, path):
@@ -162,7 +176,7 @@ class CaravelConf(yacman.YacAttMap):
         if path in self[CFG_PROJECTS_KEY]:
             del self[CFG_PROJECTS_KEY][path]
         else:
-            current_app.logger.info("{} not found".format(path))
+            _LOGGER.info("{} not found".format(path))
         return self
 
     def filter_missing(self):

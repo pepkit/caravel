@@ -227,6 +227,9 @@ def index():
         app.logger.debug("Selected project:subproject bundle to update -- {}:{} of types {}:{}"
                          .format(project, subproject, project.__class__.__name__, subproject.__class__.__name__))
         globs.cc.populate_project_metadata(paths=request.args.get('path'), subprojects=request.args.get('sp'))
+    if request.args.get('clear'):
+        globs.purge_project_data()
+        globs.cc.populate_project_metadata(remove=True).write()
     if missing_projs:
         app.logger.warning("{} projects configs not found: {}".format(len(missing_projs), ", ".join(missing_projs)))
     app.logger.debug(globs.cc)

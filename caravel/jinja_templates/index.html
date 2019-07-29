@@ -55,7 +55,10 @@
 							<div class="col-9">
 								<a href="/preferences" role="button" class="btn btn-outline-dark btn-sm mr-2 pull-right">PREFERENCES <i class="fa fa-cog"></i></a>
 								<a href="{{ url_for('index', populate=True) }}" class="btn btn-outline-dark btn-sm mr-2 pull-right" role="button" aria-disabled="false">
-									POPULATE ALL
+									UPDATE ALL <i class="fa fa-table" aria-hidden="true"></i>
+								</a>
+								<a href="{{ url_for('index', clear=True) }}" class="btn btn-outline-dark btn-sm mr-2 pull-right" role="button" aria-disabled="false">
+									CLEAR ALL <i class="fa fa-eraser" aria-hidden="true"></i>
 								</a>
 							</div>
 						</div>
