@@ -16,7 +16,8 @@ class MissingCaravelConfigError(CaravelError):
     """ Exception for missing caravel config file. """
     def __init__(self, msg):
         spacing = " " if msg[-1] in ["?", ".", "\n"] else "; "
-        super(MissingCaravelConfigError, self).__init__(msg + spacing)
+        suggest = "Use -c option to provide config path or set CARAVEL environment variable"
+        super(MissingCaravelConfigError, self).__init__(msg + spacing + suggest)
 
 
 class CaravelConfigError(CaravelError):

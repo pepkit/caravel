@@ -200,16 +200,14 @@ def parse_config_file():
 
     :return CaravelConf: a configuration object
     """
+    cfg_path = current_app.config.get("project_configs")
     if current_app.config.get("demo"):
         _ensure_package_installed("pypiper", "The demonstrational pipeline requires this package. "
                                              "Install 'pypiper' using: pip install piper")
         current_app.logger.info("Demo mode, the project configs list is auto-populated with example data")
-        project_list_path = select_config(config_filepath=DEMO_FILE_PATH,
-                                          on_missing=lambda fp: MissingCaravelConfigError(fp))
-    else:
-        project_list_path = select_config(config_filepath=current_app.config.get("project_configs"),
-                                          config_env_vars=CONFIG_ENV_VAR,
-                                          on_missing=lambda fp: MissingCaravelConfigError(fp))
+        cfg_path = DEMO_FILE_PATH
+    project_list_path = select_config(config_filepath=cfg_path, config_env_vars=CONFIG_ENV_VAR,
+                                      on_missing=lambda fp: MissingCaravelConfigError(fp))
     return CaravelConf(project_list_path)
 
 
