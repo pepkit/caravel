@@ -72,58 +72,59 @@ class CaravelConf(yacman.YacAttMap):
 
     __nonzero__ = __bool__
 
-    def populate_project_metadata(self, attr_func=PROJECT_MDATA_FUN, paths=None, subprojects=None, remove=False):
+    def populate_project_metadata(self, attr_func=PROJECT_MDATA_FUN, paths=None, sp=None, clear=False):
         """
         Populate project metadata attributes for every entry in CaravelConf.projects.
         If the paths argument is not provided or it's an empty list, all the list projects names will be updated.
 
-        :param Mapping[str,function(looper.Project) -> Any] attr_func: a Mapping of metadata attribute and corresponding lambda expression to extract
-            it from a peppy.Project object
+        :param Mapping[str,function(looper.Project) -> Any] attr_func: a Mapping of metadata attribute and
+        corresponding lambda expression to extract it from a peppy.Project object
         :param list[str] | str paths: list of paths to the project config files which names should be updated
-        :param list[str] | str subprojects: name of the subproject to populate the data for
+        :param list[str] | str sp: name of the subproject to populate the data for
         :return: CaravelConf: object with populated project attributes
         """
         if isinstance(paths, str) and os.path.isfile(paths):
             paths = [paths]
-        if isinstance(subprojects, str):
-            subprojects = [subprojects]
+        if isinstance(sp, str):
+            sp = [sp]
         if not isinstance(paths, (list, type(None))):
             raise TypeError("paths argument has to be a list, got {}".format(type(paths).__name__))
-        if not isinstance(subprojects, (list, type(None))):
-            raise TypeError("subprojects argument has to be a list, got {}".format(type(subprojects).__name__))
+        if not isinstance(sp, (list, type(None))):
+            raise TypeError("subprojects argument has to be a list, got {}".format(type(sp).__name__))
         paths = paths if paths is not None else self[CFG_PROJECTS_KEY].keys()
         for path in paths:
             if not os.path.exists(path):
                 current_app.logger.debug("path '{}' does not exist, skipping metadata update".format(path))
                 continue
-            if remove:
-                self.update_projects(project=path, remove=True)
+            if clear:
+                self.update_projects(path=path, clear=True)
                 continue
             for attr, fun in attr_func.items():
                 p = Project(path)
                 try:
-                    self.update_projects(project=path, data={attr: fun(p)})
+                    self.update_projects(path=path, data={attr: fun(p)})
                 except Exception as e:
                     current_app.logger.debug("Encountered '{}' -- Could not update '{}' attr for '{}'"
                                     .format(e.__class__.__name__, attr, path))
-                    self.update_projects(project=path, data={attr: None})
+                    self.update_projects(path=path, data={attr: None})
                 try:
-                    subprojects = subprojects if subprojects is not None else p.subprojects.keys()
+                    sp = sp if sp is not None else p.subprojects.keys()
                 except AttributeError:
                     current_app.logger.debug("No subprojects defined for: {}".format(path))
                     continue
-                for sp in subprojects:
+                for i in sp:
                     try:
-                        p_sub = Project(path, subproject=sp)
+                        p_sub = Project(path, subproject=i)
                     except MissingSubprojectError:
-                        current_app.logger.warning("Nonexistent project:subproject combination '{}:{}'. Skipping".format(path, sp))
+                        current_app.logger.warning("Nonexistent project:subproject combination '{}:{}'. "
+                                                   "Skipping".format(path, i))
                         continue
                     try:
-                        self.update_projects(project=path, sp=sp, data={attr: fun(p_sub)})
+                        self.update_projects(path=path, sp=i, data={attr: fun(p_sub)})
                     except Exception as e:
                         current_app.logger.warning("Encountered '{}' -- Could not update '{}' attr for '{}'"
                                                    .format(e.__class__.__name__, attr, path))
-                        self.update_projects(project=path, data={attr: None})
+                        self.update_projects(path=path, data={attr: None})
         return self
 
     def project_date(self, paths, sp=None):
@@ -133,17 +134,17 @@ class CaravelConf(yacman.YacAttMap):
         :param str sp: name of the subproject
         """
         self.populate_project_metadata({"last_modified": lambda p: datetime.datetime.now().strftime("%Y-%m-%d %H:%M")},
-                                       paths, subprojects=sp).write()
+                                       paths, sp=sp).write()
 
-    def update_projects(self, project, sp=None, data=None, remove=False):
+    def update_projects(self, path, sp=None, data=None, clear=False):
         """
         Updates the project in CaravelConf object at any level. If the requested project is missing, it will be added.
         Set the remove arg to True to remove all the metadata for the selected project
 
-        :param str project: project to be added/updated
+        :param str path: project to be added/updated
         :param str sp: subproject to be added/updated
         :param Mapping data: data to be added/updated
-        :param bool remove: whether the keys for the selected project:subproject combination should be removed
+        :param bool clear: whether the keys for the selected project:subproject combination should be removed
         :return CaravelConf: updated object
         """
         def _remove_keys_but_name(mapping):
@@ -151,34 +152,45 @@ class CaravelConf(yacman.YacAttMap):
             for k in mapping.keys():
                 if k in mapping and k != "name":
                     del mapping[k]
-        if check_insert_data(project, str, "project"):
-            self[CFG_PROJECTS_KEY].setdefault(project, dict())
+        if check_insert_data(path, str, "project"):
+            self[CFG_PROJECTS_KEY].setdefault(path, dict())
             if sp:
                 check_insert_data(sp, str, "sp")
-                self[CFG_PROJECTS_KEY][project].setdefault(CFG_SUBPROJECTS_KEY, dict())
-                self[CFG_PROJECTS_KEY][project][CFG_SUBPROJECTS_KEY].setdefault(sp, dict())
+                self[CFG_PROJECTS_KEY][path].setdefault(CFG_SUBPROJECTS_KEY, dict())
+                self[CFG_PROJECTS_KEY][path][CFG_SUBPROJECTS_KEY].setdefault(sp, dict())
                 if check_insert_data(data, Mapping, "data"):
-                    self[CFG_PROJECTS_KEY][project][CFG_SUBPROJECTS_KEY][sp].update(data)
-                elif remove:
-                    _remove_keys_but_name(self[CFG_PROJECTS_KEY][project][CFG_SUBPROJECTS_KEY][sp])
+                    self[CFG_PROJECTS_KEY][path][CFG_SUBPROJECTS_KEY][sp].update(data)
+                elif clear:
+                    _remove_keys_but_name(self[CFG_PROJECTS_KEY][path][CFG_SUBPROJECTS_KEY][sp])
             else:
                 if check_insert_data(data, Mapping, "data"):
-                    self[CFG_PROJECTS_KEY][project].update(data)
-                elif remove:
-                    _remove_keys_but_name(self[CFG_PROJECTS_KEY][project])
+                    self[CFG_PROJECTS_KEY][path].update(data)
+                elif clear:
+                    _remove_keys_but_name(self[CFG_PROJECTS_KEY][path])
         return self
 
-    def remove_project(self, path):
+    def remove_project(self, path, sp=None):
         """
-        Removes project by path
+        Removes project/subproject by path/name
 
         :param str path: path of the project to be deleted
+        :param str sp: name of the subproject to be deleted
         :return CaravelConf: updated object
         """
         if path in self[CFG_PROJECTS_KEY]:
-            del self[CFG_PROJECTS_KEY][path]
+            if sp:
+                if sp in self[CFG_PROJECTS_KEY][path][CFG_SUBPROJECTS_KEY]:
+                    del self[CFG_PROJECTS_KEY][path][CFG_SUBPROJECTS_KEY][sp]
+                    if not bool(len(self[CFG_PROJECTS_KEY][path][CFG_SUBPROJECTS_KEY].keys())):
+                        current_app.logger.info("No more subprojs defined for '{}', "
+                                                "removing '{}' section".format(path, CFG_SUBPROJECTS_KEY))
+                        del self[CFG_PROJECTS_KEY][path][CFG_SUBPROJECTS_KEY]
+                else:
+                    current_app.logger.warning("'{}:{}' not found".format(path, sp))
+            else:
+                del self[CFG_PROJECTS_KEY][path]
         else:
-            current_app.logger.info("{} not found".format(path))
+            current_app.logger.warning("'{}' not found".format(path))
         return self
 
     def filter_missing(self):

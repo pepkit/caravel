@@ -221,15 +221,17 @@ def index():
     globs.cc = globs.cc or parse_config_file()
     update_preferences()
     missing_projs = globs.cc.list_missing_projects() or None
+    project = request.args.get('path')
+    subproject = request.args.get('sp')
+    app.logger.debug("Selected project:subproject bundle -- {}:{} of types {}:{}"
+                     .format(project, subproject, project.__class__.__name__, subproject.__class__.__name__))
+    if request.args.get('remove'):
+        globs.cc.remove_project(path=project, sp=subproject).write()
     if request.args.get('populate'):
-        project = request.args.get('path')
-        subproject = request.args.get('sp')
-        app.logger.debug("Selected project:subproject bundle to update -- {}:{} of types {}:{}"
-                         .format(project, subproject, project.__class__.__name__, subproject.__class__.__name__))
-        globs.cc.populate_project_metadata(paths=request.args.get('path'), subprojects=request.args.get('sp'))
+        globs.cc.populate_project_metadata(paths=project, sp=subproject).write()
     if request.args.get('clear'):
         globs.purge_project_data()
-        globs.cc.populate_project_metadata(remove=True).write()
+        globs.cc.populate_project_metadata(clear=True).write()
     if missing_projs:
         app.logger.warning("{} projects configs not found: {}".format(len(missing_projs), ", ".join(missing_projs)))
     app.logger.debug(globs.cc)

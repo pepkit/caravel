@@ -73,11 +73,7 @@
 									<th class="text-nowrap text-center">Protocols</th>
                                     <th class="text-nowrap text-center">Inputs size</th>
 									<th class="text-nowrap text-center">Last modified</th>
-									<th class="text-nowrap text-center">
-										<a href="{{ url_for('index', populate=True) }}">
-											Update metadata
-										</a>
-									</th>
+									<th class="text-nowrap text-center">Update/remove project</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -109,8 +105,11 @@
 											{{ cc.projects[p].last_modified }}
 										</td>
 										<td class="text-nowrap text-center">
-											<a href="{{ url_for('index', populate=True, path=p) }}" class="btn btn-outline-dark btn-sm" role="button">
-												Update
+											<a href="{{ url_for('index', populate=True, path=p, sp=sp) }}" class="btn btn-outline-dark btn-sm mr-0" role="button">
+												<i class="fa fa-refresh" aria-hidden="true"></i>
+											</a>
+											<a href="{{ url_for('index', remove=True, path=p, sp=sp) }}" class="btn btn-outline-dark btn-sm ml-o" role="button">
+												<i class="fa fa-trash" aria-hidden="true"></i>
 											</a>
 										</td>
 									</tr>
@@ -138,8 +137,11 @@
 												{{ cc.projects[p].subprojects[sp].last_modified }}
 											</td>
 											<td class="text-nowrap text-center">
-												<a href="{{ url_for('index', populate=True, path=p, sp=sp) }}" class="btn btn-outline-dark btn-sm" role="button">
-													Update
+												<a href="{{ url_for('index', populate=True, path=p, sp=sp) }}" class="btn btn-outline-dark btn-sm mr-0" role="button">
+													<i class="fa fa-refresh" aria-hidden="true"></i>
+												</a>
+												<a href="{{ url_for('index', remove=True, path=p, sp=sp) }}" class="btn btn-outline-dark btn-sm ml-o" role="button">
+													<i class="fa fa-trash" aria-hidden="true"></i>
 												</a>
 											</td>
 										</tr>
