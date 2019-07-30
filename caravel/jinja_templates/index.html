@@ -105,7 +105,7 @@
 											{{ cc.projects[p].last_modified }}
 										</td>
 										<td class="text-nowrap text-center">
-											<a href="{{ url_for('index', populate=True, path=p, sp=sp) }}" class="btn btn-outline-info btn-sm mr-0" role="button">
+											<a href="{{ url_for('index', populate=True, path=p, sp=none) }}" class="btn btn-outline-info btn-sm mr-0" role="button">
 												<i class="fa fa-refresh" aria-hidden="true"></i>
 											</a>
 											<a href="{{ url_for('index', remove=True, path=p, sp=sp) }}" class="btn btn-outline-danger btn-sm ml-0" role="button">
@@ -120,7 +120,7 @@
 												<i class="fa fa-chevron-right" aria-hidden="true"></i>
 											</td>
 											<td>
-												<button type="submit" class="btn btn-secondary btn-sm" name="select_project" value="{{ p }};{{ outer_loop.index }};{{ sp }}">
+												<button type="submit" class="btn btn-outline-secondary btn-sm" name="select_project" value="{{ p }};{{ outer_loop.index }};{{ sp }}">
 													{{ sp }}
 												</button>
 											</td>

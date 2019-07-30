@@ -81,6 +81,7 @@ class CaravelConf(yacman.YacAttMap):
         corresponding lambda expression to extract it from a peppy.Project object
         :param list[str] | str paths: list of paths to the project config files which names should be updated
         :param list[str] | str sp: name of the subproject to populate the data for
+        :param bool clear: whether specified project/subproject metadata should be removed
         :return: CaravelConf: object with populated project attributes
         """
         if isinstance(paths, str) and os.path.isfile(paths):
