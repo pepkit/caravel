@@ -64,7 +64,7 @@
 						</div>
 					</div>
 					<div class="card-body">
-						<table id="projects-table" data-height="400" data-toggle="table" class="table-sm table-bordered">
+						<table id="projects-table" data-height="400" data-toggle="table" data-search="true" data-show-columns="true" class="table-sm">
 							<thead class="thead-light">
 								<tr>
 									<th data-field="name" class="text-nowrap text-center">Project name</th>
@@ -89,7 +89,7 @@
 											{% if cc.projects[p].num_sp is none %}
 												{{ cc.projects[p].num_sp }}
 											{% else %}
-												<a href="JavaScript:void(0);" data-toggle="collapse"  data-target="#sp{{ outer_loop.index }}" class="accordion-toggle">{{ cc.projects[p].num_sp }}</a>
+												<a href="JavaScript:void(0);" data-toggle="collapse"  data-target="#sp{{ outer_loop.index }}">{{ cc.projects[p].num_sp }}</a>
 											{% endif %}
 										</td>
 										<td class="text-nowrap text-center">
@@ -115,8 +115,8 @@
 									</tr>
 									{% if cc.projects[p].subprojects is defined %}
 										{% for sp in cc.projects[p].subprojects.keys() %}
-										<tr id="sp{{ outer_loop.index }}" class="accordian-body collapse show">
-											<td class="text-nowrap text-center" data-toggle="collapse"  data-target="#sp{{ outer_loop.index }}" class="accordion-toggle text-nowrap text-center">
+										<tr id="sp{{ outer_loop.index }}" class="collapse show">
+											<td class="text-nowrap text-center" data-toggle="collapse"  data-target="#sp{{ outer_loop.index }}">
 												<i class="fa fa-chevron-right" aria-hidden="true"></i>
 											</td>
 											<td>

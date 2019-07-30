@@ -206,3 +206,12 @@ div#projects-table_info {
 #projects-table td {
     font-size:0.8rem;
 }
+
+.collapsed .fa {
+  transform: rotate(-90deg);
+  transition: .2s transform ease-in-out;
+}
+
+.collapse .fa {
+  cursor: pointer;
+}
