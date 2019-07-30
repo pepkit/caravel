@@ -150,7 +150,7 @@ class CaravelConf(yacman.YacAttMap):
         def _remove_keys_but_name(mapping):
             """ removes all the keys from the mapping but the 'name' key """
             for k in mapping.keys():
-                if k in mapping and k != "name":
+                if k in mapping and k != CFG_PROJECT_NAME_KEY:
                     del mapping[k]
         if check_insert_data(path, str, "project"):
             self[CFG_PROJECTS_KEY].setdefault(path, dict())

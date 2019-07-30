@@ -73,7 +73,7 @@
 									<th class="text-nowrap text-center">Protocols</th>
                                     <th class="text-nowrap text-center">Inputs size</th>
 									<th class="text-nowrap text-center">Last modified</th>
-									<th class="text-nowrap text-center">Update/remove project</th>
+									<th class="text-nowrap text-center">&nbsp;</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -105,10 +105,10 @@
 											{{ cc.projects[p].last_modified }}
 										</td>
 										<td class="text-nowrap text-center">
-											<a href="{{ url_for('index', populate=True, path=p, sp=sp) }}" class="btn btn-outline-dark btn-sm mr-0" role="button">
+											<a href="{{ url_for('index', populate=True, path=p, sp=sp) }}" class="btn btn-outline-info btn-sm mr-0" role="button">
 												<i class="fa fa-refresh" aria-hidden="true"></i>
 											</a>
-											<a href="{{ url_for('index', remove=True, path=p, sp=sp) }}" class="btn btn-outline-dark btn-sm ml-o" role="button">
+											<a href="{{ url_for('index', remove=True, path=p, sp=sp) }}" class="btn btn-outline-danger btn-sm ml-0" role="button">
 												<i class="fa fa-trash" aria-hidden="true"></i>
 											</a>
 										</td>
@@ -137,10 +137,10 @@
 												{{ cc.projects[p].subprojects[sp].last_modified }}
 											</td>
 											<td class="text-nowrap text-center">
-												<a href="{{ url_for('index', populate=True, path=p, sp=sp) }}" class="btn btn-outline-dark btn-sm mr-0" role="button">
+												<a href="{{ url_for('index', populate=True, path=p, sp=sp) }}" class="btn btn-outline-info btn-sm mr-0" role="button">
 													<i class="fa fa-refresh" aria-hidden="true"></i>
 												</a>
-												<a href="{{ url_for('index', remove=True, path=p, sp=sp) }}" class="btn btn-outline-dark btn-sm ml-o" role="button">
+												<a href="{{ url_for('index', remove=True, path=p, sp=sp) }}" class="btn btn-outline-danger btn-sm ml-0" role="button">
 													<i class="fa fa-trash" aria-hidden="true"></i>
 												</a>
 											</td>
