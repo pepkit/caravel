@@ -436,6 +436,7 @@ def main():
         globs.logging_lvl = logging.DEBUG
     else:
         generate_token(token=parse_token_file())
+    app.logger.setLevel(globs.logging_lvl or logging.INFO)
     app.logger.info("Using python {}".format(python_version()))
     app.run(port=args.port, host='0.0.0.0')
 

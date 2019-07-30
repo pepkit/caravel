@@ -1,6 +1,6 @@
-import yacman
 import glob
 import datetime
+from yacman import YacAttMap
 from looper import Project
 from peppy.exceptions import MissingSubprojectError
 from flask import current_app
@@ -12,7 +12,7 @@ from .const import *
 # _LOGGER = logging.getLogger(__name__)
 
 
-class CaravelConf(yacman.YacAttMap):
+class CaravelConf(YacAttMap):
     """ Object used to interact with the caravel configuration file """
     def __init__(self, entries=None):
         """

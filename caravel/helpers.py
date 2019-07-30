@@ -3,12 +3,12 @@ from __future__ import print_function
 import globs
 from const import *
 from .caravel_conf import *
+from .exceptions import MissingCaravelConfigError
 import looper
 import peppy
 import argparse
 import random
 import string
-import yaml
 import fcntl
 import termios
 import struct
@@ -23,6 +23,7 @@ from looper.html_reports import *
 from looper.looper import Summarizer, get_file_for_project, uniqify, run_custom_summarizers
 from logmuse import setup_logger
 from looper.utils import fetch_sample_flags
+import yacman
 from platform import python_version
 from distutils.version import LooseVersion
 from itertools import chain
@@ -136,19 +137,60 @@ def _ensure_package_installed(name, error_msg_appdx=""):
                           "but is conditionally required. {}".format(name, error_msg_appdx))
 
 
-def _get_configs_path():
+def select_config(config_filepath=None,
+                  config_env_vars=None,
+                  default_config_filepath=None,
+                  check_exist=True,
+                  on_missing=lambda fp: IOError(fp)):
     """
-    Parses the config file (YAML) provided as an CLI argument or in a environment variable ($CARAVEL)
-    or uses example data if run in the demo mode. The demo is given the priority.
+    Selects the config file to load.
 
-    :return str: path to the caravel config file
+    This uses a priority ordering to first choose a config filepath if it's given,
+    but if not, then look in a priority list of environment variables and choose
+    the first available filepath to return.
+
+    :param str | NoneType config_filepath: direct filepath specification
+    :param Iterable[str] | NoneType config_env_vars: names of environment
+        variables to try for config filepaths
+    :param str default_config_filepath: default value if no other alternative
+        resolution succeeds
+    :param bool check_exist: whether to check for path existence as file
+    :param function(str) -> object on_missing: what to do with a filepath if it
+        doesn't exist
     """
-    if current_app.config.get("demo"):
-        _ensure_package_installed("pypiper", "The demonstrational pipeline requires this package. "
-                                             "Install 'pypiper' using: pip install piper")
-        current_app.logger.info("Demo mode, the project configs list is auto-populated with example data")
-        return DEMO_FILE_PATH
-    return current_app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
+    def _checker(path, strict=check_exist, user_error=on_missing):
+        if path:
+            if not strict or os.path.isfile(path):
+                return path
+            current_app.logger.error(path)
+            result = user_error(path)
+            if isinstance(result, Exception):
+                raise result
+            return result
+    try:
+        env_var = yacman.get_first_env_var(config_env_vars)[1] if config_env_vars else config_env_vars
+    except TypeError:
+        env_var = None
+    paths = [config_filepath,
+             env_var,
+             default_config_filepath]
+    msgs = ["{} config_filepath {}",
+            "{} environment variable {}",
+            "{} default config file {}"]
+    i = 0
+    current_app.logger.debug(msgs[i].format("Checking", paths[i]))
+    try:
+        while _checker(paths[i]) is None:
+            i += 1
+            current_app.logger.debug(msgs[i].format("Checking", paths[i]))
+        current_app.logger.info(msgs[i].format("Using", "-- " + paths[i]))
+        return paths[i]
+    except IndexError:
+        txt = "No configuration file found"
+        result = on_missing(txt)
+        if isinstance(result, Exception):
+            raise result
+        print(txt)
 
 
 def parse_config_file():
@@ -158,13 +200,16 @@ def parse_config_file():
 
     :return CaravelConf: a configuration object
     """
-    project_list_path = _get_configs_path()
-    if project_list_path is None:
-        raise ValueError("Please set the environment variable {} or provide a YAML file listing paths to project "
-                         "config files".format(CONFIG_ENV_VAR))
-    project_list_path = os.path.normpath(os.path.join(os.getcwd(), os.path.expanduser(project_list_path)))
-    if not os.path.isfile(project_list_path):
-        raise ValueError("Project configs list isn't a file: {}".format(project_list_path))
+    if current_app.config.get("demo"):
+        _ensure_package_installed("pypiper", "The demonstrational pipeline requires this package. "
+                                             "Install 'pypiper' using: pip install piper")
+        current_app.logger.info("Demo mode, the project configs list is auto-populated with example data")
+        project_list_path = select_config(config_filepath=DEMO_FILE_PATH,
+                                          on_missing=lambda fp: MissingCaravelConfigError(fp))
+    else:
+        project_list_path = select_config(config_filepath=current_app.config.get("project_configs"),
+                                          config_env_vars=CONFIG_ENV_VAR,
+                                          on_missing=lambda fp: MissingCaravelConfigError(fp))
     return CaravelConf(project_list_path)
 
 
@@ -255,11 +300,11 @@ def expand_path(p, root=""):
     if root:
         if not os.path.isabs(root):
             raise ValueError("Non-absolute root path: {}".format(root))
-        
+
         def absolutize(x):
             return os.path.join(root, x)
     else:
-        
+
         def absolutize(x):
             return x
     exp = os.path.expanduser(os.path.expandvars(p))
