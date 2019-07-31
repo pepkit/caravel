@@ -215,3 +215,11 @@ div#projects-table_info {
 .collapse .fa {
   cursor: pointer;
 }
+
+.fixed-table-border {
+  border-color:transparent !important;
+}
+
+.bootstrap-table .fixed-table-container.fixed-height:not(.has-footer) {
+  border-bottom-color: transparent !important;
+}
