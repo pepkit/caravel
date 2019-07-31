@@ -223,3 +223,7 @@ div#projects-table_info {
 .bootstrap-table .fixed-table-container.fixed-height:not(.has-footer) {
   border-bottom-color: transparent !important;
 }
+
+.card-body#table {
+  padding-top: 0px;
+}
