@@ -4,26 +4,12 @@
 	<script type=text/javascript>
 		$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 	</script>
-	<script type=text/javascript>
-	  $(function() {
-		$('a#exec').bind('click', function() {
-		  $.getJSON($SCRIPT_ROOT + '/_background_exec', {
-			cmd: $('select[name="command"]').val(),
-		  }, function(data) {
-			$("#exec_txt").text(data.exec_txt);
-		  });
-		});
-	  });
+	<script>
+<!--		$(".rotate").click(function(){-->
+<!--			$(this).toggleClass("down");-->
+<!--		})-->
 	</script>
-	<script type="text/javascript">
-		$(function() {
-			$('#gobtn').bind('click', function() {
-				$('#select_project').submit();
-				$("#gobtn").attr("disabled", true);
-				$('#gobtn').html('LOADING PROJECT DATA <i class="fa fa-spinner fa-pulse fa-fw"></i>');
-			});
-		});
-	</script>
+	<script src="https://code.jquery.com/jquery-3.3.1.js" type="text/javascript"></script>
     <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
 	<link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.15.3/dist/bootstrap-table.min.css">
 	<script src="https://unpkg.com/bootstrap-table@1.15.3/dist/bootstrap-table.min.js"></script>
@@ -68,8 +54,8 @@
 							<thead class="thead-light">
 								<tr>
 									<th class="text-nowrap text-center">Action</th>
+									<th>&nbsp;</th>
 									<th data-field="name" class="text-nowrap text-center">Project name</th>
-									<th data-field="sp_count" class="text-nowrap text-center">Subproject count</th>
 									<th class="text-nowrap text-center">Sample count</th>
 									<th class="text-nowrap text-center">Protocols</th>
                                     <th class="text-nowrap text-center">Inputs size</th>
@@ -92,14 +78,14 @@
 											</button>
 										</td>
 										<td class="text-nowrap text-center">
-											{{ cc.projects[p].name }}
+											{% if cc.projects[p].num_sp is not none %}
+												<div class="fa fa-chevron-down rotate" aria-hidden="true" data-toggle="collapse"  data-target="#sp{{ outer_loop.index }}"></div>
+											{% else %}
+												&nbsp;
+											{% endif %}
 										</td>
 										<td class="text-nowrap text-center">
-											{% if cc.projects[p].num_sp is none %}
-												{{ cc.projects[p].num_sp }}
-											{% else %}
-												<a href="JavaScript:void(0);" data-toggle="collapse"  data-target="#sp{{ outer_loop.index }}">{{ cc.projects[p].num_sp }}</a>
-											{% endif %}
+											{{ cc.projects[p].name }}
 										</td>
 										<td class="text-nowrap text-center">
 											{{ cc.projects[p].num_samples }}
@@ -116,7 +102,7 @@
 									</tr>
 									{% if cc.projects[p].subprojects is defined %}
 										{% for sp in cc.projects[p].subprojects.keys() %}
-										<tr id="sp{{ outer_loop.index }}" class="noborder collapse show">
+										<tr id="sp{{ outer_loop.index }}" class="collapse show">
 											<td class="text-nowrap text-center">
 												<a href="{{ url_for('index', populate=True, path=p, sp=sp) }}" class="btn btn-outline-info btn-sm mr-0" role="button">
 													<i class="fa fa-refresh" aria-hidden="true"></i>
@@ -128,8 +114,8 @@
 													<i class="fa fa-play-circle" aria-hidden="true"></i>
 												</button>
 											</td>
-											<td class="text-nowrap text-center" data-toggle="collapse"  data-target="#sp{{ outer_loop.index }}">
-												<i class="fa fa-chevron-right" aria-hidden="true"></i>
+											<td>
+												&nbsp;
 											</td>
 											<td>
 												{{ sp }}

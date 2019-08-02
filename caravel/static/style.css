@@ -193,7 +193,6 @@ div#projects-table_info {
   font-size: 0.8rem;
 }
 
-
 .container-fluid {
   padding: 15px;
 }
@@ -205,15 +204,6 @@ div#projects-table_info {
 
 #projects-table td {
     font-size:0.8rem;
-}
-
-.collapsed .fa {
-  transform: rotate(-90deg);
-  transition: .2s transform ease-in-out;
-}
-
-.collapse .fa {
-  cursor: pointer;
 }
 
 .fixed-table-border {
@@ -230,4 +220,16 @@ div#projects-table_info {
 
 .container#project-table {
   max-width: none !important;
+}
+
+.rotate{
+    -moz-transition: all .2s linear;
+    -webkit-transition: all .2s linear;
+    transition: all .2s linear;
+}
+
+.collapsed{
+    -moz-transform:rotate(-90deg);
+    -webkit-transform:rotate(-90deg);
+    transform:rotate(-90deg);
 }
