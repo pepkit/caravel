@@ -67,13 +67,13 @@
 						<table id="projects-table" data-height="400" data-toggle="table" data-search="true" data-show-columns="true" class="table-sm">
 							<thead class="thead-light">
 								<tr>
+									<th class="text-nowrap text-center">Action</th>
 									<th data-field="name" class="text-nowrap text-center">Project name</th>
 									<th data-field="sp_count" class="text-nowrap text-center">Subproject count</th>
 									<th class="text-nowrap text-center">Sample count</th>
 									<th class="text-nowrap text-center">Protocols</th>
                                     <th class="text-nowrap text-center">Inputs size</th>
 									<th class="text-nowrap text-center">Last modified</th>
-									<th class="text-nowrap text-center">Action</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -81,9 +81,18 @@
 									{% set outer_loop = loop %}
 									<tr valign="middle">
 										<td class="text-nowrap text-center">
-											<button type="submit" class="btn btn-secondary btn-sm" name="select_project" value="{{ p }};{{ outer_loop.index }}">
-												{{ cc.projects[p].name }}
+											<a href="{{ url_for('index', populate=True, path=p, sp=none) }}" class="btn btn-outline-info btn-sm mr-0" role="button">
+												<i class="fa fa-refresh" aria-hidden="true"></i>
+											</a>
+											<a href="{{ url_for('index', remove=True, path=p, sp=sp) }}" class="btn btn-outline-danger btn-sm ml-0" role="button">
+												<i class="fa fa-trash" aria-hidden="true"></i>
+											</a>
+											<button type="submit" class="btn btn-outline-success btn-sm ml-0" name="select_project" value="{{ p }};{{ outer_loop.index }}">
+												<i class="fa fa-play-circle" aria-hidden="true"></i>
 											</button>
+										</td>
+										<td class="text-nowrap text-center">
+											{{ cc.projects[p].name }}
 										</td>
 										<td class="text-nowrap text-center">
 											{% if cc.projects[p].num_sp is none %}
@@ -104,25 +113,26 @@
 										<td class="text-nowrap text-center">
 											{{ cc.projects[p].last_modified }}
 										</td>
-										<td class="text-nowrap text-center">
-											<a href="{{ url_for('index', populate=True, path=p, sp=none) }}" class="btn btn-outline-info btn-sm mr-0" role="button">
-												<i class="fa fa-refresh" aria-hidden="true"></i>
-											</a>
-											<a href="{{ url_for('index', remove=True, path=p, sp=sp) }}" class="btn btn-outline-danger btn-sm ml-0" role="button">
-												<i class="fa fa-trash" aria-hidden="true"></i>
-											</a>
-										</td>
 									</tr>
 									{% if cc.projects[p].subprojects is defined %}
 										{% for sp in cc.projects[p].subprojects.keys() %}
-										<tr id="sp{{ outer_loop.index }}" class="collapse show">
+										<tr id="sp{{ outer_loop.index }}" class="noborder collapse show">
+											<td class="text-nowrap text-center">
+												<a href="{{ url_for('index', populate=True, path=p, sp=sp) }}" class="btn btn-outline-info btn-sm mr-0" role="button">
+													<i class="fa fa-refresh" aria-hidden="true"></i>
+												</a>
+												<a href="{{ url_for('index', remove=True, path=p, sp=sp) }}" class="btn btn-outline-danger btn-sm ml-0" role="button">
+													<i class="fa fa-trash" aria-hidden="true"></i>
+												</a>
+												<button type="submit" class="btn btn-outline-success btn-sm ml-0" name="select_project" value="{{ p }};{{ outer_loop.index }};{{ sp }}">
+													<i class="fa fa-play-circle" aria-hidden="true"></i>
+												</button>
+											</td>
 											<td class="text-nowrap text-center" data-toggle="collapse"  data-target="#sp{{ outer_loop.index }}">
 												<i class="fa fa-chevron-right" aria-hidden="true"></i>
 											</td>
 											<td>
-												<button type="submit" class="btn btn-outline-secondary btn-sm" name="select_project" value="{{ p }};{{ outer_loop.index }};{{ sp }}">
-													{{ sp }}
-												</button>
+												{{ sp }}
 											</td>
 											<td class="text-nowrap text-center">
 												{{ cc.projects[p].subprojects[sp].num_samples }}
@@ -135,14 +145,6 @@
 											</td>
 											<td class="text-nowrap text-center">
 												{{ cc.projects[p].subprojects[sp].last_modified }}
-											</td>
-											<td class="text-nowrap text-center">
-												<a href="{{ url_for('index', populate=True, path=p, sp=sp) }}" class="btn btn-outline-info btn-sm mr-0" role="button">
-													<i class="fa fa-refresh" aria-hidden="true"></i>
-												</a>
-												<a href="{{ url_for('index', remove=True, path=p, sp=sp) }}" class="btn btn-outline-danger btn-sm ml-0" role="button">
-													<i class="fa fa-trash" aria-hidden="true"></i>
-												</a>
 											</td>
 										</tr>
 										{% endfor %}
