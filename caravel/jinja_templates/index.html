@@ -41,19 +41,19 @@
 			</ul>
 		</div>
 	{% endif %}
-	<div class="container">
+	<div class="container" id="project-table">
 		<div class="row">
-			<div class="table-responsive-lg" style="min-width: 900px;">
+		<div class="col-12">
+			<div class="table-responsive-lg">
 				<form id="select_project" class="form" method="POST" action="{{ url_for('process') }}">
 				<input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
-				<div class="card">
+				<div class="card align-self-center">
 					<div class="card-header">
 						<div class="row">
 							<div class="col-3 mt-1">
 								<b>Select a project</b>
 							</div>
 							<div class="col-9">
-								<a href="/preferences" role="button" class="btn btn-outline-dark btn-sm mr-2 pull-right">PREFERENCES <i class="fa fa-cog"></i></a>
 								<a href="{{ url_for('index', populate=True) }}" class="btn btn-outline-dark btn-sm mr-2 pull-right" role="button" aria-disabled="false">
 									UPDATE ALL <i class="fa fa-table" aria-hidden="true"></i>
 								</a>
@@ -64,7 +64,7 @@
 						</div>
 					</div>
 					<div class="card-body" id="table">
-						<table id="projects-table" data-height="400" data-toggle="table" data-search="true" data-show-columns="true" class="table-sm">
+						<table id="projects-table" data-toggle="table" data-search="true" data-show-columns="true" class="table-sm">
 							<thead class="thead-light">
 								<tr>
 									<th class="text-nowrap text-center">Action</th>
@@ -156,6 +156,7 @@
 				</div>
 				</form>
 			</div>
+		</div>
 		</div>
 	</div>
 {% endblock %}

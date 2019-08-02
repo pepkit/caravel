@@ -227,3 +227,7 @@ div#projects-table_info {
 .card-body#table {
   padding-top: 0px;
 }
+
+.container#project-table {
+  max-width: none !important;
+}
