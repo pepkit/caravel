@@ -4,12 +4,6 @@
 	<script type=text/javascript>
 		$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 	</script>
-	<script>
-<!--		$(".rotate").click(function(){-->
-<!--			$(this).toggleClass("down");-->
-<!--		})-->
-	</script>
-	<script src="https://code.jquery.com/jquery-3.3.1.js" type="text/javascript"></script>
     <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
 	<link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.15.3/dist/bootstrap-table.min.css">
 	<script src="https://unpkg.com/bootstrap-table@1.15.3/dist/bootstrap-table.min.js"></script>
@@ -77,9 +71,9 @@
 												<i class="fa fa-play-circle" aria-hidden="true"></i>
 											</button>
 										</td>
-										<td class="text-nowrap text-center">
-											{% if cc.projects[p].num_sp is not none %}
-												<div class="fa fa-chevron-down rotate" aria-hidden="true" data-toggle="collapse"  data-target="#sp{{ outer_loop.index }}"></div>
+										<td class="text-nowrap text-center" style='border-right:none'>
+											{% if cc.projects[p].num_sp is not none and cc.projects[p].num_sp is defined %}
+												<div style="cursor: pointer;" class="fa fa-chevron-down rotate" aria-hidden="true" data-toggle="collapse"  data-target="#sp{{ outer_loop.index }}"></div>
 											{% else %}
 												&nbsp;
 											{% endif %}
