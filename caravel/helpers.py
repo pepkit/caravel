@@ -236,7 +236,24 @@ def select_project(proj_selection_str):
         return globs.selected_project, globs.selected_project_id, globs.current_subproj
 
 
-def update_preferences():
+def write_preferences(preferences_dict):
+    """
+    Write the preferences to the global caravel config file
+
+    :param dict preferences_dict: preferences to be written
+    """
+    for preference_name, preference_value in preferences_dict.items():
+        try:
+            if check_insert_data(preference_value, PREFERENCES_NAMES_TYPES[preference_name], preference_name):
+                globs.cc.setdefault(CFG_PREFERENCES_KEY, dict())
+                globs.cc[CFG_PREFERENCES_KEY][preference_name] = preference_value
+        except KeyError:
+            current_app.logger.warning("Preference '{}' cannot be set. The defined preferences are: {}".
+                                       format(preference_name, ", ".join(PREFERENCES_NAMES_TYPES.keys())))
+    globs.cc.write()
+
+
+def read_preferences():
     """
     Update preferences. If an appropriate key under preferences key is found, the type of the value
     associated with the key is checked and the particular setting was not set manually -- the global setting is updated.
@@ -257,6 +274,7 @@ def update_preferences():
             current_app.logger.debug("'{}' set to {}".format(name, cc[CFG_PREFERENCES_KEY][name]))
 
     if hasattr(globs.cc, CFG_PREFERENCES_KEY):
+        current_app.logger.debug("cc has the pref key")
         for pref_name, val_type in PREFERENCES_NAMES_TYPES.iteritems():
             _check_apply_pref(globs.cc, pref_name, val_type)
 

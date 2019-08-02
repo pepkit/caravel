@@ -219,7 +219,7 @@ def index():
         globs.summary_links = SUMMARY_NAVBAR_PLACEHOLDER
         app.logger.info("Project data removed")
     globs.cc = globs.cc or parse_config_file()
-    update_preferences()
+    read_preferences()
     missing_projs = globs.cc.list_missing_projects() or None
     project = request.args.get('path')
     subproject = request.args.get('sp')
@@ -268,11 +268,14 @@ def set_comp_env():
             return jsonify(active_settings=render_template('compute_info.html', active_settings=None, msg=msg))
         globs.compute_package = selected_package
         active_settings = globs.compute_config.get_active_package()
+        write_preferences({"status_check_interval": globs.status_check_interval,
+                       "compute_package": globs.compute_package})
         return jsonify(active_settings=render_template('compute_info.html', active_settings=active_settings))
     active_settings = globs.compute_config.get_active_package()
     notify_not_set = COMPUTE_SETTINGS_VARNAME[0] if \
         globs.compute_config.default_config_file == globs.compute_config.config_file else None
-
+    write_preferences({"status_check_interval": globs.status_check_interval,
+                       "compute_package": globs.compute_package})
     return render_template('preferences.html', env_conf_file=globs.compute_config.config_file,
                            compute_packages=globs.compute_config.list_compute_packages(), active_settings=active_settings,
                            compute_package=globs.compute_package, notify_not_set=notify_not_set,
