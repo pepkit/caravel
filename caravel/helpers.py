@@ -230,7 +230,7 @@ def select_project(proj_selection_str):
             current_app.logger.info("Project data removed")
     try:
         seletion_list = proj_selection_str.split(";")
-        return seletion_list if len(seletion_list) > 2 else seletion_list + [None]
+        return seletion_list if len(seletion_list) > 2 else seletion_list + [list()]
     except AttributeError:
         current_app.logger.debug("The project was not selected, recovering previous one")
         return globs.selected_project, globs.selected_project_id, globs.current_subproj

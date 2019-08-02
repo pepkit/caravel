@@ -1,12 +1,15 @@
-import glob
 import datetime
-from yacman import YacAttMap
+import glob
+from collections import Mapping
+
+from flask import current_app
 from looper import Project
 from peppy.exceptions import MissingSubprojectError
-from flask import current_app
-from collections import Mapping
-from .exceptions import *
+from yacman import YacAttMap
+
 from .const import *
+from .exceptions import *
+
 
 # import logging
 # _LOGGER = logging.getLogger(__name__)
@@ -130,12 +133,14 @@ class CaravelConf(YacAttMap):
 
     def project_date(self, paths, sp=None):
         """
-        Add current date and time to the selected project/subproject section of the caravel config file
+        Add current date and time to the selected project/subproject section of the CaravelConf object
+
         :param list[str] | str paths: path to the project config of interest
         :param str sp: name of the subproject
+        :return: CaravelConf: object with populated date
         """
-        self.populate_project_metadata({"last_modified": lambda p: datetime.datetime.now().strftime("%Y-%m-%d %H:%M")},
-                                       paths, sp=sp).write()
+        return self.populate_project_metadata(
+            {"last_modified": lambda p: datetime.datetime.now().strftime("%Y-%m-%d %H:%M")}, paths, sp=sp)
 
     def update_projects(self, path, sp=None, data=None, clear=False):
         """

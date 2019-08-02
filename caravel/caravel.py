@@ -302,8 +302,11 @@ def process():
         subprojects = globs.p.subprojects.keys()
     except AttributeError:
         subprojects = None
-    globs.cc.populate_project_metadata(paths=globs.selected_project, sp=globs.current_subproj).write()
-    globs.cc.project_date(globs.selected_project, globs.current_subproj)
+    # populating project/subproject metadata and date are treated individually since when the project is activated
+    # we want its subprojects data to be populated but not the dates
+    globs.cc.populate_project_metadata(paths=globs.selected_project,
+                                       sp=globs.current_subproj if globs.current_subproj else None).write()
+    globs.cc.project_date(globs.selected_project, globs.current_subproj).write()
     get_navbar_summary_links()
     return render_template('process.html', p_info=project_info_dict(globs.p), change=None,
                            selected_subproject=globs.p.subproject, actions=actions, subprojects=subprojects,
