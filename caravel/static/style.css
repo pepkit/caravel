@@ -233,3 +233,7 @@ div#projects-table_info {
     -webkit-transform:rotate(-90deg);
     transform:rotate(-90deg);
 }
+
+.indented {
+    padding-left: 25px !important;
+}

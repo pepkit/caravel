@@ -1,7 +1,7 @@
 """ General-purpose functions """
 from __future__ import print_function
 import globs
-from const import *
+from .const import *
 from .caravel_conf import *
 from .exceptions import MissingCaravelConfigError
 import looper

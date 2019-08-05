@@ -48,7 +48,6 @@
 							<thead class="thead-light">
 								<tr>
 									<th class="text-nowrap text-center">Action</th>
-									<th>&nbsp;</th>
 									<th data-field="name" class="text-nowrap text-center">Project name</th>
 									<th class="text-nowrap text-center">Sample count</th>
 									<th class="text-nowrap text-center">Protocols</th>
@@ -70,16 +69,11 @@
 											<button type="submit" class="btn btn-outline-success btn-sm ml-0" name="select_project" value="{{ p }};{{ outer_loop.index }}">
 												<i class="fa fa-play-circle" aria-hidden="true"></i>
 											</button>
-										</td>
-										<td class="text-nowrap text-center" style='border-right:none'>
+										<td class="text-nowrap text-left">
 											{% if cc.projects[p].num_sp is not none and cc.projects[p].num_sp is defined %}
 												<div style="cursor: pointer;" class="fa fa-chevron-down rotate" aria-hidden="true" data-toggle="collapse"  data-target="#sp{{ outer_loop.index }}"></div>
-											{% else %}
-												&nbsp;
 											{% endif %}
-										</td>
-										<td class="text-nowrap text-center">
-											{{ cc.projects[p].name }}
+											<b><font size="3">{{ cc.projects[p].name }}</font></b>
 										</td>
 										<td class="text-nowrap text-center">
 											{{ cc.projects[p].num_samples }}
@@ -108,10 +102,7 @@
 													<i class="fa fa-play-circle" aria-hidden="true"></i>
 												</button>
 											</td>
-											<td>
-												&nbsp;
-											</td>
-											<td>
+											<td class="text-nowrap text-left indented">
 												{{ sp }}
 											</td>
 											<td class="text-nowrap text-center">

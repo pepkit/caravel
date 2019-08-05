@@ -6,9 +6,9 @@ import traceback
 import warnings
 from flask import Flask, render_template, request, jsonify, session, redirect, send_from_directory, url_for, flash
 import globs
-from const import *
-from helpers import *
-from looper_parser import *
+from .const import *
+from .helpers import *
+from .looper_parser import *
 import divvy
 from textile import textile
 from platform import python_version
