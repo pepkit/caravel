@@ -23,38 +23,54 @@
 </script>
 {% endblock %}
 {% block content %}
-	{% if not sratoolkit %}
-		<div class="alert alert-warning" role="alert">
-			<button type="button" class="close" data-dismiss="alert">&times;</button>
-			<code>prefetch</code> command is not callable, install <code>sratoolkit</code> to use <code>geofetch</code>
-		</div>
+	{% if not sratoolkit or geofetch_version is none %}
+		{% if geofetch_version is none %}
+			<div class="alert alert-warning" role="alert">
+				<button type="button" class="close" data-dismiss="alert">&times;</button>
+				<code>geofetch</code> python library is not installed, install with: <code>pip install geofetch --user</code> and try again.
+			</div>
+		{% elif not sratoolkit %}
+			<div class="alert alert-warning" role="alert">
+				<button type="button" class="close" data-dismiss="alert">&times;</button>
+				<code>prefetch</code> command is not callable, install <code>sratoolkit</code> to use <code>geofetch</code>
+			</div>
+		{% endif %}
 	{% else %}
-		<div class="container">
-				<div class="row">
-					<div class="col-12">
-						<form class="needs-validation" novalidate>
-							<input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
-							<div class="card">
-								<div class="card-header">Download metadata</div>
-								<div class="card-body">
-									<div class="form-row">
-										<div class="col-5">
-											<input type="text" pattern="[A-Za-z0-9]+" maxlength="8" minlength="8" class="form-control" placeholder="Accession number" value="GSExxxxx" required>
-											<div class="valid-feedback">Looks good!</div>
-											<div class="invalid-feedback">GEO accession is an alphanumeric code of length 8</div>
-										</div>
-										<div class="col-5">
-											<button class="btn btn-secondary" type="submit">Get metadata</button>
-										</div>
-									</div>
+	<div class="container">
+		<div class="row">
+			<div class="col-12">
+				<form class="needs-validation" novalidate>
+					<input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
+					<div class="card">
+						<div class="card-header">
+							<div class="row">
+								<div class="col-9 mt-1">
+									<b>Download metadata</b>
+								</div>
+								<div class="col-3">
+									<a href="https://geofetch.databio.org" class="pull-right" target="_new"><img src="{{ url_for('static',filename='geofetch_logo.svg') }}" width="120" height="30"></a>
 								</div>
 							</div>
-						</form>
+						</div>
+						<div class="card-body">
+							<div class="form-row">
+								<div class="col-5">
+									<input type="text" pattern="[A-Za-z0-9]+" maxlength="8" minlength="8" class="form-control" placeholder="Accession number" value="GSExxxxx" required>
+									<div class="valid-feedback">Looks good!</div>
+									<div class="invalid-feedback">GEO accession is an alphanumeric code of length 8</div>
+								</div>
+								<div class="col-5">
+									<button class="btn btn-secondary" type="submit">Get metadata </button>
+								</div>
+							</div>
+						</div>
 					</div>
-				</div>
+				</form>
+			</div>
 		</div>
 	{% endif %}
 	<a href="{{ referrer }}" id="set"><button type="submit" class="btn btn-outline-dark m-2">Set <i class="fa fa-check"></i></button></a>
 	{% include 'back_referrer.html' %}
+	</div>
 {% endblock %}
 
