@@ -3,6 +3,10 @@ import os
 from divvy.const import COMPUTE_SETTINGS_VARNAME
 from looper import __version__ as LOOPER_VERSION
 from peppy import __version__ as PEPPY_VERSION
+try:
+    from geofetch import __version__ as GEOFETCH_VERSION
+except ModuleNotFoundError:
+    GEOFETCH_VERSION = None
 from ._version import __version__ as CARAVEL_VERSION
 import ubiquerg
 
@@ -49,7 +53,7 @@ LOG_FILENAME = "caravel.log"
 REQUIRED_LOOPER_VERSION = get_req_version("loopercli")["loopercli"]
 REQUIRED_PEPPY_VERSION = get_req_version("peppy")["peppy"]
 REQUIRED_V_BY_NAME = {"loopercli": REQUIRED_LOOPER_VERSION, "peppy": REQUIRED_PEPPY_VERSION}
-V_BY_NAME = {"loopercli": LOOPER_VERSION, "peppy": PEPPY_VERSION, "caravel": CARAVEL_VERSION}
+V_BY_NAME = {"loopercli": LOOPER_VERSION, "peppy": PEPPY_VERSION, "caravel": CARAVEL_VERSION, "geotetch": GEOFETCH_VERSION}
 DEFAULT_TERMINAL_WIDTH = 80
 SUMMARY_NAVBAR_PLACEHOLDER = "<li class='nav-item'><a class='nav-link disabled'>No summary yet</a></li>"
 TEMPLATES_DIRNAME = "jinja_templates"

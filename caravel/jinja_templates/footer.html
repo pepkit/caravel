@@ -5,17 +5,27 @@
 						<tr>
 							<th scope="col" class="footer">caravel</th>
 							<th scope="col" class="footer">looper</th>
+							<th scope="col" class="footer">geofetch</th>
 							<th scope="col" class="footer">Python</th>
 						</tr>
 					</thead>
 					<tbody>
 						<tr>
 							<td scope="row" class="footer">
-								<a href="http://caravel.databio.org" target="_new">{% include "logo_caravel_icon.html" %}</a> <code class="footer">{{caravel_version}}</code>
+								<a href="https://caravel.databio.org" target="_new">{% include "logo_caravel_icon.html" %}</a> <code class="footer">{{caravel_version}}</code>
 							</td>
 							<td scope="row" class="footer">
-								<a href="http://looper.databio.org" target="_new">{% include "logo_looper.html" %}</a> <code class="footer">{{looper_version}}</code>
+								<a href="https://looper.databio.org" target="_new">{% include "logo_looper.html" %}</a> <code class="footer">{{looper_version}}</code>
 							</td>
+							{% if geofetch_version is not none %}
+								<td scope="row" class="footer">
+									<a href="https://geofetch.databio.org" target="_new">{% include "logo_geofetch.html" %}</a> <code class="footer">{{geofetch_version}}</code>
+								</td>
+							{% else %}
+								<td scope="row" class="footer">
+									<a href="https://geofetch.databio.org" target="_new">{{geofetch_version}}</a>
+								</td>
+							{% endif %}
 							<td scope="row" class="footer">
 								<a href="https://www.python.org" target="_new">{% include "logo_python.html" %}</a> <code class="footer">{{python_version}}</code>
 							</td>
