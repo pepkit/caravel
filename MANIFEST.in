@@ -1,4 +1,6 @@
 include caravel/requirements/*
+recursive-include caravel/examples *
+include caravel/caravel_demo.yaml
 include caravel/_version.py
 include README.md
 include caravel/static/*

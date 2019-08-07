@@ -2,22 +2,19 @@
 
 from functools import wraps
 import getpass
-import logging
 import traceback
 import warnings
-from flask import Blueprint, Flask, render_template, request, jsonify, session, redirect, send_from_directory, url_for,\
-    flash
-import yaml
+from flask import Flask, render_template, request, jsonify, session, redirect, send_from_directory, url_for, flash
 import globs
-from const import *
-from helpers import *
-from looper_parser import *
+from .const import *
+from .helpers import *
+from .looper_parser import *
 import divvy
 from textile import textile
 from platform import python_version
 from looper.project import Project
 from looper.html_reports import *
-from ubiquerg import is_collection_like
+from ubiquerg import is_collection_like, is_command_callable
 
 
 app = Flask(__name__, template_folder=TEMPLATES_PATH)
@@ -108,9 +105,9 @@ def generate_csrf_token(n=100):
     """
     if '_csrf_token' not in session:
         session['_csrf_token'] = random_string(n)
-        app.logger.info("CSRF token generated")
+        app.logger.debug("CSRF token generated")
     else:
-        app.logger.info("CSRF token retrieved from the session")
+        app.logger.debug("CSRF token retrieved from the session")
     return session['_csrf_token']
 
 
@@ -140,7 +137,7 @@ def csrf_protect():
 @app.after_request
 def add_header(r):
     """
-    Add headers to both force the browser not to cache the pages
+    Add headers to force the browser not to cache the pages
 
     This is relevant for serving the summary pages for multiple projects one after another
     """
@@ -191,9 +188,9 @@ def gdsv(s):
         value_idx = [x.startswith("value") for x in lst].index(True)
         value_string = lst[value_idx]
         result = value_string.split("=")[1]
-    except:
-        app.logger.warning("could not determine default option for slider out of string: '{}'."
-                           " Returning 'None' instead".format(s))
+    except Exception as e:
+        app.logger.warning("Got '{}'; could not determine default option for slider out of string: '{}'."
+                           " Returning 'None' instead".format(e.__class__.__name__, s))
         result = None
     return result
 
@@ -203,7 +200,8 @@ def inject_dict_for_all_templates():
     if globs.summary_links is None:
         globs.summary_links = SUMMARY_NAVBAR_PLACEHOLDER
     return dict(caravel_version=CARAVEL_VERSION, looper_version=LOOPER_VERSION, python_version=python_version(),
-                referrer=request.referrer, debug=app.config["DEBUG"], summary_links=globs.summary_links, login=app.config['login'])
+                geofetch_version=GEOFETCH_VERSION, referrer=request.referrer, debug=app.config["DEBUG"],
+                summary_links=globs.summary_links, login=app.config['login'])
 
 
 app.jinja_env.filters['gdsv'] = gdsv
@@ -215,20 +213,30 @@ app.jinja_env.globals['csrf_token'] = generate_csrf_token
 @app.route("/index")
 @token_required
 def index():
-    if globs.p is not None:
-        summary_exists = check_for_summary(globs.p)
-    else:
-        app.logger.debug("No project defined yet, summary links not created")
-        summary_exists = False
     get_navbar_summary_links()
     if request.args.get('reset'):
         globs.init_globals()
         globs.summary_links = SUMMARY_NAVBAR_PLACEHOLDER
-        globs.reset_btn = None
         app.logger.info("Project data removed")
-    app.logger.debug("reset button: {}".format(str(globs.reset_btn)))
-    projects, globs.command = parse_config_file()
-    return render_template('index.html', projects=projects, reset_btn=globs.reset_btn, command_btn=globs.command)
+    globs.cc = globs.cc or parse_config_file()
+    read_preferences()
+    missing_projs = globs.cc.list_missing_projects() or None
+    project = request.args.get('path')
+    subproject = request.args.get('sp')
+    app.logger.debug("Selected project:subproject bundle -- {}:{} of types {}:{}"
+                     .format(project, subproject, project.__class__.__name__, subproject.__class__.__name__))
+    if request.args.get('remove'):
+        globs.cc.remove_project(path=project, sp=subproject).write()
+    if request.args.get('populate'):
+        globs.cc.populate_project_metadata(paths=project, sp=subproject).write()
+    if request.args.get('clear'):
+        globs.purge_project_data()
+        globs.cc.populate_project_metadata(clear=True).write()
+    if missing_projs:
+        app.logger.warning("{} projects configs not found: {}".format(len(missing_projs), ", ".join(missing_projs)))
+    app.logger.debug(globs.cc)
+    return render_template('index.html', missing_projects=missing_projs, cc=globs.cc.filter_missing(),
+                           selected=globs.selected_project, selected_id=globs.selected_project_id)
 
 
 @app.route('/_background_exec')
@@ -240,30 +248,38 @@ def background_exec():
     return jsonify(exec_txt=out)
 
 
-@app.route("/set_comp_env")
+@app.route("/preferences")
 @token_required
 def set_comp_env():
     global active_settings
     if globs.compute_config is None:
         globs.compute_config = divvy.ComputingConfiguration()
     selected_package = request.args.get('compute', type=str)
-    if globs.currently_selected_package is None:
-        globs.currently_selected_package = "default"
+    globs.status_check_interval = int(request.args.get('interval', type=int)
+                                      or globs.status_check_interval
+                                      or POLL_INTERVAL)
+    if globs.compute_package is None:
+        globs.compute_package = "default"
     if selected_package is not None:
         success = globs.compute_config.clean_start(selected_package)
         if not success:
             msg = "Compute package '{}' cannot be activated".format(selected_package)
             app.logger.warning(msg)
             return jsonify(active_settings=render_template('compute_info.html', active_settings=None, msg=msg))
-        globs.currently_selected_package = selected_package
+        globs.compute_package = selected_package
         active_settings = globs.compute_config.get_active_package()
+        write_preferences({"status_check_interval": globs.status_check_interval,
+                       "compute_package": globs.compute_package})
         return jsonify(active_settings=render_template('compute_info.html', active_settings=active_settings))
     active_settings = globs.compute_config.get_active_package()
-    notify_not_set = COMPUTE_SETTINGS_VARNAME[0] if globs.compute_config.default_config_file == globs.compute_config.config_file\
-        else None
-    return render_template('set_comp_env.html', env_conf_file=globs.compute_config.config_file,
+    notify_not_set = COMPUTE_SETTINGS_VARNAME[0] if \
+        globs.compute_config.default_config_file == globs.compute_config.config_file else None
+    write_preferences({"status_check_interval": globs.status_check_interval,
+                       "compute_package": globs.compute_package})
+    return render_template('preferences.html', env_conf_file=globs.compute_config.config_file,
                            compute_packages=globs.compute_config.list_compute_packages(), active_settings=active_settings,
-                           currently_selected_package=globs.currently_selected_package, notify_not_set=notify_not_set)
+                           compute_package=globs.compute_package, notify_not_set=notify_not_set,
+                           default_interval=globs.status_check_interval)
 
 
 @app.route("/process", methods=['GET', 'POST'])
@@ -271,27 +287,30 @@ def set_comp_env():
 def process():
     from looper import build_parser as blp
     actions = get_positional_args(blp(), sort=True)
-    # this try-except block is used to determine whether the user should be redirected to the index page
-    # to select the project when they land on the process subpage from the set_comp_env subpage
-    if globs.selected_project is None and request.form.get('select_project') is None:
-        app.logger.info("The project is not selected, redirecting to the index page.")
+    try:
+        globs.selected_project, globs.selected_project_id, globs.current_subproj = \
+            select_project(request.form.get('select_project'))
+    except TypeError:
+        app.logger.info("No project selected, redirecting to the index page.")
         flash("No project was selected, choose one from the list below.")
         return redirect(url_for('index'))
-    else:
-        new_selected_project = request.form.get('select_project')
-        if new_selected_project is not None and globs.selected_project != new_selected_project:
-            globs.selected_project = new_selected_project
     config_file = str(os.path.expandvars(os.path.expanduser(globs.selected_project)))
     if globs.p is None:
-        globs.p = Project(config_file)
+        globs.p = Project(config_file, subproject=globs.current_subproj)
     try:
+        # subproject related logic can be removed with the introduction of direct subproject selection in the index
         subprojects = globs.p.subprojects.keys()
     except AttributeError:
         subprojects = None
+    # populating project/subproject metadata and date are treated individually since when the project is activated
+    # we want its subprojects data to be populated but not the dates
+    globs.cc.populate_project_metadata(paths=globs.selected_project,
+                                       sp=globs.current_subproj if globs.current_subproj else None).write()
+    globs.cc.project_date(globs.selected_project, globs.current_subproj).write()
     get_navbar_summary_links()
-    globs.reset_btn = True
-    return render_template('process.html', p_info=project_info_dict(globs.p), change=None, selected_subproject=globs.p.subproject,
-                           actions=actions, subprojects=subprojects)
+    return render_template('process.html', p_info=project_info_dict(globs.p), change=None,
+                           selected_subproject=globs.p.subproject, actions=actions, subprojects=subprojects,
+                           interval=globs.status_check_interval)
 
 
 @app.route('/_background_subproject')
@@ -302,6 +321,9 @@ def background_subproject():
         globs.p.deactivate_subproject()
     else:
         globs.p.activate_subproject(sp)
+        globs.run = False
+        globs.current_subproj = sp
+        globs.cc.project_date(globs.selected_project, globs.current_subproj)
     globs.summary_requested = None
     get_navbar_summary_links()
     return jsonify(subproj_txt=output, p_info=project_info_dict(globs.p), navbar_links=globs.summary_links)
@@ -397,6 +419,11 @@ def igvxml():
 @app.route("/action", methods=['GET', 'POST'])
 @token_required
 def action():
+    if globs.act == "summarize" and not check_if_run(globs.p):
+        msg = "No samples were run yet, there's no point in summarizing"
+        current_app.logger.warning(msg)
+        flash(msg)
+        return redirect(url_for("process"))
     args = argparse.Namespace()
     args_dict = vars(args)
     # Set the arguments from the forms
@@ -413,7 +440,7 @@ def action():
     # establish the looper log path
     # set the selected computing environment in the Project object
     try:
-        globs.p.dcc.activate_package(globs.currently_selected_package)
+        globs.p.dcc.activate_package(globs.compute_package)
     except NameError:
         app.logger.info("The compute package was not selected, using 'default'.")
         globs.p.dcc.activate_package("default")
@@ -421,6 +448,27 @@ def action():
     run_looper(prj=globs.p, args=args, act=globs.act, log_path=globs.log_path, logging_lvl=globs.logging_lvl)
     get_navbar_summary_links()
     return render_template("/execute.html")
+
+
+@app.route("/add", methods=['GET'])
+@token_required
+def add():
+    return render_template("/add.html", sratoolkit=is_command_callable("prefetch"))
+
+
+@app.route('/_background_check_status')
+def background_check_status():
+    app.logger.info("checking flags for {} samples".format(len(list(globs.p.sample_names))))
+    flags = get_sample_flags(globs.p, list(globs.p.sample_names))
+    if all(not value for value in flags.values()) and not globs.run:
+        return jsonify(status_table="No samples were processed yet. " \
+                                    "Use <code>looper run</code> and then check the status",
+                       interval=globs.status_check_interval)
+    elif any(value for value in flags.values()):
+        return jsonify(status_table=create_status_table(globs.p, final=False) + sample_info_hint(globs.p),
+                       interval=globs.status_check_interval)
+    else:
+        return jsonify(status_table=MISSING_SAMPLE_DATA_TXT, interval=globs.status_check_interval)
 
 
 @app.route('/_background_result')
@@ -442,6 +490,7 @@ def main():
     app.config["port"] = args.port
     app.config["project_configs"] = args.config
     app.config["DEBUG"] = args.debug
+    app.config["demo"] = args.demo
     app.config['SECRET_KEY'] = 'thisisthesecretkey'
     app.config['login'] = getpass.getuser()
     globs.init_globals()
@@ -449,10 +498,10 @@ def main():
         warnings.warn("You have entered the debug mode. The server-client connection is not secure!")
         globs.logging_lvl = logging.DEBUG
     else:
-        globs.logging_lvl = DEFAULT_LOGGING_LVL
         generate_token(token=parse_token_file())
+    app.logger.setLevel(globs.logging_lvl or logging.INFO)
     app.logger.info("Using python {}".format(python_version()))
-    app.run(port=args.port)
+    app.run(port=args.port, host='0.0.0.0')
 
 
 if __name__ == "__main__":

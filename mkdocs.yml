@@ -11,6 +11,7 @@ nav:
     - How to configure caravel: configure-caravel.md
     - How to run on a remote server: remote-server.md
     - Configuring logging: logging.md
+    - Changing compute settings: computing.md
   - Reference:
     - Advanced features: advanced.md
     - Usage: usage.md
@@ -26,4 +27,4 @@ navbar:
   left:
     - text: Live demo
       icon: fa-play
-      href: "#"
+      href: "demo"

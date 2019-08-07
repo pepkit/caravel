@@ -34,7 +34,7 @@
                         </div>
                     {% elif type == "range" %}
                         <div class="col-2 col-slider">
-                            <input type="{{ type }}" {{ opts[i] }} name="{{ names[i] }}" oninput="show_value(this.name,this.value)">
+                            <input type="{{ type }}" {{ opts[i] }} class="custom-range" name="{{ names[i] }}" oninput="show_value(this.name,this.value)">
                             {% set input = opts[i] %}
                             <button id="{{ names[i] }}" class="disp-value" disabled>{{ input|gdsv }}</button>
                         </div>
