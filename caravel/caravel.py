@@ -403,7 +403,8 @@ def action():
 @app.route("/add", methods=['GET'])
 @token_required
 def add():
-    return render_template("/add.html", sratoolkit=is_command_callable("prefetch"))
+    return render_template("/add.html", sratoolkit=is_command_callable("prefetch"),
+                           metadata=request.args.get('metadata'), type=bool)
 
 
 @app.route('/_background_check_status')

@@ -39,6 +39,7 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-12">
+				{% if metadata %}
 				<form class="needs-validation" novalidate>
 					<input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
 					<div class="card">
@@ -66,6 +67,9 @@
 						</div>
 					</div>
 				</form>
+				{% else %}
+					TABLE GOES HERE
+				{% endif %}
 			</div>
 		</div>
 	{% endif %}
