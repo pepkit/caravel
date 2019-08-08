@@ -67,7 +67,7 @@ class CaravelConf(YacAttMap):
         missing_names = [p for p in self[CFG_PROJECTS_KEY].keys()
                          if not hasattr(self[CFG_PROJECTS_KEY][p], CFG_PROJECT_NAME_KEY)]
         current_app.logger.debug("Missing project names list: {}".format(str(missing_names)))
-        self.populate_project_metadata({"name": lambda p: p.name}, missing_names).write()
+        self.populate_project_metadata({"name": lambda p: p.name}, missing_names, []).write()
 
     def __bool__(self):
         minkeys = set(self.keys()) == {CFG_PROJECTS_KEY}
@@ -153,10 +153,10 @@ class CaravelConf(YacAttMap):
         :param bool clear: whether the keys for the selected project:subproject combination should be removed
         :return CaravelConf: updated object
         """
-        def _remove_keys_but_name(mapping):
+        def _remove_keys_but_name_desc(mapping):
             """ removes all the keys from the mapping but the 'name' key """
             for k in mapping.keys():
-                if k in mapping and k != CFG_PROJECT_NAME_KEY:
+                if k in mapping and k not in (CFG_PROJECT_NAME_KEY, CFG_PROJECT_DESC_KEY):
                     del mapping[k]
         if check_insert_data(path, str, "project"):
             self[CFG_PROJECTS_KEY].setdefault(path, dict())
@@ -167,12 +167,12 @@ class CaravelConf(YacAttMap):
                 if check_insert_data(data, Mapping, "data"):
                     self[CFG_PROJECTS_KEY][path][CFG_SUBPROJECTS_KEY][sp].update(data)
                 elif clear:
-                    _remove_keys_but_name(self[CFG_PROJECTS_KEY][path][CFG_SUBPROJECTS_KEY][sp])
+                    _remove_keys_but_name_desc(self[CFG_PROJECTS_KEY][path][CFG_SUBPROJECTS_KEY][sp])
             else:
                 if check_insert_data(data, Mapping, "data"):
                     self[CFG_PROJECTS_KEY][path].update(data)
                 elif clear:
-                    _remove_keys_but_name(self[CFG_PROJECTS_KEY][path])
+                    _remove_keys_but_name_desc(self[CFG_PROJECTS_KEY][path])
         return self
 
     def remove_project(self, path, sp=None):
