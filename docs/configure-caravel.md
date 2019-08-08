@@ -6,20 +6,49 @@
 
 ```yaml
 projects:
-  - "path/to/project1_config.yaml"
-  - "path/to/project2_config.yaml"
+  - path/to/project1_config.yaml
+  - path/to/project2_config.yaml
 ```
 
 You can also use wildcards (`*`)  to add projects according to a pattern:
 
 ```yaml
 projects:
-  - "path/to/project1_config.yaml"
-  - "path/to/project2_config.yaml"  
-  - "other/path/to/PEPs/*/*_config.yaml"  # adds all matched projects
+  - path/to/project1_config.yaml
+  - path/to/project2_config.yaml
+  - other/path/to/PEPs/*/*_config.yaml  # adds all matched projects
 ```
 
 Paths should be either absolute or *relative to the caravel configuration file*.
+
+## New config format
+
+Starting with v0.13.2 `caravel` uses the config file for project metadata management. Consequently, upon the server launch, the file formatted as presented above is reformatted so it is compliant with config version 0.2 standards.
+One of the user facing benefits of this change is **the possibility to configure `caravel` preferences directly in the config**, like:
+```yaml
+projects:
+  - path/to/project1_config.yaml
+  - path/to/project2_config.yaml
+preferences:
+  status_check_interval: 3
+  compute_package: local
+```
+ 
+### Config v0.2 example
+
+```yaml
+config_version: 0.2
+projects:
+  caravel/examples/caravel_demo/metadata/animals_config.yaml:
+    project_description: This is an examplary project
+  caravel/examples/caravel_demo/metadata/duplicated_config.yaml:
+    project_description: This is another examplary project
+preferences:
+  status_check_interval: 3
+  compute_package: local
+```
+
+Although the new configuration file format is much more flexible and powerful, the old format is still supported. Particularly because it is much easier to create it by hand. 
 
 ## The `$CARAVEL` environment variable
 
