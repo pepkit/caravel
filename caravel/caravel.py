@@ -14,7 +14,7 @@ from textile import textile
 from platform import python_version
 from looper.project import Project
 from looper.html_reports import *
-from ubiquerg import is_collection_like, is_command_callable
+from ubiquerg import is_collection_like
 
 
 app = Flask(__name__, template_folder=TEMPLATES_PATH)
@@ -200,8 +200,8 @@ def inject_dict_for_all_templates():
     if globs.summary_links is None:
         globs.summary_links = SUMMARY_NAVBAR_PLACEHOLDER
     return dict(caravel_version=CARAVEL_VERSION, looper_version=LOOPER_VERSION, python_version=python_version(),
-                geofetch_version=GEOFETCH_VERSION, referrer=request.referrer, debug=app.config["DEBUG"],
-                summary_links=globs.summary_links, login=app.config['login'])
+                referrer=request.referrer, debug=app.config["DEBUG"], summary_links=globs.summary_links,
+                login=app.config['login'])
 
 
 app.jinja_env.filters['gdsv'] = gdsv
@@ -398,12 +398,6 @@ def action():
     run_looper(prj=globs.p, args=args, act=globs.act, log_path=globs.log_path, logging_lvl=globs.logging_lvl)
     get_navbar_summary_links()
     return render_template("/execute.html")
-
-
-@app.route("/add", methods=['GET'])
-@token_required
-def add():
-    return render_template("/add.html", sratoolkit=is_command_callable("prefetch"))
 
 
 @app.route('/_background_check_status')
