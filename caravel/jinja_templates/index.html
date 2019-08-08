@@ -70,7 +70,7 @@
 												<i class="fa fa-play-circle" aria-hidden="true"></i>
 											</button>
 										<td class="text-nowrap text-left">
-											{% if cc.projects[p].num_sp is not none and cc.projects[p].num_sp is defined %}
+											{% if cc.projects[p].num_sp is defined and cc.projects[p].num_sp is not none %}
 												<div style="cursor: pointer;" class="fa fa-chevron-down rotate" aria-hidden="true" data-toggle="collapse"  data-target="#sp{{ outer_loop.index }}"></div>
 											{% endif %}
 											<b><font size="3">{{ cc.projects[p].name }}</font></b>
