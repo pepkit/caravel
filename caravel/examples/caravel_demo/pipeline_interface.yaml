@@ -1,7 +1,6 @@
 protocol_mapping:
-  mammals: count_reads_slowly
-  amphibians: count_reads_quickly
-  aves: count_reads_slowly
+  RNA-seq: count_reads_slowly
+  ATAC-seq: count_reads_quickly
 
 pipelines:
   count_reads_quickly:

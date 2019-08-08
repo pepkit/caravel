@@ -1,7 +1,7 @@
-name: caravel_demo
+name: duplicated_demo
 email: michal@virginia.edu
 metadata:
-    output_dir: ${HOME}/caravel_demo
+    output_dir: ${HOME}/caravel_duplicated_demo
     sample_table: sample_table_animals.csv
     pipeline_interfaces: ../pipeline_interface.yaml
 
@@ -13,8 +13,3 @@ constant_attributes:
 # Data sources are constructed paths to static (input) files
 data_sources:
     path: "../../data/{filename}"
-
-subprojects:
-    frog_only:
-        metadata:
-            sample_table: sample_table_animals_frog.csv
