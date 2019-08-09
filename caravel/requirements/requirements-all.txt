@@ -1,6 +1,6 @@
 flask
 divvy>=0.3.1
-loopercli>=0.12.5
+loopercli>=0.12.4
 peppy>=0.22.3
 textile
 logmuse

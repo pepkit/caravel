@@ -1,10 +1,11 @@
 """ Package constants """
 import os
 from divvy.const import COMPUTE_SETTINGS_VARNAME
-from looper import __version__ as LOOPER_VERSION
+from looper import __version__ as LOOPER_VERSION, Sample as LooperSample
 from peppy import __version__ as PEPPY_VERSION
 from ._version import __version__ as CARAVEL_VERSION
-import ubiquerg
+from ubiquerg import filesize_to_str
+from warnings import warn
 
 
 def get_req_version(module=None):
@@ -33,6 +34,27 @@ def get_req_version(module=None):
         raise IOError("The requirements file '{rf}' not found or module arg '{mod}' is missing. "
                       "The version of '{mod}' could not be asserted.".format(rf=reqs_file, mod=module))
         return None
+
+
+def input_sizes(p):
+    """
+    Safely determine all the input file sizes for a project. If any exception raises, return "NA".
+
+    :param looper.Project p: project to determine input file sizes for
+    :return str: sum input file sizes
+    """
+    cumulative_file_size = 0
+    try:
+        for s in p.samples:
+            s = LooperSample(s)
+            for proto in [s.protocol] if isinstance(s.protocol, str) else s.protocol:
+                for piface in p.get_interfaces(proto):
+                    s.set_pipeline_attributes(piface, piface.fetch_pipelines(proto))
+                    cumulative_file_size += s.input_file_size * 1024 ** 3
+        return filesize_to_str(cumulative_file_size)
+    except Exception as e:
+        warn("Could not determine file size for project: '{}'. Got: '{}'".format(p.name, e))
+        return "NA"
 
 
 DEFAULT_PORT = 5000
@@ -71,8 +93,9 @@ PROJECT_MDATA_FUN = {"name": lambda p: p.name,
                      "num_sp": lambda p: len(p.subprojects.keys()),
                      "num_samples": lambda p: p.num_samples,
                      "protocols": lambda p: ", ".join(sorted(p.protocols)),
-                     "inputs_size": lambda p: ubiquerg.filesize_to_str(sum([ubiquerg.size(iput, False)
-                                                                           for iput in p.get_inputs()]))}
+                     "inputs_size": input_sizes}
+
+
 """
 Config file structure determination 
 """
