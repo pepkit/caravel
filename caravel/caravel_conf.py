@@ -87,6 +87,7 @@ class CaravelConf(YacAttMap):
         :param bool clear: whether specified project/subproject metadata should be removed
         :return: CaravelConf: object with populated project attributes
         """
+        sp_choice = sp
         if isinstance(paths, str) and os.path.isfile(paths):
             paths = [paths]
         if isinstance(sp, str):
@@ -129,6 +130,7 @@ class CaravelConf(YacAttMap):
                         current_app.logger.warning("Encountered '{}' -- Could not update '{}' attr for '{}'"
                                                    .format(e.__class__.__name__, attr, path))
                         self.update_projects(path=path, data={attr: None})
+            sp = sp_choice
         return self
 
     def project_date(self, paths, sp=None):
