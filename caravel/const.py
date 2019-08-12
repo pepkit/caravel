@@ -53,7 +53,7 @@ def input_sizes(p):
                     cumulative_file_size += s.input_file_size * 1024 ** 3
         return filesize_to_str(cumulative_file_size)
     except Exception as e:
-        warn("Could not determine file size for project: '{}'. Got: '{}'".format(p.name, e))
+        warn("Could not determine file size for project: '{}'. Got: '{}'".format(p.name, e.__class__.__name__))
         return "NA"
 
 
