@@ -135,6 +135,11 @@
 					<div class="card-header">
 						<b>Project <code>{{ p_info["name"] }}</code> sample table</b>
 						<span class="badge badge-primary float-right" data-toggle="modal" data-target="#metadataModal" style="cursor: pointer; align-self: right;">Show metadata</span>
+						{% if selected_subproject is not none %}
+							<p class="card-subtitle mt-2 text-muted">
+								Activated subproject: <code>{{ selected_subproject }}</code>
+							</p>
+						{% endif %}
 					</div>
 					<div class="card-body" id="status_table">
 						After <code>looper run</code> click "CHECK STATUS" to update
@@ -162,31 +167,7 @@
 						</select>
 						<div id="options" class="divider-vertical"></div>
 					</div>
-					{% if subprojects is not none %}
-					<div class="card-header">Switch subproject</div>
-					<div class="card-body">
-						<select name="subprojects" class="custom-select" style="width:auto;">
-						{% for i in subprojects %}
-							<option value="{{ i }}">{{ i }}</option>
-						{% endfor %}
-						</select>
-						<a href="javascript:" id=activate_subproject>
-							<button id="activate_btn" type="submit" class="btn btn-outline-dark ml-2 btn-sm">ACTIVATE</button>
-						</a>
-						{% if selected_subproject is none %}
-							<a href="javascript:" id=deactivate_subproject>
-								<button id="deactivate_btn" disabled type="submit" class="btn btn-outline-dark ml-2 btn-sm">DEACTIVATE</button>
-							</a>
-						{% else %}
-							<a href="javascript:" id=deactivate_subproject>
-								<button id="deactivate_btn" type="submit" class="btn btn-outline-dark ml-2 btn-sm">DEACTIVATE</button>
-							</a>
-						{% endif %}
-						<div class="divider-vertical">
-							<p id=subproj_txt class="badge badge-primary">Activated subproject: {{ selected_subproject }}</p>
-						</div>
 				</div>
-				{% endif %}
 			</div>
 		</div>
 	</div>
