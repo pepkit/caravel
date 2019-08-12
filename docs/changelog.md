@@ -13,12 +13,14 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
     - a possibility to add project-level attributes (like `name`) 
 - removed custom command feature
 - list of projects in the index page to a table representation
+- removed the subproject switching functionality on the project page
   
 ### Added:
 
 - `CaravelConf` class for caravel config file management
 - the possibility to set preferences in the config file
 - direct subproject activation from the index page
+- text indicating currently active subproject
 
 
 ## [0.13.1] -- 2019-07-18
