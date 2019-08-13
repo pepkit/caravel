@@ -1,5 +1,6 @@
 import datetime
 import glob
+from abc import ABC
 from collections import Mapping
 
 from flask import current_app
@@ -15,7 +16,7 @@ from .exceptions import *
 # _LOGGER = logging.getLogger(__name__)
 
 
-class CaravelConf(YacAttMap):
+class CaravelConf(YacAttMap, ABC):
     """ Object used to interact with the caravel configuration file """
     def __init__(self, entries=None):
         """
@@ -81,12 +82,32 @@ class CaravelConf(YacAttMap):
         If the paths argument is not provided or it's an empty list, all the list projects names will be updated.
 
         :param Mapping[str,function(looper.Project) -> Any] attr_func: a Mapping of metadata attribute and
-        corresponding lambda expression to extract it from a peppy.Project object
+            corresponding lambda expression to extract it from a peppy.Project object
         :param list[str] | str paths: list of paths to the project config files which names should be updated
         :param list[str] | str sp: name of the subproject to populate the data for
         :param bool clear: whether specified project/subproject metadata should be removed
         :return: CaravelConf: object with populated project attributes
         """
+
+        def _update_project_attrs(af_mapping, proj, subproj=None):
+            """
+            An internal function that populates the project/subproject attribute data.
+            If no subproject provided, the main project's attribute data is updated.
+
+            :param Mapping[str,function(looper.Project) -> Any] af_mapping: a Mapping of metadata attribute and
+                corresponding lambda expression to extract it from a peppy.Project object
+            :param looper.Project proj: project update the attributes for
+            :param str subproj: subproject update the attributes for
+            attribute and corresponding lambda expression to extract it from a peppy.Project object
+            """
+            for a, f in af_mapping.items():
+                try:
+                    self.update_projects(path=path, sp=subproj, data={a: f(proj)})
+                except Exception as e:
+                    current_app.logger.warning("Encountered '{}' -- Could not update '{}' attr for '{}'"
+                                               .format(e.__class__.__name__, a, path))
+                    self.update_projects(path=path, sp=subproj, data={a: None})
+
         sp_choice = sp
         if isinstance(paths, str) and os.path.isfile(paths):
             paths = [paths]
@@ -104,32 +125,20 @@ class CaravelConf(YacAttMap):
             if clear:
                 self.update_projects(path=path, clear=True)
                 continue
-            for attr, fun in attr_func.items():
-                p = Project(path)
-                try:
-                    self.update_projects(path=path, data={attr: fun(p)})
-                except Exception as e:
-                    current_app.logger.debug("Encountered '{}' -- Could not update '{}' attr for '{}'"
-                                    .format(e.__class__.__name__, attr, path))
-                    self.update_projects(path=path, data={attr: None})
-                try:
-                    sp = sp if sp is not None else p.subprojects.keys()
-                except AttributeError:
-                    current_app.logger.debug("No subprojects defined for: {}".format(path))
-                    continue
+            p = Project(path)
+            _update_project_attrs(af_mapping=attr_func, proj=p)
+            try:
+                sp = sp if sp is not None else p.subprojects.keys()
+            except AttributeError:
+                current_app.logger.debug("No subprojects defined for: {}".format(path))
+            else:
                 for i in sp:
                     try:
-                        p_sub = Project(path, subproject=i)
+                        p.activate_subproject(subproject=i)
+                        _update_project_attrs(af_mapping=attr_func, proj=p, subproj=i)
                     except MissingSubprojectError:
                         current_app.logger.warning("Nonexistent project:subproject combination '{}:{}'. "
                                                    "Skipping".format(path, i))
-                        continue
-                    try:
-                        self.update_projects(path=path, sp=i, data={attr: fun(p_sub)})
-                    except Exception as e:
-                        current_app.logger.warning("Encountered '{}' -- Could not update '{}' attr for '{}'"
-                                                   .format(e.__class__.__name__, attr, path))
-                        self.update_projects(path=path, data={attr: None})
             sp = sp_choice
         return self
 
