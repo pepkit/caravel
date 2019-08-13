@@ -4,6 +4,7 @@ from functools import wraps
 import getpass
 import traceback
 import warnings
+from yaml import safe_load
 from flask import Flask, render_template, request, jsonify, session, redirect, send_from_directory, url_for, flash
 import globs
 from .const import *
@@ -157,7 +158,7 @@ def parse_token_file(path=TOKEN_FILE_NAME):
     """
     try:
         with open(path, 'r') as stream:
-            out = yaml.safe_load(stream)
+            out = safe_load(stream)
         assert CONFIG_TOKEN_KEY in out, \
             "'{token}' key not in the {file} file.".format(token=CONFIG_TOKEN_KEY, file=TOKEN_FILE_NAME)
         token = out[CONFIG_TOKEN_KEY][0]
