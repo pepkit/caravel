@@ -51,7 +51,7 @@ setup(
     keywords="project, bioinformatics, sequencing, ngs, workflow, GUI",
     url="https://{}.databio.org/".format(PACKAGE),
     author=u"Nathan Sheffield, Vince Reuter, Michal Stolarczyk",
-    license="BSD2",
+    license="BSD-2-Clause",
     entry_points={
         "console_scripts": [
             "{p} = {p}.{p}:main".format(p=PACKAGE)
