@@ -1,6 +1,6 @@
 site_name: Caravel
 site_logo: img/logo_caravel_dark.svg
-site_url: http://code.databio.org/caravel/
+site_url: http://caravel.databio.org
 pypi_name: caravel
 repo_url: http://github.com/pepkit/caravel
 
