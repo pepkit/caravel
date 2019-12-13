@@ -5,4 +5,6 @@ peppy>=0.22.3
 textile
 logmuse
 ubiquerg>=0.4.6
-yacman
+# yacman>=0.6.6 uncommend after release
+-e git+git://github.com/databio/yacman@dev#egg=yacman
+
