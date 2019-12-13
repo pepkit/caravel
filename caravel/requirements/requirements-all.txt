@@ -1,10 +1,8 @@
 flask
 divvy>=0.3.1
-loopercli>=0.12.4
+loopercli>=0.12.5
 peppy>=0.22.3
 textile
 logmuse
 ubiquerg>=0.4.6
-# yacman>=0.6.6 uncommend after release
--e git+git://github.com/databio/yacman@dev#egg=yacman
-
+yacman>=0.6.6

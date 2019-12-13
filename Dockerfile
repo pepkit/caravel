@@ -9,6 +9,9 @@ RUN pip install -U pip
 RUN pip install piper
 # install R, used in the demo pipeline
 RUN apt-get --assume-yes install r-base r-base-dev
+RUN pip install git+git://github.com/pepkit/looper#egg=looper
+RUN pip install git+git://github.com/pepkit/peppy#egg=peppy
+RUN pip install git+git://github.com/databio/yacman#egg=yacman
 # install caravel
 WORKDIR /app
 RUN pip install .
