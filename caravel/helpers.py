@@ -208,7 +208,13 @@ def parse_config_file():
         cfg_path = DEMO_FILE_PATH
     project_list_path = select_config(config_filepath=cfg_path, config_env_vars=CONFIG_ENV_VAR,
                                       on_missing=lambda fp: MissingCaravelConfigError(fp))
-    return CaravelConf(project_list_path)
+    cc = CaravelConf(filepath=project_list_path)
+    missing_names = [p for p in cc[CFG_PROJECTS_KEY].keys()
+                     if not hasattr(cc[CFG_PROJECTS_KEY][p], CFG_PROJECT_NAME_KEY)]
+    current_app.logger.debug("Missing project names list: {}".format(str(missing_names)))
+    with cc as x:
+        x.populate_project_metadata({"name": lambda p: p.name}, missing_names, [])
+    return cc
 
 
 def select_project(proj_selection_str):
@@ -245,12 +251,12 @@ def write_preferences(preferences_dict):
     for preference_name, preference_value in preferences_dict.items():
         try:
             if check_insert_data(preference_value, PREFERENCES_NAMES_TYPES[preference_name], preference_name):
-                globs.cc.setdefault(CFG_PREFERENCES_KEY, dict())
-                globs.cc[CFG_PREFERENCES_KEY][preference_name] = preference_value
+                with globs.cc as x:
+                    x.setdefault(CFG_PREFERENCES_KEY, dict())
+                    x[CFG_PREFERENCES_KEY][preference_name] = preference_value
         except KeyError:
             current_app.logger.warning("Preference '{}' cannot be set. The defined preferences are: {}".
                                        format(preference_name, ", ".join(PREFERENCES_NAMES_TYPES.keys())))
-    globs.cc.write()
 
 
 def read_preferences():

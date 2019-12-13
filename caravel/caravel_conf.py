@@ -18,7 +18,7 @@ from .exceptions import *
 
 class CaravelConf(YacAttMap, ABC):
     """ Object used to interact with the caravel configuration file """
-    def __init__(self, entries=None):
+    def __init__(self, filepath=None, entries=None, writable=False, wait_max=10):
         """
         Create the config instance by with a filepath or key-value pairs.
 
@@ -28,8 +28,8 @@ class CaravelConf(YacAttMap, ABC):
             item is missing
         :raise ValueError: if entries is given as a string and is not a file
         """
-        super(CaravelConf, self).__init__(entries)
-        config_path = entries if isinstance(entries, str) else ""
+        super(CaravelConf, self).__init__(filepath=filepath, entries=entries, writable=writable, wait_max=wait_max)
+        # config_path = entries if isinstance(entries, str) else ""
         projects = self.setdefault(CFG_PROJECTS_KEY, dict())
         if not isinstance(projects, dict):
             current_app.logger.warning("'{k}' value is a {t_old}, "
@@ -40,7 +40,7 @@ class CaravelConf(YacAttMap, ABC):
                 current_app.logger.info("Reformatting to the new config format: v{}".format(REQ_CFG_VERSION))
                 new_projects = dict()
                 for x in self[CFG_PROJECTS_KEY]:
-                    new_projects.update({p: dict() for p in _process_project_path(x, config_path)})
+                    new_projects.update({p: dict() for p in _process_project_path(x, self._file_path)})
                 self[CFG_PROJECTS_KEY] = new_projects
             else:
                 current_app.logger.info("Setting '{}' to empty {}".format(CFG_PROJECTS_KEY, dict.__name__))
@@ -64,11 +64,6 @@ class CaravelConf(YacAttMap, ABC):
                     raise ConfigNotCompliantError(msg)
                 else:
                     current_app.logger.debug("Config version is compliant: {}".format(version))
-
-        missing_names = [p for p in self[CFG_PROJECTS_KEY].keys()
-                         if not hasattr(self[CFG_PROJECTS_KEY][p], CFG_PROJECT_NAME_KEY)]
-        current_app.logger.debug("Missing project names list: {}".format(str(missing_names)))
-        self.populate_project_metadata({"name": lambda p: p.name}, missing_names, []).write()
 
     def __bool__(self):
         minkeys = set(self.keys()) == {CFG_PROJECTS_KEY}

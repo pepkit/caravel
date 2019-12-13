@@ -226,13 +226,14 @@ def index():
     subproject = request.args.get('sp')
     app.logger.debug("Selected project:subproject bundle -- {}:{} of types {}:{}"
                      .format(project, subproject, project.__class__.__name__, subproject.__class__.__name__))
-    if request.args.get('remove'):
-        globs.cc.remove_project(path=project, sp=subproject).write()
-    if request.args.get('populate'):
-        globs.cc.populate_project_metadata(paths=project, sp=subproject).write()
-    if request.args.get('clear'):
-        globs.purge_project_data()
-        globs.cc.populate_project_metadata(clear=True).write()
+    with globs.cc as x:
+        if request.args.get('remove'):
+            x.remove_project(path=project, sp=subproject)
+        if request.args.get('populate'):
+            x.populate_project_metadata(paths=project, sp=subproject)
+        if request.args.get('clear'):
+            globs.purge_project_data()
+            x.populate_project_metadata(clear=True)
     if missing_projs:
         app.logger.warning("{} projects configs not found: {}".format(len(missing_projs), ", ".join(missing_projs)))
     app.logger.debug(globs.cc)
@@ -305,9 +306,10 @@ def process():
         subprojects = None
     # populating project/subproject metadata and date are treated individually since when the project is activated
     # we want its subprojects data to be populated but not the dates
-    globs.cc.populate_project_metadata(paths=globs.selected_project,
-                                       sp=globs.current_subproj if globs.current_subproj else None).write()
-    globs.cc.project_date(globs.selected_project, globs.current_subproj).write()
+    with globs.cc as x:
+        x.populate_project_metadata(paths=globs.selected_project,
+                                           sp=globs.current_subproj if globs.current_subproj else None)
+        x.project_date(globs.selected_project, globs.current_subproj)
     get_navbar_summary_links()
     return render_template('process.html', p_info=project_info_dict(globs.p), change=None,
                            selected_subproject=globs.p.subproject, actions=actions, subprojects=subprojects,
