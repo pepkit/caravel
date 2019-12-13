@@ -6,8 +6,8 @@ Here you can see the command-line usage instructions for `caravel`:
 
 `caravel --help`:
 ```
-caravel version: 0.13.1dev
-looper version: 0.12.1
+caravel version: 0.13.2
+looper version: 0.12.5
 usage: caravel [-h] [-V] [-c CONFIG] [-p PORT] [-d] [--demo]
 
 caravel - run a web interface for looper

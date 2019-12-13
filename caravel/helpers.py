@@ -1,13 +1,14 @@
 """ General-purpose functions """
 from __future__ import print_function
-from .const import *
 import globs
+from .const import *
+from .caravel_conf import *
+from .exceptions import MissingCaravelConfigError
 import looper
 import peppy
 import argparse
 import random
 import string
-import yaml
 import fcntl
 import termios
 import struct
@@ -15,14 +16,14 @@ import pandas as _pd
 from importlib import import_module
 from sys import stderr
 from csv import DictReader
-from flask import render_template, current_app
+from flask import current_app, render_template, redirect, url_for, flash
 from re import sub
 from functools import partial
 from looper.html_reports import *
 from looper.looper import Summarizer, get_file_for_project, uniqify, run_custom_summarizers
 from logmuse import setup_logger
-from ubiquerg import is_collection_like
 from looper.utils import fetch_sample_flags
+import yacman
 from platform import python_version
 from distutils.version import LooseVersion
 from itertools import chain
@@ -108,17 +109,6 @@ def get_summary_html_name(prj):
     return fname + "_summary.html"
 
 
-def parse_selected_project(selection_str, sep=";"):
-    """
-    Parse the string returned by the index page form
-
-    :param str selection_str: a string formatted like: "<project_path>;<project_id>"
-    :param str sep: separator string
-    :return str: separated project and id
-    """
-    return selection_str.split(sep)
-
-
 def check_for_summary(prj):
     """
     Check if the summary page has been produced
@@ -147,19 +137,60 @@ def _ensure_package_installed(name, error_msg_appdx=""):
                           "but is conditionally required. {}".format(name, error_msg_appdx))
 
 
-def _get_configs_path():
+def select_config(config_filepath=None,
+                  config_env_vars=None,
+                  default_config_filepath=None,
+                  check_exist=True,
+                  on_missing=lambda fp: IOError(fp)):
     """
-    Parses the config file (YAML) provided as an CLI argument or in a environment variable ($CARAVEL)
-    or uses example data if run in the demo mode. The demo is given the priority.
+    Selects the config file to load.
 
-    :return str: path to the caravel config file
+    This uses a priority ordering to first choose a config filepath if it's given,
+    but if not, then look in a priority list of environment variables and choose
+    the first available filepath to return.
+
+    :param str | NoneType config_filepath: direct filepath specification
+    :param Iterable[str] | NoneType config_env_vars: names of environment
+        variables to try for config filepaths
+    :param str default_config_filepath: default value if no other alternative
+        resolution succeeds
+    :param bool check_exist: whether to check for path existence as file
+    :param function(str) -> object on_missing: what to do with a filepath if it
+        doesn't exist
     """
-    if current_app.config.get("demo"):
-        _ensure_package_installed("pypiper", "The demonstrational pipeline requires this package. "
-                                             "Install 'pypiper' using: pip install piper")
-        current_app.logger.info("Demo mode, the project configs list is auto-populated with example data")
-        return DEMO_FILE_PATH
-    return current_app.config.get("project_configs") or os.getenv(CONFIG_ENV_VAR)
+    def _checker(path, strict=check_exist, user_error=on_missing):
+        if path:
+            if not strict or os.path.isfile(path):
+                return path
+            current_app.logger.error(path)
+            result = user_error(path)
+            if isinstance(result, Exception):
+                raise result
+            return result
+    try:
+        env_var = yacman.get_first_env_var(config_env_vars)[1] if config_env_vars else config_env_vars
+    except TypeError:
+        env_var = None
+    paths = [config_filepath,
+             env_var,
+             default_config_filepath]
+    msgs = ["{} config_filepath {}",
+            "{} environment variable {}",
+            "{} default config file {}"]
+    i = 0
+    current_app.logger.debug(msgs[i].format("Checking", paths[i]))
+    try:
+        while _checker(paths[i]) is None:
+            i += 1
+            current_app.logger.debug(msgs[i].format("Checking", paths[i]))
+        current_app.logger.info(msgs[i].format("Using", "-- " + paths[i]))
+        return paths[i]
+    except IndexError:
+        txt = "No configuration file found"
+        result = on_missing(txt)
+        if isinstance(result, Exception):
+            raise result
+        print(txt)
 
 
 def parse_config_file():
@@ -167,31 +198,91 @@ def parse_config_file():
     Path to the PEP projects and predefined token are extracted if file is read successfully.
     Additionally, looks for a custom command to execute.
 
-    :return (list[str], list[str]): a pair of projects list and list of commands
+    :return CaravelConf: a configuration object
     """
-    project_list_path = _get_configs_path()
-    if project_list_path is None:
-        raise ValueError("Please set the environment variable {} or provide a YAML file listing paths to project "
-                         "config files".format(CONFIG_ENV_VAR))
-    project_list_path = os.path.normpath(os.path.join(os.getcwd(), os.path.expanduser(project_list_path)))
-    if not os.path.isfile(project_list_path):
-        raise ValueError("Project configs list isn't a file: {}".format(project_list_path))
-    with open(project_list_path, 'r') as stream:
-        pl = yaml.safe_load(stream)
-        assert CONFIG_PRJ_KEY in pl, \
-            "'{}' key not in the projects list file.".format(CONFIG_PRJ_KEY)
-        projects = pl[CONFIG_PRJ_KEY]
-        # for each project use the dirname of the yaml file to establish the paths to the project itself,
-        # additionally expand the environment variables and the user
-        projects = sorted(flatten([glob_if_exists(os.path.join(
-            os.path.dirname(project_list_path), os.path.expanduser(os.path.expandvars(prj)))) for prj in projects]))
-        # check if the custom command/script is listed in the config and return it
+    cfg_path = current_app.config.get("project_configs")
+    if current_app.config.get("demo"):
+        _ensure_package_installed("pypiper", "The demonstrational pipeline requires this package. "
+                                             "Install 'pypiper' using: pip install piper")
+        current_app.logger.info("Demo mode, the project configs list is auto-populated with example data")
+        cfg_path = DEMO_FILE_PATH
+    project_list_path = select_config(config_filepath=cfg_path, config_env_vars=CONFIG_ENV_VAR,
+                                      on_missing=lambda fp: MissingCaravelConfigError(fp))
+    cc = CaravelConf(filepath=project_list_path)
+    missing_names = [p for p in cc[CFG_PROJECTS_KEY].keys()
+                     if not hasattr(cc[CFG_PROJECTS_KEY][p], CFG_PROJECT_NAME_KEY)]
+    current_app.logger.debug("Missing project names list: {}".format(str(missing_names)))
+    with cc as x:
+        x.populate_project_metadata({"name": lambda p: p.name}, missing_names, [])
+    return cc
+
+
+def select_project(proj_selection_str):
+    """
+    Parse the string returned by the index page form. Three strings separated by a semicolon are expected by default.
+    If the last one (subproject in our use case) is missing, an empty list is appended to the returned list,
+    which is subsequently disregarded by looper.Project.__init__ and no subproject is activated
+
+    :param str proj_selection_str: a string formatted like: "<project_path>;<project_id>;<subproject_name>"
+    :return list[str]: separated project, ID and subproject name
+    """
+
+    if globs.selected_project is None and proj_selection_str is None:
+        raise TypeError("No selection provided")
+    else:
+        if None not in (proj_selection_str, globs.selected_project) and globs.selected_project != proj_selection_str:
+            globs.purge_project_data()
+            globs.summary_links = SUMMARY_NAVBAR_PLACEHOLDER
+            current_app.logger.info("Project data removed")
+    try:
+        seletion_list = proj_selection_str.split(";")
+        return seletion_list if len(seletion_list) > 2 else seletion_list + [list()]
+    except AttributeError:
+        current_app.logger.debug("The project was not selected, recovering previous one")
+        return globs.selected_project, globs.selected_project_id, globs.current_subproj
+
+
+def write_preferences(preferences_dict):
+    """
+    Write the preferences to the global caravel config file
+
+    :param dict preferences_dict: preferences to be written
+    """
+    for preference_name, preference_value in preferences_dict.items():
         try:
-            command = pl[COMMAND_KEY]
+            if check_insert_data(preference_value, PREFERENCES_NAMES_TYPES[preference_name], preference_name):
+                with globs.cc as x:
+                    x.setdefault(CFG_PREFERENCES_KEY, dict())
+                    x[CFG_PREFERENCES_KEY][preference_name] = preference_value
         except KeyError:
-            current_app.logger.debug("No custom command found in config")
-            command = None
-    return projects, command
+            current_app.logger.warning("Preference '{}' cannot be set. The defined preferences are: {}".
+                                       format(preference_name, ", ".join(PREFERENCES_NAMES_TYPES.keys())))
+
+
+def read_preferences():
+    """
+    Update preferences. If an appropriate key under preferences key is found, the type of the value
+    associated with the key is checked and the particular setting was not set manually -- the global setting is updated.
+    If the criteria are not met, the settings will be disregarded.
+    """
+
+    def _check_apply_pref(cc, name, value_type):
+        """
+        Check the preference update possibility and perform it
+
+        :param CaravelConf cc: caravel preferences object
+        :param str name: name of the preference to be updated
+        :param value_type: class of the value to be set
+        """
+        if getattr(globs, name, False) is None and hasattr(cc[CFG_PREFERENCES_KEY], name) and \
+                check_insert_data(cc[CFG_PREFERENCES_KEY][name], value_type, name):
+            setattr(globs, name, cc[CFG_PREFERENCES_KEY][name])
+            current_app.logger.debug("'{}' set to {}".format(name, cc[CFG_PREFERENCES_KEY][name]))
+
+    if hasattr(globs.cc, CFG_PREFERENCES_KEY):
+        current_app.logger.debug("cc has the pref key")
+        for pref_name, val_type in PREFERENCES_NAMES_TYPES.iteritems():
+            _check_apply_pref(globs.cc, pref_name, val_type)
 
 
 def ensure_version(current=V_BY_NAME, required=REQUIRED_V_BY_NAME):
@@ -231,11 +322,11 @@ def expand_path(p, root=""):
     if root:
         if not os.path.isabs(root):
             raise ValueError("Non-absolute root path: {}".format(root))
-        
+
         def absolutize(x):
             return os.path.join(root, x)
     else:
-        
+
         def absolutize(x):
             return x
     exp = os.path.expanduser(os.path.expandvars(p))
@@ -283,16 +374,6 @@ def project_info_dict(p):
     """
     return {"name": p.name, "config_file": p.config_file, "sample_count": p.num_samples,
              "output_dir": p.metadata.output_dir, "subprojects": _get_sp_txt(globs.p)}
-
-
-def glob_if_exists(x):
-    """
-    Return all matches in the directory for x and x if nothing matches
-
-    :param x: a string with path containing globs
-    :return list[str]: a list of paths
-    """
-    return [glob.glob(e) or e for e in x] if is_collection_like(x) else (glob.glob(x) or [x])
 
 
 def random_string(n):
@@ -379,7 +460,7 @@ def _print_terminal_width(txt=None, char="-"):
     spaced_txt = txt.center(len(txt)+2) if txt is not None else ""
     fill_width = int(0.5 * (_terminal_width() - len(spaced_txt)))
     filler = char * fill_width
-    print(filler + spaced_txt + filler)
+    eprint(filler + spaced_txt + filler)
 
 
 def _terminal_width():

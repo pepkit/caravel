@@ -2,6 +2,25 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
 
+## [0.13.2] -- 2019-12-13
+
+### Changed: 
+
+- caravel config file format change. introduced in v0.2:
+    - `config_version` entry
+    - a possibility to add project-level attributes (like `name`) 
+- removed custom command feature
+- list of projects in the index page to a table representation
+- removed the subproject switching functionality on the project page
+  
+### Added:
+
+- `CaravelConf` class for caravel config file management
+- the possibility to set preferences in the config file
+- direct subproject activation from the index page
+- text indicating currently active subproject
+
+
 ## [0.13.1] -- 2019-07-18
 
 ### Fixed:

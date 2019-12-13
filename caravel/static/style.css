@@ -136,6 +136,7 @@ div.col-slider {
 
 .nav-link {
   color: white;
+  padding: 0.5rem 1rem 0.5rem 0rem !important;
   }
 
 .nav-link#tab {
@@ -189,6 +190,10 @@ div#status-table_paginate {
   font-size: 0.8rem;
 }
 
+div#projects-table_info {
+  font-size: 0.8rem;
+}
+
 .container-fluid {
   padding: 15px;
 }
@@ -197,3 +202,44 @@ div#status-table_paginate {
     height: 10px;
     padding: 5px;
 }
+
+#projects-table td {
+    font-size:0.8rem;
+}
+
+.fixed-table-border {
+  border-color:transparent !important;
+}
+
+.bootstrap-table .fixed-table-container.fixed-height:not(.has-footer) {
+  border-bottom-color: transparent !important;
+}
+
+.card-body#table {
+  padding-top: 0px;
+}
+
+.container#project-table {
+  max-width: none !important;
+}
+
+.rotate{
+    -moz-transition: all .2s linear;
+    -webkit-transition: all .2s linear;
+    transition: all .2s linear;
+}
+
+.collapsed{
+    -moz-transform:rotate(-90deg);
+    -webkit-transform:rotate(-90deg);
+    transform:rotate(-90deg);
+}
+
+.indented {
+    padding-left: 25px !important;
+}
+
+hr {
+    margin-top: 0;
+}
+

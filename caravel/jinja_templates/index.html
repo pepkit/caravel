@@ -4,78 +4,128 @@
 	<script type=text/javascript>
 		$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 	</script>
-	<script type=text/javascript>
-	  $(function() {
-		$('a#exec').bind('click', function() {
-		  $.getJSON($SCRIPT_ROOT + '/_background_exec', {
-			cmd: $('select[name="command"]').val(),
-		  }, function(data) {
-			$("#exec_txt").text(data.exec_txt);
-		  });
-		});
-	  });
-	</script>
-	<script type="text/javascript">
-		$(function() {
-			$('#gobtn').bind('click', function() {
-				$('#select_project').submit();
-				$("#gobtn").attr("disabled", true);
-				$('#gobtn').html('LOADING PROJECT DATA <i class="fa fa-spinner fa-pulse fa-fw"></i>');
-			});
-		});
-	</script>
+    <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
+	<link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.15.3/dist/bootstrap-table.min.css">
+	<script src="https://unpkg.com/bootstrap-table@1.15.3/dist/bootstrap-table.min.js"></script>
 {% endblock %}
 {% block title %}Index{% endblock %}
 {% block content %}
-	<div class="container px-lg-3 mt-3">
+	{% if missing_projects is not none %}
+		<div class="alert alert-warning" role="alert">
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+			<b>{{ missing_projects|length }}</b> files are missing. Corresponding projects are not listed below:
+			<ul style="padding-left: 30px">
+				{% for mp in missing_projects %}
+					<li><code>{{ mp }}</code></li>
+				{% endfor %}
+			</ul>
+		</div>
+	{% endif %}
+	<div class="container" id="project-table">
 		<div class="row">
-			<div class="col">
-				<div class="card">
-					<div class="card-header"><b>Select a project</b></div>
-					<div class="card-body">
-						<form id="select_project" class="form" method="POST" action="{{ url_for('process') }}">
-							<div class="form-group row">
-								<input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
-								<div class="col-xl-12">
-									<div class="list-group">
-										{% if reset_btn is not none %}
-											<div class="alert alert-secondary" role="alert">
-												<button type="button" class="close" data-dismiss="alert">&times;</button>
-												Reset currently activated project to select other ones
-											</div>
-										{% endif %}
-										{% if selected is none %}
-											{% set cls = "list-group-item list-group-item-action" %}
-										{% else %}
-											{% set cls = "list-group-item list-group-item-action disabled" %}
-										{% endif %}
-										{% for p in projects %}
-											{% if loop.index == selected_id | int  %}
-												{% set cls = "list-group-item list-group-item-action list-group-item-secondary" %}
-											{% endif %}
-											<button type="submit" name="select_project" class="{{ cls }}" value="{{ p }};{{ loop.index }}">
-												{{ p }}
-											</button>
-										{% endfor %}
-									</div>
+			<div class="col-12">
+				<div class="table-responsive-lg">
+					<form id="select_project" class="form" method="POST" action="{{ url_for('process') }}">
+					<input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
+					<div class="card align-self-center">
+						<div class="card-header">
+							<div class="row">
+								<div class="col-3 mt-1">
+									<b>Select a project</b>
+								</div>
+								<div class="col-9">
+									<a href="{{ url_for('index', populate=True) }}" class="btn btn-outline-dark btn-sm mr-2 pull-right" role="button" aria-disabled="false">
+										UPDATE ALL <i class="fa fa-table" aria-hidden="true"></i>
+									</a>
+									<a href="{{ url_for('index', clear=True) }}" class="btn btn-outline-dark btn-sm mr-2 pull-right" role="button" aria-disabled="false">
+										CLEAR ALL <i class="fa fa-eraser" aria-hidden="true"></i>
+									</a>
 								</div>
 							</div>
-						</form>
+						</div>
+						<div class="card-body" id="table">
+							<table id="projects-table" data-toggle="table" data-search="true" data-show-columns="true" class="table-sm">
+								<thead class="thead-light">
+									<tr>
+										<th class="text-nowrap text-center">Action</th>
+										<th data-field="name" class="text-nowrap text-center">Project name</th>
+										<th class="text-nowrap text-center">Sample count</th>
+										<th class="text-nowrap text-center">Protocols</th>
+										<th class="text-nowrap text-center">Inputs size</th>
+										<th class="text-nowrap text-center">Last modified</th>
+									</tr>
+								</thead>
+								<tbody>
+									{% for p in cc.projects.keys() %}
+										{% set outer_loop = loop %}
+										<tr valign="middle">
+											<td class="text-nowrap text-center">
+												<a href="{{ url_for('index', populate=True, path=p, sp=none) }}" class="btn btn-outline-info btn-sm mr-0" role="button">
+													<i class="fa fa-refresh" aria-hidden="true"></i>
+												</a>
+												<a href="{{ url_for('index', remove=True, path=p, sp=sp) }}" class="btn btn-outline-danger btn-sm ml-0" role="button">
+													<i class="fa fa-trash" aria-hidden="true"></i>
+												</a>
+												<button type="submit" class="btn btn-outline-success btn-sm ml-0" name="select_project" value="{{ p }};{{ outer_loop.index }}">
+													<i class="fa fa-play-circle" aria-hidden="true"></i>
+												</button>
+											<td class="text-nowrap text-left">
+												{% if cc.projects[p].num_sp is defined and cc.projects[p].num_sp is not none %}
+													<div style="cursor: pointer;" class="fa fa-chevron-down rotate" aria-hidden="true" data-toggle="collapse"  data-target="#sp{{ outer_loop.index }}"></div>
+												{% endif %}
+												<b><font size="3">{{ cc.projects[p].name }}</font></b>
+											</td>
+											<td class="text-nowrap text-center">
+												{{ cc.projects[p].num_samples }}
+											</td>
+											<td class="text-center">
+												{{ cc.projects[p].protocols }}
+											</td>
+											<td class="text-nowrap text-center">
+												{{ cc.projects[p].inputs_size }}
+											</td>
+											<td class="text-nowrap text-center">
+												{{ cc.projects[p].last_modified }}
+											</td>
+										</tr>
+										{% if cc.projects[p].subprojects is defined %}
+											{% for sp in cc.projects[p].subprojects.keys() %}
+											<tr id="sp{{ outer_loop.index }}" class="collapse show">
+												<td class="text-nowrap text-center">
+													<a href="{{ url_for('index', populate=True, path=p, sp=sp) }}" class="btn btn-outline-info btn-sm mr-0" role="button">
+														<i class="fa fa-refresh" aria-hidden="true"></i>
+													</a>
+													<button type="submit" class="btn btn-outline-success btn-sm ml-0" name="select_project" value="{{ p }};{{ outer_loop.index }};{{ sp }}">
+														<i class="fa fa-play-circle" aria-hidden="true"></i>
+													</button>
+												</td>
+												<td class="text-nowrap text-left indented">
+													{{ sp }}
+												</td>
+												<td class="text-nowrap text-center">
+													{{ cc.projects[p].subprojects[sp].num_samples }}
+												</td>
+												<td class="text-nowrap text-center">
+													{{ cc.projects[p].subprojects[sp].protocols }}
+												</td>
+												<td class="text-nowrap text-center">
+													{{ cc.projects[p].subprojects[sp].inputs_size }}
+												</td>
+												<td class="text-nowrap text-center">
+													{{ cc.projects[p].subprojects[sp].last_modified }}
+												</td>
+											</tr>
+											{% endfor %}
+										{% endif %}
+								{% endfor %}
+								</tbody>
+							</table>
+						</div>
 					</div>
-					<div class="card-footer text-muted">
-					{% if reset_btn is not none %}
-						<a href="{{ url_for('index', reset=True) }}" class="btn btn-outline-danger" role="button" aria-disabled="false">
-							RESET PROJECT <i class="fa fa-undo"></i>
-						</a>
-					{% else %}
-						<a href="{{ url_for('index', reset=True) }}" class="btn btn-outline-danger disabled" role="button" aria-disabled="true">
-							RESET PROJECT <i class="fa fa-undo"></i>
-						</a>
-					{% endif %}
-					<a href="/preferences" role="button" class="btn btn-outline-dark ml-2">PREFERENCES <i class="fa fa-cog"></i></a>
-					</div>
+					</form>
 				</div>
 			</div>
 		</div>
 	</div>
 {% endblock %}
+
