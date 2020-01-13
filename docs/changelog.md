@@ -4,6 +4,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [0.13.2] -- 2019-12-13
 
+### Added:
+
+- possibility to execute library module as a script: `python -m caravel ...`
+
+## [0.13.2] -- 2019-12-13
+
 ### Changed: 
 
 - caravel config file format change. introduced in v0.2:
