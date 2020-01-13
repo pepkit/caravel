@@ -54,7 +54,7 @@ setup(
     license="BSD-2-Clause",
     entry_points={
         "console_scripts": [
-            "{p} = {p}.{p}:main".format(p=PACKAGE)
+            "{p} = {p}.__main__:main".format(p=PACKAGE)
         ],
     },
     package_data={PACKAGE: ['templates/*', 'requirements/*']},
