@@ -1,4 +1,4 @@
 sample_name,protocol,filename,data_source
-frog1,RNA-seq,frog1_sounds.txt,path
-frog2,RNA-seq,frog2_sounds.txt,path
-frog3,RNA-seq,frog3_sounds.txt,path
+frog1,slow,frog1_sounds.txt,path
+frog2,slow,frog2_sounds.txt,path
+frog3,slow,frog3_sounds.txt,path

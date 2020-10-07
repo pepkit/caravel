@@ -1,0 +1,35 @@
+description: A PEP for demo caravel pipeline
+imports:
+  - http://schema.databio.org/pep/2.0.0.yaml
+properties:
+  samples:
+    type: array
+    items:
+      type: object
+      properties:
+        sample_name:
+          type: string
+          description: "Name of the sample"
+        protocol:
+          type: string
+          description: "slow or quick"
+          enum: ["slow", "quick"]
+        data_source:
+          type: string
+          description: "path to the file to process"
+        sleep:
+          type: number
+          description: "how long to sleep for"
+        pipeline_interfaces:
+          type: ["string", "array"]
+          description: "list of pipeline interfaces"
+      required:
+        - sample_name
+        - protocol
+        - data_source
+      required_files:
+        - data_source
+      files:
+        - data_source
+required:
+  - samples

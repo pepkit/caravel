@@ -1,15 +1,23 @@
-name: duplicated_demo
+name: "duplicated demo"
 email: michal@virginia.edu
-metadata:
-    output_dir: ${HOME}/caravel_duplicated_demo
-    sample_table: sample_table_animals.csv
-    pipeline_interfaces: ../pipeline_interface.yaml
+sample_table: sample_table_animals.csv
+sample_modifiers:
+    derive:
+        attributes: [data_source]
+        sources:
+            path: "../../data/{filename}"
+    append:
+        pipeline_interfaces: ../pipeline_interface.yaml
+    imply:
+        - if:
+            protocol: slow
+          then:
+            sleep: 5
 
-# Derived columns indicates variables which are to be processed as `data_sources`
-derived_attributes: data_source
-constant_attributes: 
-    sleep: 0.1
+project_modifiers:
+    amend:
+        my_project2:
+            sample_table: sample_table_animals_frog.csv
 
-# Data sources are constructed paths to static (input) files
-data_sources:
-    path: "../../data/{filename}"
+looper:
+    output_dir: "~/Desktop/testing/caravel_demo"

@@ -1,9 +1,9 @@
 sample_name,protocol,filename,data_source
-frog1,RNA-seq,frog1_sounds.txt,path
-frog2,RNA-seq,frog2_sounds.txt,path
-frog3,RNA-seq,frog3_sounds.txt,path
-dog1,ATAC-seq,dog1_sounds.txt,path
-dog2,ATAC-seq,dog2_sounds.txt,path
-dog3,ATAC-seq,dog3_sounds.txt,path
-sparrow1,RNA-seq,sparrow1_sounds.txt,path
-sparrow2,RNA-seq,sparrow2_sounds.txt,path
+frog1,slow,frog1_sounds.txt,path
+frog2,slow,frog2_sounds.txt,path
+frog3,slow,frog3_sounds.txt,path
+dog1,quick,dog1_sounds.txt,path
+dog2,quick,dog2_sounds.txt,path
+dog3,quick,dog3_sounds.txt,path
+sparrow1,slow,sparrow1_sounds.txt,path
+sparrow2,slow,sparrow2_sounds.txt,path
